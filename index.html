@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" href="./style.css">
+
+<title>Heart to Beat</title>
+
+</head>
+
+<body>
+ 
+
+<div class="wrap">
+  <div>
+    <h1>Heart to Beat</h1>
+    <div class="sub">心动？！生存法则！</div>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT -->
+    <aside class="card pad" id="left">
+      <div id="setup">
+        <div style="margin-bottom:10px">
+          <label>输入名字</label>
+          <input id="name" placeholder="例如：猫妖JG" autocomplete="off" />
+        </div>
+        <div style="margin-bottom:12px">
+          <label>选择组</label>
+          <select id="group">
+            <option value="" selected disabled>请选择…</option>
+            <option value="carb">碳水组</option>
+            <option value="protein">蛋白质组</option>
+            <option value="seasoning">调味料组</option>
+            <option value="veg">蔬菜组</option>
+            <option value="gear">炊具组</option>
+          </select>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="start">进入流程</button>
+          <button class="btn" id="demo">示例开始</button>
+        </div>
+        <div class="hr"></div>
+        <div class="mini">名字不在DB里会随机 1–10。刷新网页则会清空所有信息。</div>
+      </div>
+
+      <div id="stats" style="display:none">
+        <div class="pill"><span>玩家</span><b id="who">—</b></div>
+        <div class="pill"><span>组别</span><b id="grp">—</b></div>
+        <div class="hr"></div>
+        <div class="pill"><span>运气</span><b id="luck">—</b></div>
+        <div class="pill"><span>方向感</span><b id="dir">—</b></div>
+        <div class="pill"><span>耐力</span><b id="sta">—</b></div>
+        <div class="hr"></div>
+        <div class="mini">秘密累积中…</div>
+      </div>
+    </aside>
+
+    <!-- RIGHT -->
+    <main class="card pad" id="right" style="min-height:320px">
+      <div id="flow" style="display:none">
+        <p class="sceneTitle" id="t">Scene</p>
+        <p class="sceneBody" id="b">…</p>
+        <div class="choices" id="c"></div>
+      </div>
+      <div id="placeholder" class="mini">请输入姓名，选择组类，开始没人期待的mini探险。</div>
+    </main>
+  </div>
+</div>
+
+ <script src="./main.js"></script>
+</body>
+</html>
