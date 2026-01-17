@@ -1,5 +1,14 @@
 @media (max-width:860px){
-  .grid{grid-template-columns:1fr}
+  #left{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:6px;
+    font-size:11px;
+  }
+
+  #left .pill{
+    padding:6px 8px;
+  }
 }
 
 :root{
