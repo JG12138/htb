@@ -1,13 +1,13 @@
 @media (max-width:860px){
-  #left{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:6px;
-    font-size:11px;
+  .grid{
+    grid-template-columns:1fr;
   }
 
-  #left .pill{
-    padding:6px 8px;
+  #right{ order:1; }
+  #left{
+    order:2;
+    opacity:.85;
+    font-size:12px;
   }
 }
 
@@ -102,3 +102,4 @@ input,select{
   display:block;
   margin:10px 0;
 }
+
