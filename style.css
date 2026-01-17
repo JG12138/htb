@@ -105,11 +105,16 @@ input,select{
 
 @media (max-width:860px){
   .grid{
-    grid-template-columns:1fr;
-    grid-template-areas:
-      "right"
-      "left";
+    display:flex;          /* 手机端不用 grid */
+    flex-direction:column; /* 上下布局 */
+    gap:12px;
   }
 
-  #left{opacity:.85;font-size:12px;}
+  #right{ order:1; }
+  #left{
+    order:2;
+    opacity:.85;
+    font-size:12px;
+  }
 }
+
