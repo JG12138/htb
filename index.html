@@ -1,74 +1,170 @@
 <!doctype html>
 <html lang="zh-Hans">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<link rel="stylesheet" href="./style.css">
-
-<title>Heart to Beat</title>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="./style.css">
+  <title>Heart to Beat · Main</title>
 </head>
 
 <body>
- 
+  <div class="wrap">
+    <header class="top">
+      <div>
+        <h1>Heart to Beat</h1>
+        <div class="sub">心动？！生存法则！ · Main</div>
+      </div>
+      <div class="mini">入口页</div>
+    </header>
 
-<div class="wrap">
-  <div>
-    <h1>Heart to Beat</h1>
-    <div class="sub">心动？！生存法则！</div>
-  </div>
+    <section class="grid">
+      <!-- LEFT: 导航/提示 -->
+      <aside class="card pad" id="left">
+        <div class="pill">
+          <span>当前章节</span>
+          <b>Chapter One</b>
+        </div>
 
-  <div class="grid">
-    <!-- LEFT -->
-    <aside class="card pad" id="left">
-      <div id="setup">
-        <div style="margin-bottom:10px">
-          <label>输入名字</label>
-          <input id="name" placeholder="例如：猫妖JG" autocomplete="off" />
+        <div class="hr"> </div>
+
+
+        <div class="mini">
+          <br/>
+
         </div>
-        <div style="margin-bottom:12px">
-          <label>选择组</label>
-          <select id="group">
-            <option value="" selected disabled>请选择…</option>
-            <option value="carb">碳水组</option>
-            <option value="protein">蛋白质组</option>
-            <option value="seasoning">调味料组</option>
-            <option value="veg">蔬菜组</option>
-            <option value="gear">炊具组</option>
-          </select>
-        </div>
+
+        <div class="hr">
+         </div>
+
         <div class="row">
-          <button class="btn primary" id="start">进入流程</button>
-          <button class="btn" id="demo">示例开始</button>
+
         </div>
-        <div class="hr"></div>
-        <div class="mini">名字不在DB里会随机 1–10。刷新网页则会清空所有信息。</div>
-      </div>
 
-      <div id="stats" style="display:none">
-        <div class="pill"><span>玩家</span><b id="who">—</b></div>
-        <div class="pill"><span>组别</span><b id="grp">—</b></div>
-        <div class="hr"></div>
-        <div class="pill"><span>运气</span><b id="luck">—</b></div>
-        <div class="pill"><span>方向感</span><b id="dir">—</b></div>
-        <div class="pill"><span>耐力</span><b id="sta">—</b></div>
-        <div class="hr"></div>
-        <div class="mini">秘密累积中…</div>
-      </div>
-    </aside>
+<div class="hr"></div>
 
-    <!-- RIGHT -->
-    <main class="card pad" id="right" style="min-height:320px">
-      <div id="flow" style="display:none">
-        <p class="sceneTitle" id="t">Scene</p>
-        <p class="sceneBody" id="b">…</p>
-        <div class="choices" id="c"></div>
-      </div>
-      <div id="placeholder" class="mini">请输入姓名，选择组类，开始没人期待的mini探险。</div>
-    </main>
-  </div>
+<div class="mini" style="margin-bottom:8px">今日登山突发运气查询</div>
+
+<button class="btn primary" id="drawLuck">抽卡</button>
+
+<div class="hr"></div>
+
+<div id="luckResult" class="pill" style="display:none">
+  <span id="luckTag">—</span>
+  <b id="luckName">—</b>
 </div>
 
- <script src="./main.js"></script>
+<div id="luckDesc" class="mini" style="display:none; white-space:pre-wrap; margin-top:10px"></div>
+
+<div class="mini" style="margin-top:10px">
+  规则：每次进入网页仅可抽一次；刷新/退出会清空。请截图保存，别作弊。
+</div>
+
+      </aside>
+
+      <!-- RIGHT: 主卡片内容 -->
+      <main class="card pad" id="right">
+        <p class="sceneTitle">MAIN</p>
+
+        <p class="sceneBody">欢迎来到入口页。</p>
+
+        <div class="choices">
+          <a class="choiceLink" href="./chap_one/index.html">
+            <div class="choice">
+              <b>▶ Chapter One：</b> 要饿死了！寻找食材大作战 
+              <div class="mini">进入第一章节游玩地图</div>
+            </div>
+          </a>
+
+          <a class="choiceLink" href="#" aria-disabled="true">
+            <div class="choice disabled">
+              <b>▶Chapter Two：</b> Coming soon
+              <div class="mini"></div>
+            </div>
+          </a>
+        </div>
+      </main>
+    </section>
+
+    <footer class="footer mini">
+      v0.1 · Root index.html
+    </footer>
+  </div>
+
+
+  <script>
+(() => {
+  // 抽卡池：你可以继续往里加
+  const pool = [
+    { tag: "BUFF", name: "路线直觉 +2", desc: "你今天对“看起来不对劲的小路”特别敏感。\n效果：涉及方向/选择的判定小幅有利。", weight: 14 },
+    { tag: "BUFF", name: "体温管理 +1", desc: "今天不容易被冷到或热到心态炸裂。\n效果：耐力相关描述偏正面。", weight: 12 },
+    { tag: "BUFF", name: "队友滤镜 +1", desc: "你说啥都显得很可靠。\n效果：社交/协作场景更容易被相信。", weight: 10 },
+    { tag: "BUFF", name: "背包轻了", desc: "你总觉得自己少带了一样东西——但其实没有。\n效果：行动更干脆。", weight: 8 },
+
+    { tag: "DEBUFF", name: "鞋带诅咒", desc: "你今天的鞋带就是很爱松。\n效果：赶路/奔跑相关场景更狼狈。", weight: 12 },
+    { tag: "DEBUFF", name: "信号焦虑", desc: "你会忍不住担心手机没信号。\n效果：遇到未知状况更容易慌一下。", weight: 10 },
+    { tag: "DEBUFF", name: "口渴感放大", desc: "水明明还够，但你就是觉得渴。\n效果：补给相关场景更紧张。", weight: 9 },
+    { tag: "DEBUFF", name: "迷路错觉", desc: "你会频繁怀疑“我们是不是走错了”。\n效果：方向相关叙述偏负面。", weight: 7 },
+
+    { tag: "WEIRD", name: "山在看你", desc: "你有一种被自然观察的微妙感觉。\n效果：任何诡异事件都更合理。", weight: 6 },
+    { tag: "WEIRD", name: "好运偏移", desc: "小事很顺，大事很难讲。\n效果：小收益更容易出现，但关键节点不保底。", weight: 6 },
+  ];
+
+  // 加权随机
+  function weightedPick(items){
+    const total = items.reduce((s, it) => s + (it.weight ?? 1), 0);
+    let r = Math.random() * total;
+    for (const it of items){
+      r -= (it.weight ?? 1);
+      if (r <= 0) return it;
+    }
+    return items[items.length - 1];
+  }
+
+  // DOM
+  const btn = document.getElementById("drawLuck");
+  const box = document.getElementById("luckResult");
+  const tagEl = document.getElementById("luckTag");
+  const nameEl = document.getElementById("luckName");
+  const descEl = document.getElementById("luckDesc");
+
+  if (!btn) return;
+
+  // 本次会话防二抽（刷新就没了）
+  const KEY = "luck_draw_used_v1";
+  const used = sessionStorage.getItem(KEY) === "1";
+
+  function lockUI(){
+    btn.disabled = true;
+    btn.textContent = "已抽过";
+  }
+
+  if (used){
+    lockUI();
+    // 不保存结果：刷新后 sessionStorage 还在同一 tab 会话里，但你说“refresh 之前不能点击第二次”
+    // 为避免“刷新还能看到旧结果”，这里不恢复结果；只锁按钮。
+  }
+
+  btn.addEventListener("click", () => {
+    // 双保险
+    if (sessionStorage.getItem(KEY) === "1") return;
+
+    const result = weightedPick(pool);
+
+    tagEl.textContent = result.tag;
+    nameEl.textContent = result.name;
+    descEl.textContent = result.desc;
+
+    box.style.display = "flex";
+    descEl.style.display = "block";
+
+    sessionStorage.setItem(KEY, "1");
+    lockUI();
+  });
+})();
+</script>
+
 </body>
+
+
 </html>
+
