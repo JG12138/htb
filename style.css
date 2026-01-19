@@ -1,7 +1,4 @@
-/* =========================
-   Heart to Beat · Main CSS
-   Clean rewrite (single source of truth)
-   ========================= */
+
 
 :root{
   --bg:#1E2A1B;
@@ -16,14 +13,13 @@
 
   --gold:#F7D7A8;
 
-  /* 关键：卡片底色改为近不透明，避免背景纹理“透进 div” */
   --cardSolid: rgba(20,30,18,.96);
   --cardHighlight1: rgba(255,255,255,.06);
   --cardHighlight2: rgba(255,255,255,.02);
 }
 
-/* -------- reset -------- */
 *{ box-sizing:border-box; }
+
 
 body{
   margin:0;
@@ -34,7 +30,6 @@ body{
   display:flex;
   justify-content:center;
 
-  /* 背景：细斜纹 + 底色（只在环境层出现） */
   background:
     repeating-linear-gradient(
       135deg,
@@ -46,13 +41,12 @@ body{
     var(--bg);
 }
 
-/* 页面左右金色竖线（环境边界） */
 body::before,
 body::after{
   content:"";
   position:fixed;
   top:0;
-  width:2px;
+  width:5px;
   height:100vh;
   background:linear-gradient(
     to bottom,
@@ -68,7 +62,7 @@ body::after{
 body::before{ left:18px; }
 body::after{ right:18px; }
 
-/* 内容层永远在背景之上 */
+
 .wrap{
   width:min(980px,100%);
   padding:clamp(14px,3vw,28px);
@@ -79,14 +73,12 @@ body::after{ right:18px; }
   z-index:1;
 }
 
-/* -------- top (no background / no border) -------- */
 .top{
   display:flex;
   justify-content:space-between;
   align-items:flex-end;
   gap:12px;
 
-  /* 你要求：去掉 top 背景和边框，所以这里保持干净 */
   padding:0;
   border:none;
   background:none;
@@ -99,33 +91,31 @@ h1{
 }
 .sub{
   margin-top:6px;
-  font-size:13px;
+  font-size:16px;
   color:rgba(255,255,255,.78);
 }
 
-.mini{ font-size:12px; color:var(--mut); }
+.mini{ font-size:14px; color:var(--mut); }
 
-/* 可选：时间显示 */
 .clock{
   margin-top:8px;
   padding:10px 12px;
   border:1px solid var(--bd);
   background:rgba(0,0,0,.10);
-  font-size:13px;
+  font-size:15px;
   display:flex;
   justify-content:space-between;
   gap:10px;
 }
 .clock b{ font-variant-numeric:tabular-nums; }
 
-/* -------- layout: stacked (left then right) -------- */
 .grid{
   display:flex;
   flex-direction:column;
   gap:14px;
 }
 
-/* -------- cards -------- */
+
 .card{
   position:relative;
   background:var(--cardSolid);
@@ -133,7 +123,6 @@ h1{
   box-shadow:var(--shadow);
 }
 
-/* 轻微高光，保留“玻璃感”但不透背景纹理 */
 .card::before{
   content:"";
   position:absolute;
@@ -147,7 +136,7 @@ h1{
   );
 }
 
-/* 卡片内容在高光层上方 */
+
 .card > *{
   position:relative;
   z-index:1;
@@ -161,12 +150,12 @@ h1{
   display:flex;
   justify-content:space-between;
   padding:10px 12px;
-  border:1px solid var(--bd);
+  border:3px solid var(--bd);
   background:rgba(0,0,0,.10);
-  font-size:13px;
+  font-size:15px;
 }
 
-/* -------- buttons / links -------- */
+
 .row{ display:flex; gap:10px; flex-wrap:wrap; }
 
 .btn{
@@ -196,7 +185,7 @@ h1{
   white-space:pre-wrap;
 }
 
-/* -------- choices -------- */
+
 .choices{ display:flex; flex-direction:column; gap:10px; }
 
 .choiceLink{ text-decoration:none; color:inherit; }
@@ -215,7 +204,7 @@ h1{
   cursor:not-allowed;
 }
 
-/* -------- left/right tweaks -------- */
+
 #left{
   opacity:.92;
 }
@@ -227,7 +216,7 @@ h1{
   min-height:260px;
 }
 
-/* 右侧微光（不影响文字） */
+
 #right::after{
   content:"";
   position:absolute;
@@ -241,7 +230,7 @@ h1{
   z-index:0;
 }
 
-/* right 内容压过微光 */
+
 #right > *{
   position:relative;
   z-index:1;
@@ -252,13 +241,12 @@ h1{
   padding-top:6px;
 }
 
-/* -------- responsive -------- */
+
 @media (max-width:860px){
   .top{ align-items:flex-start; }
 }
 
 
-/* Luck draw small tweaks */
 #drawLuck[disabled]{
   opacity:.55;
   cursor:not-allowed;
@@ -266,5 +254,106 @@ h1{
 
 #luckTag{
   color:var(--mut);
-  font-size:12px;
+  font-size:16px;
 }
+
+/* ====== 抽取区：一行两列 ====== */
+.drawGrid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+  align-items:start;
+}
+
+.drawCol{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.w100{ width:100%; }
+
+.genderRow select{
+  width:100%;
+  padding:9px 10px;
+  border:1px solid var(--bd);
+  background:rgba(0,0,0,.14);
+  color:var(--txt);
+}
+
+/* ====== 结果盒子 ====== */
+.resultBox{
+  margin-top:10px;
+  padding:12px;
+  border:2px solid var(--bd);
+  background:rgba(0,0,0,.10);
+}
+
+.resultTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:8px;
+}
+
+.tag{
+  padding:2px 8px;
+  border:1px solid var(--bd);
+  background:rgba(255,255,255,.06);
+  font-size:16px;
+  color:var(--mut);
+}
+
+.resultName{
+  display:block;
+  font-size:20px;
+  line-height:1.35;
+  margin-bottom:6px;
+}
+
+.resultDesc{
+  white-space:pre-wrap;
+}
+
+/* 按钮禁用态 */
+button[disabled]{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+/* 手机端：两列变一列 */
+@media (max-width:860px){
+  .drawGrid{ grid-template-columns: 1fr; }
+}
+
+/* ====== Left 抽卡区居中变窄 ====== */
+.panelCenter{
+  width:100%;
+  max-width: 640px;        /* 桌面端“往中间挤”的宽度，你可改 380~460 */
+  margin-inline:auto;      /* 水平居中 */
+}
+
+/* 让 left 卡片内部内容默认也更像“面板”排版 */
+#left{
+  display:flex;
+  flex-direction:column;
+}
+
+/* 结果盒子、下拉、按钮更对齐 */
+.panelCenter .resultBox,
+.panelCenter .genderRow select,
+.panelCenter .btn{
+  width:100%;
+}
+
+/* 移动端：不要硬挤，回到全宽；两按钮改为上下 */
+@media (max-width: 520px){
+  .panelCenter{
+    max-width: none;
+  }
+  .drawGrid{
+    grid-template-columns: 1fr;  /* 两列变一列 */
+  }
+}
+

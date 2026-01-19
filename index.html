@@ -12,7 +12,7 @@
     <header class="top">
       <div>
         <h1>Heart to Beat</h1>
-        <div class="sub">心动？！生存法则！ · Main</div>
+        <div class="sub">心动？！生存法则！ ·  Main</div>
       </div>
       <div class="mini">入口页</div>
     </header>
@@ -22,41 +22,76 @@
       <aside class="card pad" id="left">
         <div class="pill">
           <span>当前章节</span>
-          <b>Chapter One</b>
+          <b>Chapter Zero</b>
         </div>
 
-        <div class="hr"> </div>
+<div class="panelCenter">
+<!--         <div class="hr"> </div>
 
 
         <div class="mini">
           <br/>
 
-        </div>
+        </div> -->
 
-        <div class="hr">
+      <!--   <div class="hr">
          </div>
 
         <div class="row">
 
-        </div>
+        </div> -->
 
 <div class="hr"></div>
 
-<div class="mini" style="margin-bottom:8px">今日登山突发运气查询</div>
+<div class="mini" style="margin-bottom:8px">今日登山查询</div>
 
-<button class="btn primary" id="drawLuck">抽卡</button>
+<div class="drawGrid">
+  <!-- 左：突发 -->
+  <div class="drawCol">
+    <button class="btn primary w100" id="drawLuck">抽取今日突发</button>
+  </div>
 
-<div class="hr"></div>
-
-<div id="luckResult" class="pill" style="display:none">
-  <span id="luckTag">—</span>
-  <b id="luckName">—</b>
+  <!-- 右：搭档 -->
+  <div class="drawCol">
+    <div class="genderRow">
+      <label class="mini" for="myGender" style="margin:0">你的性别</label>
+      <select id="myGender">
+        <option value="" selected disabled>请选择…</option>
+        <option value="F">女</option>
+        <option value="M">男</option>
+      </select>
+    </div>
+    <button class="btn w100" id="drawPartner">抽取异性搭档</button>
+  </div>
 </div>
 
-<div id="luckDesc" class="mini" style="display:none; white-space:pre-wrap; margin-top:10px"></div>
+<div class="hr"></div>
+
+<!-- 结果区：突发 -->
+<div id="luckResult" class="resultBox" style="display:none">
+  <div class="resultTop">
+    <span class="mini">今日突发</span>
+    <span class="tag" id="luckTag">—</span>
+  </div>
+  <b class="resultName" id="luckName">—</b>
+  <div class="mini resultDesc" id="luckDesc"></div>
+</div>
+
+<!-- 结果区：搭档 -->
+<div id="partnerResult" class="resultBox" style="display:none">
+  <div class="resultTop">
+    <span class="mini">异性搭档</span>
+    <span class="tag" id="partnerTag">—</span>
+  </div>
+  <b class="resultName" id="partnerName">—</b>
+  <div class="mini resultDesc" id="partnerDesc"></div>
+</div>
 
 <div class="mini" style="margin-top:10px">
-  规则：每次进入网页仅可抽一次；刷新/退出会清空。请截图保存，别作弊。
+  规则：每次进入网页仅可各抽一次；退出则会清空结果——非要作弊节目组也没有任何手段阻止。
+  <br>
+  抽卡仅作为打卡灵感参考，不强制绘制，想游玩请截图保存。
+</div>
 </div>
 
       </aside>
@@ -65,36 +100,51 @@
       <main class="card pad" id="right">
         <p class="sceneTitle">MAIN</p>
 
-        <p class="sceneBody">欢迎来到入口页。</p>
+<!--         <p class="sceneBody">欢迎来到入口页。</p> -->
 
         <div class="choices">
           <a class="choiceLink" href="./chap_one/index.html">
-            <div class="choice">
-              <b>▶ Chapter One：</b> 要饿死了！寻找食材大作战 
-              <div class="mini">进入第一章节游玩地图</div>
+            <div class="choice disabled">
+              <b>▶ Chapter One：</b> Coming Soon 
+              <div class="mini"><!-- 进入第一章节游玩地图 --></div>
             </div>
           </a>
 
           <a class="choiceLink" href="#" aria-disabled="true">
             <div class="choice disabled">
-              <b>▶Chapter Two：</b> Coming soon
+              <b>▶ Chapter Two：</b> Coming soon
               <div class="mini"></div>
             </div>
           </a>
+
+           <a class="choiceLink" href="#" aria-disabled="true">
+            <div class="choice disabled">
+              <b>▶ Chapter Three：</b> Coming soon 
+              <div class="mini"></div>
+            </div>
+          </a>
+
+          <a class="choiceLink" href="#" aria-disabled="true">
+            <div class="choice disabled">
+              <b>▶ Chapter Four：</b> Coming soon 
+              <div class="mini"></div>
+            </div>
+          </a>
+
+
+
         </div>
       </main>
     </section>
-
-    <footer class="footer mini">
-      v0.1 · Root index.html
-    </footer>
   </div>
 
 
   <script>
 (() => {
-  // 抽卡池：你可以继续往里加
-  const pool = [
+  /* =========================
+     1) 今日突发池
+     ========================= */
+  const luckPool = [
     { tag: "BUFF", name: "路线直觉 +2", desc: "你今天对“看起来不对劲的小路”特别敏感。\n效果：涉及方向/选择的判定小幅有利。", weight: 14 },
     { tag: "BUFF", name: "体温管理 +1", desc: "今天不容易被冷到或热到心态炸裂。\n效果：耐力相关描述偏正面。", weight: 12 },
     { tag: "BUFF", name: "队友滤镜 +1", desc: "你说啥都显得很可靠。\n效果：社交/协作场景更容易被相信。", weight: 10 },
@@ -109,7 +159,26 @@
     { tag: "WEIRD", name: "好运偏移", desc: "小事很顺，大事很难讲。\n效果：小收益更容易出现，但关键节点不保底。", weight: 6 },
   ];
 
-  // 加权随机
+  /* =========================
+     2) 搭档 DB（名字 + 性别）
+     gender: "F" | "M"
+     ========================= */
+  const PartnerDB = [
+    { name: "猫妖JG", gender: "F" },
+    { name: "鱼师傅", gender: "M" },
+    { name: "小雪", gender: "F" },
+    { name: "阿飒", gender: "M" },
+    { name: "晴彦", gender: "M" },
+    { name: "雨乃", gender: "F" },
+    { name: "Seven", gender: "M" },
+    { name: "伊斯卡", gender: "M" },
+  ];
+
+  /* =========================
+     util
+     ========================= */
+  const $ = (id) => document.getElementById(id);
+
   function weightedPick(items){
     const total = items.reduce((s, it) => s + (it.weight ?? 1), 0);
     let r = Math.random() * total;
@@ -120,48 +189,164 @@
     return items[items.length - 1];
   }
 
-  // DOM
-  const btn = document.getElementById("drawLuck");
-  const box = document.getElementById("luckResult");
-  const tagEl = document.getElementById("luckTag");
-  const nameEl = document.getElementById("luckName");
-  const descEl = document.getElementById("luckDesc");
+  function pickRandom(arr){
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
 
-  if (!btn) return;
+  function oppositeGender(g){
+    if (g === "F") return "M";
+    if (g === "M") return "F";
+    return null;
+  }
 
-  // 本次会话防二抽（刷新就没了）
-  const KEY = "luck_draw_used_v1";
-  const used = sessionStorage.getItem(KEY) === "1";
+  function safeParse(json){
+    try { return JSON.parse(json); } catch { return null; }
+  }
 
-  function lockUI(){
+  /* =========================
+     DOM
+     ========================= */
+  const btnLuck = $("drawLuck");
+  const btnPartner = $("drawPartner");
+  const myGender = $("myGender");
+
+  const luckBox = $("luckResult");
+  const luckTag = $("luckTag");
+  const luckName = $("luckName");
+  const luckDesc = $("luckDesc");
+
+  const pBox = $("partnerResult");
+  const pTag = $("partnerTag");
+  const pName = $("partnerName");
+  const pDesc = $("partnerDesc");
+
+  /* =========================
+     sessionStorage keys
+     ========================= */
+  const KEY_LUCK_USED = "htb_luck_used_v2";
+  const KEY_LUCK_DATA = "htb_luck_data_v2";
+
+  const KEY_PARTNER_USED = "htb_partner_used_v2";
+  const KEY_PARTNER_DATA = "htb_partner_data_v2";
+
+  function lock(btn, text){
+    if (!btn) return;
     btn.disabled = true;
-    btn.textContent = "已抽过";
+    if (text) btn.textContent = text;
   }
 
-  if (used){
-    lockUI();
-    // 不保存结果：刷新后 sessionStorage 还在同一 tab 会话里，但你说“refresh 之前不能点击第二次”
-    // 为避免“刷新还能看到旧结果”，这里不恢复结果；只锁按钮。
+  /* =========================
+     恢复结果（刷新后仍显示）
+     ========================= */
+  function restoreLuck(){
+    const used = sessionStorage.getItem(KEY_LUCK_USED) === "1";
+    const data = safeParse(sessionStorage.getItem(KEY_LUCK_DATA) || "");
+    if (!used || !data) return;
+
+    luckBox.style.display = "block";
+    luckTag.textContent = data.tag || "—";
+    luckName.textContent = data.name || "—";
+    luckDesc.textContent = data.desc || "";
+
+    lock(btnLuck, "今日突发已抽");
   }
 
-  btn.addEventListener("click", () => {
-    // 双保险
-    if (sessionStorage.getItem(KEY) === "1") return;
+  function restorePartner(){
+    const used = sessionStorage.getItem(KEY_PARTNER_USED) === "1";
+    const data = safeParse(sessionStorage.getItem(KEY_PARTNER_DATA) || "");
+    if (!used || !data) return;
 
-    const result = weightedPick(pool);
+    pBox.style.display = "block";
+    pTag.textContent = data.tag || "—";
+    pName.textContent = data.name || "—";
+    pDesc.textContent = data.desc || "";
 
-    tagEl.textContent = result.tag;
-    nameEl.textContent = result.name;
-    descEl.textContent = result.desc;
+    // 也把性别恢复一下（如果之前选过）
+    if (myGender && data.myGender){
+      myGender.value = data.myGender;
+    }
 
-    box.style.display = "flex";
-    descEl.style.display = "block";
+    lock(btnPartner, "搭档已抽");
+  }
 
-    sessionStorage.setItem(KEY, "1");
-    lockUI();
-  });
+  restoreLuck();
+  restorePartner();
+
+  /* =========================
+     3) 今日突发抽取
+     ========================= */
+  if (btnLuck){
+    btnLuck.addEventListener("click", () => {
+      if (sessionStorage.getItem(KEY_LUCK_USED) === "1") return;
+
+      const r = weightedPick(luckPool);
+
+      // 展示
+      luckBox.style.display = "block";
+      luckTag.textContent = r.tag;
+      luckName.textContent = r.name;
+      luckDesc.textContent = r.desc;
+
+      // 存储（刷新仍在）
+      sessionStorage.setItem(KEY_LUCK_USED, "1");
+      sessionStorage.setItem(KEY_LUCK_DATA, JSON.stringify({
+        tag: r.tag, name: r.name, desc: r.desc
+      }));
+
+      lock(btnLuck, "今日突发已抽");
+    });
+  }
+
+  /* =========================
+     4) 异性搭档抽取
+     ========================= */
+  if (btnPartner){
+    btnPartner.addEventListener("click", () => {
+      if (sessionStorage.getItem(KEY_PARTNER_USED) === "1") return;
+
+      const g = myGender ? myGender.value : "";
+      if (!g){
+        pBox.style.display = "block";
+        pTag.textContent = "提示";
+        pName.textContent = "请选择性别";
+        pDesc.textContent = "先在右侧下拉框选择你的性别，再抽取异性搭档。";
+        return;
+      }
+
+      const want = oppositeGender(g);
+      const candidates = PartnerDB.filter(x => x.gender === want);
+
+      if (candidates.length === 0){
+        pBox.style.display = "block";
+        pTag.textContent = "ERROR";
+        pName.textContent = "DB里没有可抽对象";
+        pDesc.textContent = "请在 PartnerDB 里补全异性名单。";
+        return;
+      }
+
+      const picked = pickRandom(candidates);
+
+      pBox.style.display = "block";
+      pTag.textContent = "异性";
+      pName.textContent = picked.name;
+      pDesc.textContent =
+        `性别匹配：${g} → ${want}\n提示：截图保存。刷新不会丢，但不要开新标签页刷人。`;
+
+      sessionStorage.setItem(KEY_PARTNER_USED, "1");
+      sessionStorage.setItem(KEY_PARTNER_DATA, JSON.stringify({
+        tag: "异性",
+        name: picked.name,
+        desc: `性别匹配：${g} → ${want}\n提示：截图保存。刷新不会丢，但不要开新标签页刷人。`,
+        myGender: g
+      }));
+
+      lock(btnPartner, "搭档已抽");
+    });
+  }
 })();
 </script>
+
+
 
 </body>
 
