@@ -54,9 +54,9 @@
   <!-- 右：搭档 -->
   <div class="drawCol">
     <div class="genderRow">
-      <label class="mini" for="myGender" style="margin:0">你的性别</label>
+      <label class="mini" for="myGender" style="margin-bottom:8px">不知道和谁互动？</label>
       <select id="myGender">
-        <option value="" selected disabled>请选择…</option>
+        <option value="" selected disabled>请选择你的性别…</option>
         <option value="F">女</option>
         <option value="M">男</option>
       </select>
@@ -110,12 +110,18 @@
             </div>
           </a>
 
-          <a class="choiceLink" href="#" aria-disabled="true">
+          <div class="choiceRow">
             <div class="choice disabled">
               <b>▶ Chapter Two：</b> Coming soon
-              <div class="mini"></div>
+              <div class="mini"><!-- 主线尚未开启 --></div>
             </div>
-          </a>
+
+            <!-- 右侧支线按钮 -->
+<!--             <a class="sideBtn" href="./chap_two/side_index.html">
+              支线
+            </a> -->
+          </div>
+
 
            <a class="choiceLink" href="#" aria-disabled="true">
             <div class="choice disabled">
@@ -145,9 +151,9 @@
      1) 今日突发池
      ========================= */
   const luckPool = [
-    { tag: "BUFF", name: "路线直觉 +2", desc: "你今天对“看起来不对劲的小路”特别敏感。\n效果：涉及方向/选择的判定小幅有利。", weight: 14 },
-    { tag: "BUFF", name: "体温管理 +1", desc: "今天不容易被冷到或热到心态炸裂。\n效果：耐力相关描述偏正面。", weight: 12 },
-    { tag: "BUFF", name: "队友滤镜 +1", desc: "你说啥都显得很可靠。\n效果：社交/协作场景更容易被相信。", weight: 10 },
+    { tag: "BUFF", name: "路线直觉", desc: "你今天对“看起来不对劲的小路”特别敏感。\n效果：涉及方向/选择的判定小幅有利。", weight: 14 },
+    { tag: "BUFF", name: "体温管理", desc: "今天不容易被冷到或热到心态炸裂。\n效果：耐力相关描述偏正面。", weight: 12 },
+    { tag: "BUFF", name: "队友滤镜", desc: "你说啥都显得很可靠。\n效果：社交/协作场景更容易被相信。", weight: 10 },
     { tag: "BUFF", name: "背包轻了", desc: "你总觉得自己少带了一样东西——但其实没有。\n效果：行动更干脆。", weight: 8 },
 
     { tag: "DEBUFF", name: "鞋带诅咒", desc: "你今天的鞋带就是很爱松。\n效果：赶路/奔跑相关场景更狼狈。", weight: 12 },
@@ -156,7 +162,7 @@
     { tag: "DEBUFF", name: "迷路错觉", desc: "你会频繁怀疑“我们是不是走错了”。\n效果：方向相关叙述偏负面。", weight: 7 },
 
     { tag: "WEIRD", name: "山在看你", desc: "你有一种被自然观察的微妙感觉。\n效果：任何诡异事件都更合理。", weight: 6 },
-    { tag: "WEIRD", name: "好运偏移", desc: "小事很顺，大事很难讲。\n效果：小收益更容易出现，但关键节点不保底。", weight: 6 },
+    { tag: "WEIRD", name: "好运偏移", desc: "小事很顺，大事很难讲。\n效果：或许小收益更容易出现，但关键节点不保底。", weight: 6 },
   ];
 
   /* =========================
@@ -309,7 +315,7 @@
         pBox.style.display = "block";
         pTag.textContent = "提示";
         pName.textContent = "请选择性别";
-        pDesc.textContent = "先在右侧下拉框选择你的性别，再抽取异性搭档。";
+        pDesc.textContent = "先在右侧下拉框选择你的性别，再抽取可能的异性搭档。";
         return;
       }
 
@@ -320,23 +326,25 @@
         pBox.style.display = "block";
         pTag.textContent = "ERROR";
         pName.textContent = "DB里没有可抽对象";
-        pDesc.textContent = "请在 PartnerDB 里补全异性名单。";
+        pDesc.textContent = "请在找节目组补全异性名单。";
         return;
       }
 
       const picked = pickRandom(candidates);
 
       pBox.style.display = "block";
-      pTag.textContent = "异性";
+      pTag.textContent = "互动对象！";
       pName.textContent = picked.name;
       pDesc.textContent =
-        `性别匹配：${g} → ${want}\n提示：截图保存。刷新不会丢，但不要开新标签页刷人。`;
+        `性别匹配：${g} → ${want}\n\n
+        再说一句：如果抽到心动嘉宾了这会是个好理由去小窗。`;
 
       sessionStorage.setItem(KEY_PARTNER_USED, "1");
       sessionStorage.setItem(KEY_PARTNER_DATA, JSON.stringify({
-        tag: "异性",
+        tag: "互动对象！",
         name: picked.name,
-        desc: `性别匹配：${g} → ${want}\n提示：截图保存。刷新不会丢，但不要开新标签页刷人。`,
+        desc: `性别匹配：${g} → ${want}\n\n
+        再说一句：如果抽到心动嘉宾了这会是个好理由去小窗。`,
         myGender: g
       }));
 
