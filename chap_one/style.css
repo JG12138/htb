@@ -118,3 +118,115 @@ input,select{
   }
 }
 
+/* 浮动名字自查 */
+.name-picker{
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: none;
+}
+
+.name-picker.show{ display:block; }
+
+.name-picker .mask{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(6px);
+}
+
+.name-picker .panel{
+  position:absolute;
+  right: 16px;
+  top: 16px;
+  width: min(520px, calc(100vw - 32px));
+  max-height: min(72vh, 720px);
+  overflow: auto;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(20,30,18,.96); /* 你 campfire 的 card 风格 */
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  color: #fff;
+}
+
+.name-picker .head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.name-picker .title{
+  font-weight: 700;
+  font-size: 14px;
+  opacity: .95;
+}
+
+.name-picker .sub{
+  font-size: 12px;
+  opacity: .7;
+  margin-top: 2px;
+}
+
+.name-picker .close{
+  appearance:none;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.10);
+  color:#fff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor:pointer;
+}
+
+.name-picker .sec{
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.10);
+}
+
+.name-picker .sec h4{
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  opacity: .75;
+  letter-spacing: .5px;
+}
+
+.name-picker .grid{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px;
+}
+
+.name-picker .chip{
+  appearance:none;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.08);
+  color:#fff;
+  padding: 7px 10px;
+  border-radius: 999px;
+  cursor:pointer;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.name-picker .chip:hover{
+  background: rgba(255,255,255,.14);
+}
+
+/* 右下角小按钮 */
+.name-picker-launch{
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 99998;
+  appearance:none;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.10);
+  color:#fff;
+  padding: 10px 12px;
+  border-radius: 999px;
+  cursor:pointer;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}

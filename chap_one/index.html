@@ -35,16 +35,17 @@
             <option value="protein">蛋白质组</option>
             <option value="seasoning">调味料组</option>
             <option value="veg">蔬菜组</option>
-            <option value="gear">炊具组</option>
           </select>
         </div>
 
         <div class="row">
           <button class="btn primary" id="start">进入流程</button>
-          <button class="btn" id="demo">示例开始</button>
+         <!--  <button class="btn" id="demo">示例开始</button> -->
         </div>
         <div class="hr"></div>
-        <div class="mini">名字不在DB里会固定全部数值为4。<br>“预热的时候早说啊！”
+        <div class="mini">数据未出现在镜头里会固定全部为4。
+          <br>不过数值也不代表这是个唯心主义的节目，请享受吧！
+          <br><br>“预热的时候早说啊！”
           <br>
           <br>
         刷新网页则会清空所有信息。</div>
@@ -73,6 +74,36 @@
     </main>
   </div>
 </div>
+
+<!-- 名字自查 -->
+<div id="namePicker" class="name-picker" aria-hidden="true">
+  <div class="mask" data-close="1"></div>
+  <div class="panel" role="dialog" aria-modal="true">
+    <div class="head">
+      <div>
+        <div class="title">名字自查（点一下自动填入）</div>
+        <div class="sub">中文名字统一在前；英文则按字母表排序</div>
+      </div>
+      <button class="close" type="button" data-close="1">关闭</button>
+    </div>
+
+    <div class="sec">
+      <h4>中文</h4>
+      <div id="nameListZh" class="grid"></div>
+    </div>
+
+    <div class="sec">
+      <h4>English (A–Z)</h4>
+      <div id="nameListEn" class="grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 右下角打开按钮 -->
+<button id="namePickerLaunch" class="name-picker-launch" type="button">
+  打开名字表
+</button>
+
 
  <script src="./main.js"></script>
 </body>

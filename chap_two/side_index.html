@@ -241,7 +241,7 @@
   transform:translate(-50%,-50%) scale(0.2);
   opacity:.6;
   pointer-events:none;
-  z-index:-1; /* 在卡片下面，只作用于背景 */
+  z-index:-1; /* 在卡下背景 */
   animation:rippleExpand 1.2s ease-out forwards;
 }
 
@@ -256,7 +256,7 @@
   }
 }
 
-/* 帮忙提示：轻微摇晃 */
+/* 轻微摇晃 */
 .shake-soft{
   animation: shakeSoft .45s ease-out;
 }
@@ -357,8 +357,17 @@
   </div>
 
 <script>
+
+  
 /* ===== data ===== */
-const peopleDB = { "小李":true, "阿青":true, "鱼师傅":true, "猫妖JG":true };
+const peopleDB = { 
+  "小李":true, 
+  "阿青":true, 
+  "鱼师傅":true, 
+  "猫妖JG":true 
+
+
+};
 
 const fishingSpot = {
   name: "湖边",

@@ -1,12 +1,65 @@
 /* 下垂bar */
 const $=s=>document.querySelector(s), rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
-const gLabel=g=>({carb:"碳水组",protein:"蛋白质组",seasoning:"调味料组",veg:"蔬菜组",gear:"炊具组"}[g]||"—");
+const gLabel=g=>({carb:"碳水组",protein:"蛋白质组",seasoning:"调味料组",veg:"蔬菜组"}[g]||"—");
+
 
 /*DB */
-const DB={
-  "猫妖JG":{luck:2,direction:4,stamina:6},
-  "鱼师傅":{luck:7,direction:6,stamina:5}
+const DB = {
+
+  "橙知": { luck: 1, direction: 7, stamina: 9 },
+  "丹": { luck: 4, direction: 4, stamina: 4 },
+  "Eric": { luck: 4, direction: 4, stamina: 4 },
+  "Ethan": { luck: 4, direction: 4, stamina: 4 },
+  "阿基米德": { luck: 4, direction: 4, stamina: 4 },
+  "Friedrich": { luck: 4, direction: 4, stamina: 4 },
+  "Honey": { luck: 4, direction: 4, stamina: 4 },
+  "J.O.": { luck: 4, direction: 4, stamina: 4 },
+  "Kazares": { luck: 4, direction: 5, stamina: 9 },
+  "奥利弗": { luck: 10, direction: 3, stamina: 8 },
+  "Matt": { luck: 4, direction: 4, stamina: 4 },
+  "Mubiru": { luck: 4, direction: 4, stamina: 4 },
+  "Samuel": { luck: 100, direction: 100, stamina: 100 },
+  "Thomas": { luck: 4, direction: 4, stamina: 4 },
+  "卡莱比": { luck: 1, direction: 2, stamina: 3 },
+  "叶澄希": { luck: 4, direction: 4, stamina: 4 },
+
+  "Amber": { luck: 4, direction: 4, stamina: 4 },
+  "Cela": { luck: 4, direction: 4, stamina: 4 },
+  "Jeffrey": { luck: 9, direction: 6, stamina: 6 },
+  "玛顿": { luck: 4, direction: 4, stamina: 4 },
+  "Maya": { luck: 5, direction: 9, stamina: 8 },
+  "马塞拉": { luck: 8, direction: 2, stamina: 5 },
+  "Melusine": { luck: 4, direction: 6, stamina: 7 },
+  "Naya": { luck: 4, direction: 4, stamina: 4 },
+  "Romaine": { luck: 4, direction: 4, stamina: 4 },
+  "向木林": { luck: 7, direction: 7, stamina: 8.5 },
+  "奈芙": { luck: 10, direction: 10, stamina: 10 },
+  "Zurabia": { luck: 4, direction: 4, stamina: 4 },
+  "Moira": { luck: 4, direction: 4, stamina: 4 },
+  "Erla": { luck: 3, direction: 8, stamina: 7 },
+  "Josephine": { luck: 5, direction: 3, stamina: 7 },
+  "Oliven": { luck: 5, direction: 6, stamina: 7 }
+
 };
+
+
+//名字害死我咧
+const normalizeName = (str) => {
+  return str
+    .trim()                         // 前后空格
+    .replace(/\s+/g,"")             // 中间空格
+    .replace(/[Ａ-Ｚａ-ｚ０-９]/g, ch =>
+      String.fromCharCode(ch.charCodeAt(0) - 65248)
+    )                               // 全角转半角
+    .toLowerCase();                 // 小写
+};
+
+const DB_NORMALIZED = {};
+Object.entries(DB).forEach(([name, stats]) => {
+  DB_NORMALIZED[normalizeName(name)] = stats;
+});
+
+
 
 /* state (refresh => reinit => cleared by default) */
 /*我的亲亲全局变量*/
@@ -20,10 +73,12 @@ const reset=()=>Object.assign(S,{
 
 /* dice 数值高就成功率大，真写的我满头大汗了*/
 const roll=(stat,tag)=>{
-  const d=rnd(1,10), ok=d<=stat;
-  console.log(`[ROLL] ${tag} d10=${d} <= ${stat} ? ${ok?"SUCCESS":"FAIL"}`);
+  const capped = Math.min(stat, 8);          // >8当8用
+  const d=rnd(1,10), ok=d<=capped;
+  console.log(`[ROLL] ${tag} d10=${d} <= ${capped} (raw=${stat}) ? ${ok?"SUCCESS":"FAIL"}`);
   return {d,ok};
 };
+
 const hiddenLuck=()=>{
   const {ok}=roll(S.stats.luck,"暗骰幸运(运气)");
   if(ok) S.tokens++;
@@ -48,7 +103,7 @@ const pick2 = arr => {
   while(out.length<2 && a.length) out.push(a.splice(rnd(0,a.length-1),1)[0]);
   return out;
 };
-const GROUPS=["carb","protein","seasoning","veg","gear"];
+const GROUPS=["carb","protein","seasoning","veg"];
 const groupOk=g=>GROUPS.includes(g);
 const tier=()=>S.tokens>=2?"高级":S.tokens===1?"一般":"眉笔"; // 你原 outcome 可以替换成这个
 
@@ -80,12 +135,8 @@ const LOOT={
     高级:["洋葱","胡萝卜","西兰花","青椒","蘑菇","番茄"],
     一般:["土豆","洋葱","胡萝卜","番茄"],
     眉笔:["海带丝","榨菜","泡菜小包","玉米粒"]
-  },
-  gear:{
-    高级:["小锅","点火器","折叠炉","铝箔","便携水壶","多功能刀"],
-    一般:["打火机","一次性碗筷","简易锅","锡纸"],
-    眉笔:["塑料叉","纸杯","破旧开瓶器","旧抹布"]
   }
+
 };
 
 /* 明投 + 观察 */
@@ -589,9 +640,16 @@ function go(id){ S.hist.push(S.scene); S.scene=id; render(); }
 
 /* start */
 function start(name,group){
+
+  if(shouldOpenNamePicker(name)){
+    showNamePicker();
+    return;
+  }
+
   name=(name||"").trim(); if(!group) return alert("先选择组别。");
   S.name=name||"游客"; S.group=group;
-  S.stats=DB[name]||{luck:4,direction:4,stamina:4};
+  const key = normalizeName(name);
+  S.stats = DB_NORMALIZED[key] || {luck:4,direction:4,stamina:4};
   S.tokens=0; S.scene="camp_intro"; S.hist=[]; S.lastRoll=null;
   S.check = {};
   console.log(`[START] name=${S.name} group=${S.group}`, S.stats);
@@ -608,6 +666,81 @@ reset();
 const startBtn = $("#start");
 if(startBtn) startBtn.onclick = ()=>start($("#name").value,$("#group").value);
 
-const demoBtn = $("#demo");
-console.log("start:", startBtn, "demo:", demoBtn);
-if(demoBtn) demoBtn.onclick = ()=>start("猫妖JG","protein");
+
+// ===== 名字自查浮层：按「中文在前，英文A-Z」生成 =====
+const isEnglishName = (n) => /^[A-Za-z]/.test(n);
+
+function buildNamePicker(){
+  const wrap = document.getElementById("namePicker");
+  const zhBox = document.getElementById("nameListZh");
+  const enBox = document.getElementById("nameListEn");
+  if(!wrap || !zhBox || !enBox) return;
+
+  // 拿 DB 的原始 key（保持你写的显示名）
+  const names = Object.keys(DB);
+
+  const zh = names.filter(n => !isEnglishName(n))
+    .sort((a,b)=>a.localeCompare(b, "zh-Hans-CN"));
+
+  const en = names.filter(isEnglishName)
+    .sort((a,b)=>a.localeCompare(b, "en", { sensitivity:"base" }));
+
+  const makeChip = (name) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chip";
+    btn.textContent = name;
+    btn.onclick = () => {
+      const input = document.getElementById("name");
+      if(input) input.value = name;
+      hideNamePicker();
+    };
+    return btn;
+  };
+
+  zhBox.innerHTML = "";
+  enBox.innerHTML = "";
+  zh.forEach(n => zhBox.appendChild(makeChip(n)));
+  en.forEach(n => enBox.appendChild(makeChip(n)));
+
+  // 关闭逻辑（点遮罩/关闭按钮）
+  wrap.querySelectorAll("[data-close='1']").forEach(el=>{
+    el.onclick = hideNamePicker;
+  });
+
+  // 右下角打开按钮
+  const launch = document.getElementById("namePickerLaunch");
+  if(launch) launch.onclick = showNamePicker;
+}
+
+function showNamePicker(){
+  const wrap = document.getElementById("namePicker");
+  if(!wrap) return;
+  wrap.classList.add("show");
+  wrap.setAttribute("aria-hidden", "false");
+}
+
+function hideNamePicker(){
+  const wrap = document.getElementById("namePicker");
+  if(!wrap) return;
+  wrap.classList.remove("show");
+  wrap.setAttribute("aria-hidden", "true");
+}
+
+// ===== 自动弹出条件：name 为空 或 不在 DB =====
+function shouldOpenNamePicker(rawName){
+  const n = (rawName || "").trim();
+  if(!n) return true;
+
+  // 你已经有 normalizeName + DB_NORMALIZED 的话，就用它判断“是否命中”
+  if(typeof normalizeName === "function" && typeof DB_NORMALIZED === "object"){
+    const key = normalizeName(n);
+    return !DB_NORMALIZED[key];
+  }
+
+  // 没有 normalizeName 的话，就退化成原始 DB key 判断
+  return !DB[n];
+}
+
+// 初始化一次
+buildNamePicker();
