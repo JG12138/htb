@@ -22,7 +22,7 @@
       <aside class="card pad" id="left">
         <div class="pill">
           <span>当前章节</span>
-          <b>Chapter Zero</b>
+          <b>Chapter ONE</b>
         </div>
 
 <div class="panelCenter">
@@ -104,9 +104,9 @@
 
         <div class="choices">
           <a class="choiceLink" href="./chap_one/index.html">
-            <div class="choice disabled">
-              <b>▶ Chapter One：</b> Coming Soon 
-              <div class="mini"><!-- 进入第一章节游玩地图 --></div>
+            <div class="choice">
+              <b>▶ Chapter One：</b> 要饿死了！寻找食材大作战！ 
+              <div class="mini">进入第一章节游玩地图</div>
             </div>
           </a>
 
@@ -147,9 +147,7 @@
 
   <script>
 (() => {
-  /* =========================
-     1) 今日突发池
-     ========================= */
+  /* 今日突发池*/
   const luckPool = [
     { tag: "BUFF", name: "路线直觉", desc: "你今天对“看起来不对劲的小路”特别敏感。\n效果：涉及方向/选择的判定小幅有利。", weight: 14 },
     { tag: "BUFF", name: "体温管理", desc: "今天不容易被冷到或热到心态炸裂。\n效果：耐力相关描述偏正面。", weight: 12 },
@@ -165,19 +163,42 @@
     { tag: "WEIRD", name: "好运偏移", desc: "小事很顺，大事很难讲。\n效果：或许小收益更容易出现，但关键节点不保底。", weight: 6 },
   ];
 
-  /* =========================
-     2) 搭档 DB（名字 + 性别）
-     gender: "F" | "M"
-     ========================= */
+  /* DB*/
   const PartnerDB = [
-    { name: "猫妖JG", gender: "F" },
-    { name: "鱼师傅", gender: "M" },
-    { name: "小雪", gender: "F" },
-    { name: "阿飒", gender: "M" },
-    { name: "晴彦", gender: "M" },
-    { name: "雨乃", gender: "F" },
-    { name: "Seven", gender: "M" },
-    { name: "伊斯卡", gender: "M" },
+    { name: "橙知", gender: "M" },
+    { name: "丹", gender: "M" },
+    { name: "Eric Wang", gender: "M" },
+    { name: "Ethan Bennett（伊森·贝内特）", gender: "M" },
+    { name: "阿基米德·凡·杜可纳", gender: "M" },
+    { name: "Friedrich Walder（弗里德里希·瓦尔德）", gender: "M" },
+    { name: "Honey Parker（哈尼·帕克）", gender: "M" },
+    { name: "J. O’Connell（J. 奥康纳尔）", gender: "M" },
+    { name: "Kazares（卡扎勒斯）", gender: "M" },
+    { name: "Lucas Moon Olive（奥利弗）", gender: "M" },
+    { name: "Matt Kobayashi", gender: "M" },
+    { name: "Mubiru Abrima", gender: "M" },
+    { name: "Samuel（塞缪尔）", gender: "M" },
+    { name: "Thomas Rocheleau（罗马·罗什布吕内）", gender: "M" },
+    { name: "卡莱比", gender: "M" },
+    { name: "叶澄希", gender: "M" },
+
+    // ===== 女嘉宾 =====
+    { name: "Amber Blackwell（安柏·布莱克威尔）", gender: "F" },
+    { name: "Cela（塞拉）", gender: "F" },
+    { name: "Jeffrey（杰芙里）", gender: "F" },
+    { name: "马顿·琼斯", gender: "F" },
+    { name: "Maya（玛雅）", gender: "F" },
+    { name: "马塞拉·卡洛", gender: "F" },
+    { name: "Melusine Raisnner（梅露希娜·拉辛纳）", gender: "F" },
+    { name: "Naya Fluor（乃亚·菲洛普）", gender: "F" },
+    { name: "Romaine Mannich", gender: "F" },
+    { name: "向木林", gender: "F" },
+    { name: "伊洛恩·奈芙", gender: "F" },
+    { name: "Zurabia（祖拉比亚）", gender: "F" },
+    { name: "Moira Ross（莫伊拉·罗斯）", gender: "F" },
+    { name: "Erla（厄拉）", gender: "F" },
+    { name: "Josephine Young（乔瑟芬·杨）", gender: "F" },
+    { name: "Oliven Orcinus（奥里文）", gender: "F" }
   ];
 
   /* =========================
