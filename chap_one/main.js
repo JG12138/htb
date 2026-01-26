@@ -716,15 +716,28 @@ function buildNamePicker(){
 function showNamePicker(){
   const wrap = document.getElementById("namePicker");
   if(!wrap) return;
+
+  wrap.hidden = false;
+  wrap.inert = false;
   wrap.classList.add("show");
-  wrap.setAttribute("aria-hidden", "false");
+
+  const closeBtn = wrap.querySelector(".close");
+  if (closeBtn) closeBtn.focus({ preventScroll: true });
 }
 
 function hideNamePicker(){
   const wrap = document.getElementById("namePicker");
   if(!wrap) return;
+
+  // 先移焦点
+  if (wrap.contains(document.activeElement)) document.activeElement.blur();
+
   wrap.classList.remove("show");
-  wrap.setAttribute("aria-hidden", "true");
+  wrap.inert = true;
+  wrap.hidden = true;
+
+  const input = document.getElementById("name");
+  if (input) input.focus({ preventScroll: true });
 }
 
 // ===== 自动弹出条件：name 为空 或 不在 DB =====
