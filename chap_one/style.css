@@ -232,3 +232,28 @@ input,select{
   cursor:pointer;
   box-shadow: 0 10px 30px rgba(0,0,0,.25);
 }
+
+
+select {
+  background: rgba(255,255,255,0.08);
+  color: #eee;
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 10px 14px;
+  outline: none;
+}
+
+/* hover */
+select:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+/* focus */
+select:focus {
+  border-color: #f7d7a8;   /* 你已有的金色变量 */
+  box-shadow: 0 0 0 2px rgba(247,215,168,0.3);
+}
+
+option {
+  background: #1E2A1B; /* 和你背景一致 */
+  color: #fff;
+}

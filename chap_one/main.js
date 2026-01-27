@@ -1115,7 +1115,7 @@ forest_result:{
     console.log(`[RESULT] (forest) group=${S.group} tier=${t} tokens=${S.tokens} got=[${got}]`);
 
     if(t==="高级") return `你很确定自己找到了真正的藏点。
-这里不是随手放置，而是精心挑过的位置对知道路线的人来说足够方便。
+这里不是随手放置，而是精心挑过的位置，对知道路线的人来说足够方便。
 
 你把能带走的东西迅速收好。
 
