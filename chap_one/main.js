@@ -8,7 +8,7 @@ const DB = {
 
   "橙知": { luck: 1, direction: 7, stamina: 9 },
   "丹": { luck: 4, direction: 4, stamina: 4 },
-  "Eric": { luck: 4, direction: 4, stamina: 4 },
+  "Eric": { luck: 10, direction: 10, stamina:10 },
   "Ethan": { luck: 4, direction: 4, stamina: 4 },
   "阿基米德": { luck: 4, direction: 4, stamina: 4 },
   "Friedrich": { luck: 4, direction: 4, stamina: 4 },
@@ -72,12 +72,28 @@ const reset=()=>Object.assign(S,{
 });
 
 /* dice 数值高就成功率大，真写的我满头大汗了*/
-const roll=(stat,tag)=>{
-  const capped = Math.min(stat, 8);          // >8当8用
-  const d=rnd(1,10), ok=d<=capped;
-  console.log(`[ROLL] ${tag} d10=${d} <= ${capped} (raw=${stat}) ? ${ok?"SUCCESS":"FAIL"}`);
-  return {d,ok};
+const roll = (stat, tag) => {
+
+  let effectiveStat;
+
+  if (stat >= 10) {
+    // 吹牛惩罚：4~8 随机
+    console.log("stat over 10 detected: overconfident, using random 4~8");
+    effectiveStat = rnd(4, 8);
+  } else {
+    effectiveStat = Math.min(stat, 8);
+  }
+
+  const d = rnd(1, 10);
+  const ok = d <= effectiveStat;
+
+  console.log(
+    `[ROLL] ${tag} d10=${d} <= ${effectiveStat} (raw=${stat}) ? ${ok ? "SUCCESS" : "FAIL"}`
+  );
+
+  return { d, ok, effectiveStat };
 };
+
 
 // 每条路线最多
 const resetRouteTokens = (routeTag="") => {
@@ -110,22 +126,35 @@ const hiddenRoll = (stat, tag) => {
 
 const hiddenLuck = () => hiddenRoll("luck", "暗骰幸运(运气)");
 const hiddenStamina = () => hiddenRoll("stamina", "暗骰耐力");
+
+
 /* loot (for test) */
-const pick2 = arr => {
-  const a=[...arr], out=[];
-  while(out.length<2 && a.length) out.push(a.splice(rnd(0,a.length-1),1)[0]);
+const pickN = (arr, n) => {
+  const a = [...arr];
+  const out = [];
+  while (out.length < n && a.length) {
+    out.push(a.splice(rnd(0, a.length - 1), 1)[0]);
+  }
   return out;
 };
+
 const GROUPS=["carb","protein","seasoning","veg"];
 const groupOk=g=>GROUPS.includes(g);
 const tier=()=>S.tokens>=2?"高级":S.tokens===1?"一般":"眉笔";
 
-const getLoot=(group,t)=>{
-  const g = groupOk(group)?group:"protein";         // 组别兜底：防 bug
+const getLoot = (group, t) => {
+  const g = groupOk(group) ? group : "protein";
   const table = LOOT[g] || LOOT.protein;
   const pool = table[t] || table["眉笔"];
-  return pick2(pool).join("、");
+
+  let n;
+  if (t === "高级") n = 4;
+  else if (t === "一般") n = 3;
+  else n = 2; // 眉笔
+
+  return pickN(pool, n).join("、");
 };
+
 
 /*记得倒回来重新检查这个池子*/
 const LOOT={

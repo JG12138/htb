@@ -149,18 +149,36 @@
 (() => {
   /* 今日突发池*/
   const luckPool = [
-    { tag: "BUFF", name: "路线直觉", desc: "你今天对“看起来不对劲的小路”特别敏感。\n效果：涉及方向/选择的判定小幅有利。", weight: 14 },
-    { tag: "BUFF", name: "体温管理", desc: "今天不容易被冷到或热到心态炸裂。\n效果：耐力相关描述偏正面。", weight: 12 },
+    { tag: "BUFF", name: "路线雷达", desc: "你今天对“看起来不对劲的小路”特别敏感。\n效果：涉及方向/选择的判定小幅有利。", weight: 14 },
+
+    { tag: "BUFF", name: "恒温动物", desc: "今天不容易被冷到或热到心态炸裂。\n效果：耐力相关描述偏正面。", weight: 12 },
+
     { tag: "BUFF", name: "队友滤镜", desc: "你说啥都显得很可靠。\n效果：社交/协作场景更容易被相信。", weight: 10 },
+
     { tag: "BUFF", name: "背包轻了", desc: "你总觉得自己少带了一样东西——但其实没有。\n效果：行动更干脆。", weight: 8 },
 
+    { tag: "BUFF", name: "四叶草", desc: "幸运的象征。\n效果：事情更容易往你期望的方向发展。", weight: 5 },
+
+    { tag: "BUFF", name: "镜头宠儿", desc: "你今天似乎十分上镜。\n效果：摄影师的镜头会频繁地对准你。", weight: 7 },
+
     { tag: "DEBUFF", name: "鞋带诅咒", desc: "你今天的鞋带就是很爱松。\n效果：赶路/奔跑相关场景更狼狈。", weight: 12 },
+
     { tag: "DEBUFF", name: "信号焦虑", desc: "你会忍不住担心手机没信号。\n效果：遇到未知状况更容易慌一下。", weight: 10 },
+
     { tag: "DEBUFF", name: "口渴感放大", desc: "水明明还够，但你就是觉得渴。\n效果：补给相关场景更紧张。", weight: 9 },
+
     { tag: "DEBUFF", name: "迷路错觉", desc: "你会频繁怀疑“我们是不是走错了”。\n效果：方向相关叙述偏负面。", weight: 7 },
 
+    { tag: "DEBUFF", name: "舌头打结", desc: "今天你的舌头总是捋不直。\n效果：说话更容易出现失误。", weight: 6 },
+
+    { tag: "DEBUFF", name: "静电体质", desc: "你和别人有点来电…呀！\n效果：接触物品或他人时更容易触发静电。", weight: 8 },
+
     { tag: "WEIRD", name: "山在看你", desc: "你有一种被自然观察的微妙感觉。\n效果：任何诡异事件都更合理。", weight: 6 },
-    { tag: "WEIRD", name: "好运偏移", desc: "小事很顺，大事很难讲。\n效果：或许小收益更容易出现，但关键节点不保底。", weight: 6 },
+
+    { tag: "WEIRD", name: "好运偏移", desc: "小事很顺，大事难讲。\n效果：小收益更容易出现，但关键节点不保底。", weight: 6 },
+
+    { tag: "WEIRD", name: "迪斯尼公主", desc: "小动物们对你格外偏爱。\n效果：更频繁遇到野生动物。", weight: 6 },
+
   ];
 
   /* DB*/
@@ -230,9 +248,8 @@
     try { return JSON.parse(json); } catch { return null; }
   }
 
-  /* =========================
-     DOM
-     ========================= */
+  /*DOM
+     */
   const btnLuck = $("drawLuck");
   const btnPartner = $("drawPartner");
   const myGender = $("myGender");
@@ -247,9 +264,6 @@
   const pName = $("partnerName");
   const pDesc = $("partnerDesc");
 
-  /* =========================
-     sessionStorage keys
-     ========================= */
   const KEY_LUCK_USED = "htb_luck_used_v2";
   const KEY_LUCK_DATA = "htb_luck_data_v2";
 
@@ -262,9 +276,9 @@
     if (text) btn.textContent = text;
   }
 
-  /* =========================
+  /* 
      恢复结果（刷新后仍显示）
-     ========================= */
+      */
   function restoreLuck(){
     const used = sessionStorage.getItem(KEY_LUCK_USED) === "1";
     const data = safeParse(sessionStorage.getItem(KEY_LUCK_DATA) || "");
@@ -299,9 +313,8 @@
   restoreLuck();
   restorePartner();
 
-  /* =========================
-     3) 今日突发抽取
-     ========================= */
+  /* 今日突发抽取
+    */
   if (btnLuck){
     btnLuck.addEventListener("click", () => {
       if (sessionStorage.getItem(KEY_LUCK_USED) === "1") return;
@@ -324,9 +337,9 @@
     });
   }
 
-  /* =========================
-     4) 异性搭档抽取
-     ========================= */
+  /*
+    异性搭档抽取
+    */
   if (btnPartner){
     btnPartner.addEventListener("click", () => {
       if (sessionStorage.getItem(KEY_PARTNER_USED) === "1") return;
