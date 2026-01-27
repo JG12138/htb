@@ -79,24 +79,37 @@ const roll=(stat,tag)=>{
   return {d,ok};
 };
 
-const hiddenLuck=()=>{
-  const {ok}=roll(S.stats.luck,"暗骰幸运(运气)");
-  if(ok) S.tokens++;
-  console.log(`[TOKENS] 暗骰累计 tokens=${S.tokens}`);
+// 每条路线最多
+const resetRouteTokens = (routeTag="") => {
+  S.tokens = 0;
+  S.check = {};        
+  console.log(`[TOKENS] reset -> tokens=0 ${routeTag?`(${routeTag})`:""}`);
 };
 
-/*把结果存进 S.check[key]*/
-S.check = {}; 
+const addToken = (reason="") => {
+  const before = S.tokens;
+  S.tokens = Math.min(2, S.tokens + 1);  
+  console.log(`[TOKENS] +1 ${reason} ${before} -> ${S.tokens}`);
+};
 
-const check = (key, statName, tag) => {
-  const { d, ok } = roll(S.stats[statName], tag);
-  S.check[key] = { d, ok, stat: statName };
+
+const checkOnce = (key, stat, tag) => {
+  const { d, ok } = roll(S.stats[stat], tag);
+  S.check[key] = { d, ok, stat };
+  if (ok) addToken(`明投成功(${key}:${stat})`);
   return ok;
 };
 
-/* outcome */
-const outcome=()=>S.tokens>=2?"高级":S.tokens===1?"一般":"眉笔";
 
+const hiddenRoll = (stat, tag) => {
+  const { ok } = roll(S.stats[stat], tag);
+  if (ok) addToken(`暗投成功(${stat})`);
+  else console.log(`[TOKENS] 暗投失败(${stat}) tokens=${S.tokens}`);
+  return ok;
+};
+
+const hiddenLuck = () => hiddenRoll("luck", "暗骰幸运(运气)");
+const hiddenStamina = () => hiddenRoll("stamina", "暗骰耐力");
 /* loot (for test) */
 const pick2 = arr => {
   const a=[...arr], out=[];
@@ -105,7 +118,7 @@ const pick2 = arr => {
 };
 const GROUPS=["carb","protein","seasoning","veg"];
 const groupOk=g=>GROUPS.includes(g);
-const tier=()=>S.tokens>=2?"高级":S.tokens===1?"一般":"眉笔"; // 你原 outcome 可以替换成这个
+const tier=()=>S.tokens>=2?"高级":S.tokens===1?"一般":"眉笔";
 
 const getLoot=(group,t)=>{
   const g = groupOk(group)?group:"protein";         // 组别兜底：防 bug
@@ -116,36 +129,34 @@ const getLoot=(group,t)=>{
 
 /*记得倒回来重新检查这个池子*/
 const LOOT={
-  carb:{
-    高级:["面粉","意面","米","土豆","玉米饼","吐司","年糕","甜玉米"],
-    一般:["米","干面包","土豆","方便米饭","玉米"],
-    眉笔:["压缩饼干","能量棒","小面包","饼干"]
+carb:{
+    高级:["意面","通心粉","米","土豆","玉米饼","白吐司","年糕","甜玉米","荞麦面"],
+    一般:["米","全麦面包","土豆","方便米饭","玉米","方便面","红薯","华夫饼","墨西哥卷饼皮"],
+    眉笔:["压缩饼干","即食燕麦","能量棒","汉堡坯","法棍","玉米粒罐头","热狗面包"]
   },
+
   protein:{
-    高级:["鸡蛋","猪五花","牛奶","培根","午餐肉","芝士"],
-    一般:["鸡蛋","牛奶","香肠","罐头豆","豆腐"],
-    眉笔:["肉松面包","鱼罐头","蛋白棒","小罐头"]
+    高级:["一打鸡蛋","猪五花","牛奶","午餐肉","开背龙虾","带皮三文鱼","和牛肉","安格斯肉眼","鲟鱼子酱"],
+    一般:["四颗鸡蛋","牛奶","香肠","培根","豆腐","虾","鸡腿肉","腌制鸡翅","硬质芝士","淡奶油"],
+    眉笔:["一颗鸡蛋","鲱鱼罐头","草莓味蛋白棒","罐头豆子","肉松","蟹柳","牛肉干","芝士片","合成牛排"]
   },
+
   seasoning:{
-    高级:["盐","黑胡椒","辣椒粉","孜然","酱油","黄油","咖喱块"],
-    一般:["盐","胡椒","酱油","番茄酱","辣椒酱"],
-    眉笔:["盐包","糖包","一次性调味包","酱料小袋"]
+    高级:["盐","黑胡椒","辣椒粉","孜然","酱油","香草黄油","咖喱块","韩式辣酱","红酒","欧芹","特辣火锅底料"],
+    一般:["盐","胡椒","酱油","番茄酱","辣椒酱","蜂蜜","柠檬汁","蛋黄酱","黄芥末酱","黄油","黑蒜酱"],
+    眉笔:["盐包","糖包","小包果酱","麦O劳黄芥末","麦O劳番茄酱","芥末","几块红糖"]
   },
+
   veg:{
-    高级:["洋葱","胡萝卜","西兰花","青椒","蘑菇","番茄"],
-    一般:["土豆","洋葱","胡萝卜","番茄"],
-    眉笔:["海带丝","榨菜","泡菜小包","玉米粒"]
+    高级:["洋葱","胡萝卜","青椒","蘑菇","口蘑","圣女果","蟹味菇","松露","南瓜","黄瓜"],
+    一般:["番茄","彩椒","芝麻菜","菠菜","西兰花","芦笋","莴苣","孢子甘蓝","酸黄瓜"],
+    眉笔:["海带丝","榨菜","泡菜","生菜","甜菜根","秋葵","洋蓟","羽衣甘蓝"]
   }
 
+
+
 };
 
-/* 明投 + 观察 */
-/*通用一次明投：把结果存到 S.check[key]*/
-const checkOnce=(key,stat,tag)=>{
-  const {d,ok}=roll(S.stats[stat],tag);
-  S.check[key]={d,ok,stat};
-  return ok;
-};
 
 const resultTextFirepit=()=>{
   const t=tier();
@@ -408,8 +419,6 @@ const trashDeepText = (mode)=>(
 );
 
 
-
-
 /* scenes */
 const SC={
   camp_intro:{
@@ -427,7 +436,7 @@ const SC={
 另一侧则能听见河水流动的声音。`,
     o:[
       ["A","保守点，留在露营地查找 (运气)","camp_search"],
-      ["B","聪明点，前往旅游中心（运气，方向感）","center"],
+      ["B","聪明点，前往旅游中心（方向感，运气）","center"],
       ["C","大胆点，顺着小路进入密林（方向感，耐力）","forest"],
       ["D","随意点，沿着河流查看情况（耐力）","river"]
     ]
@@ -454,14 +463,16 @@ const SC={
 
   /*和我的篝火说去吧*/
   /* Page 0：接近（不掷骰） */
-  camp_firepit:{
-    t:"露营地 · 篝火堆",
-    b:()=>firepitApproachText(),
-    o:[
-      ["A","仔细看看","camp_firepit_look"],
-      ["B","算了，不要浪费时间了","camp_search"]
-    ]
-  },
+camp_firepit:{
+  t:"露营地 · 篝火堆",
+  on:()=>resetRouteTokens("firepit"),
+  b:()=>firepitApproachText(),
+  o:[
+    ["A","仔细看看","camp_firepit_look"],
+    ["B","算了，不要浪费时间了","camp_search"]
+  ]
+},
+
 
   /* Page 1：仔细看看（这里才明投） */
   camp_firepit_look:{
@@ -499,14 +510,16 @@ const SC={
 
 /*和我的帐篷堆说去吧*/
     /* 帐篷堆：Page 0 接近（不掷骰） */
-  camp_tent:{
-    t:"露营地 · 帐篷堆",
-    b:()=>tentApproachText(),
-    o:[
-      ["A","仔细看看","camp_tent_look"],
-      ["B","算了，不要浪费时间了","camp_search"]
-    ]
-  },
+camp_tent:{
+  t:"露营地 · 帐篷堆",
+  on:()=>resetRouteTokens("tent"),
+  b:()=>tentApproachText(),
+  o:[
+    ["A","仔细看看","camp_tent_look"],
+    ["B","算了，不要浪费时间了","camp_search"]
+  ]
+},
+
 
   /* 帐篷堆：Page 1 仔细看看（这里才明投） */
   camp_tent_look:{
@@ -543,14 +556,16 @@ const SC={
 
   /*和我的垃圾分类点说去吧*/
   /* 垃圾点：Page 0 接近（不掷骰） */
-  camp_trash:{
-    t:"露营地 · 垃圾分类点",
-    b:()=>trashApproachText(),
-    o:[
-      ["A","仔细看看","camp_trash_look"],
-      ["B","算了，不要浪费时间了","camp_search"]
-    ]
-  },
+camp_trash:{
+  t:"露营地 · 垃圾分类点",
+  on:()=>resetRouteTokens("trash"),
+  b:()=>trashApproachText(),
+  o:[
+    ["A","仔细看看","camp_trash_look"],
+    ["B","算了，不要浪费时间了","camp_search"]
+  ]
+},
+
 
   /* 垃圾点：Page 1 仔细看看（这里才明投） */
   camp_trash_look:{
@@ -585,24 +600,687 @@ const SC={
     b:()=>resultTextTrash(),
   },
 
-  center:{
-    t:"旅游中心（占位）",
-    b:"（之后补）",
-    o:[["↩","返回开场","camp_intro"]]
-  },
+// 旅游中心
+// Page 0：接近
+center:{
+  t:"旅游中心 · 门口",
+  on:()=>resetRouteTokens("center"),
+  b:`你走到了旅游中心门口。
+虽然外观略显窘迫，但这座应急旅游中心的内部比你想象中大得多。
 
-  forest:{
-    t:"密林（占位）",
-    b:"（之后补）",
-    o:[["↩","返回开场","camp_intro"]]
+出于某种原因，这里似乎被节目组征用并“清理”过。
+大厅、走廊、储藏间彼此相连，杂物被随意堆放；不少门半掩着，像是刚有人匆匆走过。
+如果想在这里过夜，大概也不会有人阻止你——前提是你别太招摇。
+
+这里很大，也很乱。想不浪费时间就需要选对方向。`,
+  o:[
+    ["A","进去看看","center_route"],
+    ["B","算了，不在这里浪费时间了，换个地方吧。","camp_intro"]
+  ]
+},
+
+// Page 1：路线判断
+center_route:{
+  t:"旅游中心 · 选路",
+  on:()=>checkOnce("center","direction","明投方向感(旅游中心选路)"),
+  b:()=>{
+    const ok = S.check.center?.ok;
+    const suc = `
+你对室内结构有一种直觉般的把握。
+
+你扫了一眼指示牌残留的胶痕、地面拖拽的灰印，立刻判断出人流更可能去过的区域。
+如果节目组藏了什么，大概率就在最不显眼、但最方便取走的地方。`;
+
+    const fail = `
+你在门口停了几秒。
+
+走廊四通八达，指示牌残缺不全，像故意不让你一眼看懂。
+你只能凭感觉随便挑一条路走——反正时间也不会因为你犹豫而变多。`;
+
+    return (ok ? suc : fail).trim();
   },
-  
-  river:{
-    t:"河流（占位）",
-    b:"（之后补）",
-    o:[["↩","返回开场","camp_intro"]]
+  o:[
+    ["A","进入服务大厅与前台区域","center_hall"],
+    ["B","沿走廊往深处找储藏区","center_storage"],
+    ["C","绕到后方，看看员工休息室","center_staff"],
+    ["D","算了，不在这里浪费时间了，换个地方吧。","camp_intro"]
+  ]
+},
+
+// Page 2：深入
+center_hall:{
+  t:"旅游中心 · 前台区域",
+  b:()=>`
+你进入服务大厅,空气里有一股消毒水混着潮味的味道。
+
+前台台面被擦得过分干净，干净到不自然, 像是节目组为了收视率做出的努力。
+而前台后方的钥匙墙空了一大半。
+显然有人刻意把你不该摸的东西全部撤走，只留下可见的壳。
+
+你注意到两处细节：
+一是抽屉缝里卡着一小片塑封纸角；
+二是台面边缘有一圈很浅的胶带残痕，像贴过告示或清单。`.trim(),
+  o:[
+    ["A","靠近前台抽屉与台面边缘，继续检查","center_hall_continue"],
+    ["B","算了，不在这里浪费时间了，换个地方吧。","center"]
+  ]
+},
+
+
+center_hall_continue:{
+  t:"旅游中心 · 前台区域（继续）",
+  b:`你看了一眼走廊深处的阴影，又把注意力拉回前台。
+
+你蹲下身，把手指伸进抽屉缝隙，沿着台面边缘一点点摸过去。
+灰尘很薄，说明有人不久前来过。
+
+你摸到了那片塑封纸角—————`,
+
+
+  o:[["→","轻轻一拉","center_hall_deep"]]
+},
+
+
+center_hall_deep:{
+  t:"旅游中心 · 前台区域（深入）",
+  on:()=>hiddenLuck(),
+  b:()=>`你小心翼翼地拉动那张塑料纸———它没有断，反而带出一条更长的塑封条。
+
+塑封条下面压着一张被撕掉一半的打印纸。
+字被撕得只剩几行，但足够你确认：这不是游客信息，这是节目组用的投放记录。
+
+虽然只有一小条，但你把能读到的部分迅速记下来，并立刻前往了这些点位寻找。
+
+你发现了———？`,
+  o:[["→","揭晓结果","center_result"]]
+},
+
+
+
+// Page 2：储藏区
+center_storage:{
+  t:"旅游中心 · 储藏区",
+  b:()=>`你沿着走廊往深处走。
+地面有很浅的拖拽灰印，越往里，空气越干，消毒水味也淡了，取而代之的是纸箱和干燥剂的味道。
+
+你最终停在一扇虚掩的门前：储藏区。
+
+里面很乱：折叠椅、救援背包、备用雨披堆在一起。
+但越乱的地方越适合藏东西，只要你运气好到足够看出哪里是人为造就的杂乱。`,
+
+  o:[
+    ["A","翻开角落里堆着的纸箱","center_storage_deepA"],
+    ["B","掀开防水布，看看下面压着什么","center_storage_deepB"],
+    ["C","算了，不在这里浪费时间了，换个地方吧。","center"]
+  ]
+},
+
+// Page 3：深入 A（暗骰）
+center_storage_deepA:{
+  t:"旅游中心 · 储藏区（继续）",
+  on:()=>hiddenLuck(),
+  b:()=>`
+你蹲下身，把那堆纸箱的最上层轻轻挪开。
+纸箱发出干燥的摩擦声，声音在狭窄的储藏间里显得格外清楚。
+
+上层的纸箱很轻，里面几乎是空的，只装着几张折叠过的说明纸和塑料包装。
+
+但底层有一只箱子却异常沉。
+你刚一碰到，就感觉重量完全不对。
+四角贴着新的透明胶带，胶带边缘甚至没有灰尘。
+
+
+`.trim(),
+  o:[["→","用指甲抠开透明胶带","center_storage_deepA_con"]]
+},
+
+center_storage_deepA_con:{
+  t:"旅游中心 · 储藏区（深入）",
+  b:()=>`你用指甲将透明胶带抠开一道缝，然后顺势打开了纸箱。
+
+里面的光线很暗，你先听见的是塑料膜被挤压时发出的细碎声响。
+
+纸箱内壁很干净，没有灰尘，也没有潮气。
+
+你发现了———？`,
+  o:[["→","揭晓结果","center_result"]]
+
+},
+
+// Page 3：深入 B（暗骰）
+center_storage_deepB:{
+  t:"旅游中心 · 储藏区（继续）",
+  on:()=>hiddenLuck(),
+  b:()=>`
+你掀开那张防水布。
+布料掀起时扬起一层薄薄的灰尘，空气里混着纸箱和干燥剂的味道。
+
+布下面压着的不是杂物，而是一排被刻意塞得很紧的救援毯和备用物资袋。
+
+最上层的毯子摸起来很薄，但下面那一层却明显多出了一点硬度，似乎有什么东西夹在里面。
+`.trim(),
+  o:[["→","沿着边缘摸过去","center_storage_deepB_con"]]
+},
+
+center_storage_deepB_con:{
+  t:"旅游中心 · 储藏区（深入）",
+  b:()=>`你沿着最边缘摸过去。
+
+救援毯的触感冰凉而光滑，而后你的指尖很快碰到一处不该存在的塑料轮廓。
+那东西被夹在两层毯子之间，外面还多包了一层塑封膜，避免摩擦发出声响。
+
+你小心地把毯子掀开一点。
+
+你发现了——？`,
+  o:[["→","揭晓结果","center_result"]]
+
+},
+
+
+
+// Page 2：深入 C（进入员工休息室）
+center_staff:{
+  t:"旅游中心 · 员工休息室",
+  b:()=>`
+你绕到后方的员工休息室。
+门没锁，但卡得有点紧，不知道什么人会擅闯无人看守的员工休息室。
+
+但节目组都把整个旅游中心清空了，进入员工休息室也无可厚非吧。
+
+`.trim(),
+o:[
+    ["A","打开门并进入员工休息室","center_staff_con"],
+    ["B","算了，不在这里浪费时间了，换个地方吧。","center_route"]
+  ]
+},
+
+center_staff_con:{
+t:"旅游中心 · 员工休息室",
+  b:()=>`
+你走了进去。
+
+这里比大厅更安静，只有老旧灯管发出的轻微电流声。
+一张折叠桌靠墙摆着，桌上有几个一次性纸杯，但没有水。
+沙发垫被掀起过又压回原位，边缘的褶皱很新。
+
+紧贴着收纳柜的垃圾桶看起来是空的。
+
+你决定先抓住最明显的两处细节继续查。
+`.trim(),
+  o:[
+    ["A","检查沙发与坐垫下方","center_staff_deepA"],
+    ["B","检查柜子与垃圾桶周围","center_staff_deepB"],
+    ["C","算了，不在这里浪费时间了，换个地方吧。","center_route"]
+  ]
+},
+
+
+// Page 3：深入 A（暗骰）
+center_staff_deepA:{
+  t:"旅游中心 · 员工休息室（继续）",
+  on:()=>hiddenLuck(),
+  b:()=>`
+你走到沙发前，把坐垫掀起一点。
+灰尘不多，说明这里不久前被人动过。
+
+沙发底下的木板边缘还有一圈胶带残痕，像曾经固定过某样东西。
+
+你伸手进去摸索，指尖碰到一层塑封膜的滑感。
+`.trim(),
+  o:[["→","把塑封膜慢慢抽出来","center_staff_deepA_con"]]
+},
+
+center_staff_deepA_con:{
+  t:"旅游中心 · 员工休息室（深入）",
+  b:()=>`你把那层塑封膜一点点抽出来。
+
+它被折得很薄，边缘还压着一小片干燥剂纸包，明显是为了防潮防异味。
+
+塑封膜里包着一个扁平的硬物，
+重量不大，但摸起来非常规整，像一份被刻意保护的物资。
+
+你发现了——？`,
+  o:[["→","揭晓结果","center_result"]]
+},
+
+
+// Page 3：深入 B（暗骰）
+center_staff_deepB:{
+  t:"旅游中心 · 员工休息室（继续）",
+  on:()=>hiddenLuck(),
+  b:()=>`
+你转向柜子和垃圾桶。
+
+柜门半掩着，里面放着几件皱巴巴的雨披和一次性手套，看起来像是救援人员用过的备用物品。
+
+你蹲下查看垃圾桶。
+桶里几乎是空的，只剩下一点薄薄的灰尘。
+但当你从侧面看时，却发现垃圾桶内壁的高度，和外壳的高度似乎对不上。
+
+内胆比你预想的要浅一截。
+`.trim(),
+  o:[["→","手伸到垃圾桶底部摸摸看","center_staff_deepB_con"]]
+},
+
+center_staff_deepB_con:{
+  t:"旅游中心 · 员工休息室（深入）",
+  b:()=>`你伸手探进桶底边缘，指尖碰到一个不该出现在这里的硬角。不是纸，也不是塑料杯。
+
+你顺着内壁用力一掀。
+
+内胆下面果然藏着一层夹层空间。
+那东西被卡在内胆与外壳之间，外面还缠着一层薄薄的塑料膜，
+像是为了避免晃动发声，也避免沾上真正的垃圾气味。
+
+你发现了——？`,
+  o:[["→","揭晓结果","center_result"]]
+},
+
+
+// 结算
+center_result:{
+  t:"旅游中心 · 结算",
+  b:()=>{
+    const t = tier();
+    const got = getLoot(S.group, t);
+    console.log(`[RESULT] (center) group=${S.group} tier=${t} tokens=${S.tokens} got=[${got}]`);
+
+    if(t==="高级") return `你很确定自己找对了位置。
+这是被刻意藏起来、并且方便节目组随时回收的食材。
+你把能带走的东西迅速收好。
+
+你获得了：<span class="loot">${got}</span>
+
+你没有时间再继续了。
+你带着东西快步离开旅游中心，返回露营地。`;
+
+    if(t==="一般") return `你翻到了被保护起来的补给。
+虽然不算多，但总比没有好。
+你迅速把能带走的部分收好，决定见好就收。
+
+你获得了：<span class="loot">${got}</span>
+
+你没有时间再继续了。
+你带着找到的东西离开旅游中心，返回露营地。`;
+
+      if(t==="眉笔")    return `这里确实有东西，但似乎不怎么契合你的想象。
+也许你走错了，也许节目组已经取走了大部分。
+继续耗下去意义不大。节目组总不会让你饿死的。
+
+你获得了：<span class="loot">${got}</span>
+
+你拍了拍手上的灰，离开旅游中心，返回露营地。`;
+        }
+},
+
+
+// 密林线
+
+// Page 0：接近
+forest:{
+  t:"密林 · 入口",
+  on:()=>resetRouteTokens("forest"),
+  b:`你顺着那条几乎被杂草吞没的小路走进密林。
+
+树冠在头顶合拢，光线一下子暗了下来。
+地面覆盖着厚厚一层已经腐败得差不多的落叶，踩上去几乎没有声音。
+空气里有湿土和苔藓的气味，偶尔夹着不知名鸟类的叫声。
+
+这里显然不是新手游客常走的路线，被人踩出的小道算不上明显。`,
+  o:[
+    ["A","继续沿着不明显的小道前进","forest_route"],
+    ["B","算了，回去吧","camp_intro"]
+  ]
+},
+
+// Page 1：方向感明骰
+forest_route:{
+  t:"密林 · 选路",
+  on:()=>checkOnce("forest","direction","明投方向感"),
+  b:()=>{
+    const ok = S.check.forest?.ok;
+
+    const suc = `
+你凭着方向感沿路前行。
+
+有一段落叶被踩得更实，
+树干上也出现了几道几乎被时间消磨干净的记号。
+它们不明显，但足够让你确认：有人刻意沿着这里来回走过。
+
+密林并不是随机的。
+至少对知道路线的人来说不是。
+
+很快你发现了几处值得一查的地方。`;
+
+    const fail = `
+你在密林里转了几圈。
+
+所有树看起来都差不多，
+地面没有明显分叉，只有杂乱的枝叶和藤蔓。
+你只能凭直觉选了一条看起来没那么难走的方向。
+
+也许你已经偏离了真正的路线，
+但现在回头只会浪费更多体力。`;
+
+    return (ok ? suc : fail).trim();
+  },
+  o:()=>{
+    const ok = S.check.forest?.ok;
+    if(ok){
+      return [
+        ["A","查看面前的倒木与背包","forest_log"],
+        ["B","前去检查岩石缝隙","forest_rocks"],
+        ["C","看看右侧干涸的小鱼塘","forest_pond"],
+        ["D","算了，回去露营地吧","camp_intro"]
+      ];
+    }
+    return [
+      ["→","硬着头皮前进","forest_fail_continue"]
+    ];
   }
-};
+},
+
+// Page 1.5：方向感失败继续
+forest_fail_continue:{
+  t:"密林 · 硬着头皮前进",
+  b:`你决定别再纠结方向。
+
+无论你走没走对路，接下来都只能靠体力硬顶。
+你把呼吸压低，拨开树枝往里钻。
+
+你折腾了好一会，前方终于出现了几处值得检查的位置。`,
+  o:[
+    ["A","查看灌木后面的倒木与背包","forest_log"],
+    ["B","检查前面的岩石缝隙","forest_rocks"],
+    ["C","看看左侧干涸的小鱼塘","forest_pond"],
+  ]
+},
+
+// Page 2：倒木点（暗骰耐力）
+forest_log:{
+  t:"密林 · 倒木与背包点（继续）",
+  on:()=>hiddenRoll("stamina","暗骰耐力(倒木点)"),
+  b:`你拨开灌木，来到一片被倒木挡住的小空地。
+
+一棵粗大的树横倒在地上，树根裸露。
+倒木和地面之间形成一道低矮的阴影缝隙。
+旁边还散落着几根旧绳子和背包扣件。
+
+树干和地面形成的缝隙似乎正好可以让你钻入检查。
+`,
+  o:[["→","弯腰钻进去检查","forest_log_con"]]
+},
+
+forest_log_con:{
+    t:"密林 · 倒木与背包点（深入）",
+    b:`你压低身体，钻进倒木下方的阴影里。
+
+腐叶和潮湿的泥土贴在手臂和膝盖上，空间比想象中更窄，你几乎只能用一只手向前摸索。
+
+你顺着树根往最里面探去，指尖碰到一处不属于木头或石头的触感。
+外层包着防潮膜，明显是人为放置的物品。
+
+你发现了——？
+`,
+  o:[["→","j揭晓结果","forest_result"]]
+},
+
+// Page 2：岩石点
+forest_rocks:{
+  t:"密林 · 岩石缝隙（继续）",
+  on:()=>hiddenRoll("stamina","暗骰耐力(岩石缝隙)"),
+  b:`你沿着坡地向上走，发现一处被藤蔓遮住的岩石堆。
+
+几块巨石相互挤压，在中间形成狭窄的缝隙。
+缝隙内部却异常干燥，几乎没有落叶。
+`,
+  o:[["→","踩着岩石爬上去查看","forest_rocks_con"]]
+},
+
+forest_rocks_con:{
+  t:"密林 · 岩石缝隙（深入）",
+  b:`你用手撑着石面，小心把身体挤进岩石之间。
+
+岩石表面冰凉而粗糙，摩擦着手臂和肩膀。
+缝隙越往里越窄，你只能侧着身子伸手摸索。
+
+最里面的石壁上贴着一层防潮膜，被几块碎石压住，位置刚好藏在视线死角里。
+如果不是特意钻进来，几乎不可能发现。
+
+你发现了——？`,
+  o:[["→","揭晓结果","forest_result"]]
+},
+
+
+// Page 2：小鱼塘
+forest_pond:{
+  t:"密林 · 干涸的小鱼塘（继续）",
+  on:()=>hiddenRoll("stamina","暗骰耐力(小鱼塘)"),
+  b:`你顺着地势下行，脚下的碎石在落叶中轻轻滑动。
+
+前方出现一个干涸的小鱼塘，可能是之前雨季形成的临时积水洼。
+塘底泥土龟裂，边缘堆着几块被垒起的石头，
+
+附近的枯枝被折断后重新摆放过，痕迹很新，与周围自然倒伏的枝叶格格不入。`,
+  o:[["→","蹲下扒开枯枝与泥土","forest_pond_con"]]
+},
+
+forest_pond_con:{
+  t:"密林 · 干涸小鱼塘（深入）",
+  b:`你蹲下身，用手拨开泥土和枯枝。
+
+土壤比周围要干燥得多，石头下方形成一个刚好能藏进小包的空洞。
+你摸到一层塑料膜包着的硬物，外面还额外垫了防潮材料。
+
+你发现了——？`,
+  o:[["→","揭晓结果","forest_result"]]
+},
+
+
+// 结算
+forest_result:{
+  t:"密林 · 结算",
+  b:()=>{
+    const t = tier();
+    const got = getLoot(S.group, t);
+    console.log(`[RESULT] (forest) group=${S.group} tier=${t} tokens=${S.tokens} got=[${got}]`);
+
+    if(t==="高级") return `你很确定自己找到了真正的藏点。
+这里不是随手放置，而是精心挑过的位置对知道路线的人来说足够方便。
+
+你把能带走的东西迅速收好。
+
+你获得了：<span class="loot">${got}</span>
+
+你没有时间再继续深入密林。
+你转身沿着来路离开，返回露营地。`;
+
+    if(t==="一般") return `你在隐蔽的位置翻到了一些补给。
+数量不算多，但至少不是空手而归。
+你决定见好就收。
+
+你获得了：<span class="loot">${got}</span>
+
+你拍了拍身上的落叶，离开密林，返回露营地。`;
+
+    return `你摸索了好一会儿，却没能拿到想象中的东西。
+也许你走偏了路线，也许你来得有点晚了。
+
+继续留在密林里只会消耗体力。节目组总不至于让你饿死。
+
+你获得了：<span class="loot">${got}</span>
+
+你转身离开密林，返回露营地。`;
+  }
+},
+
+  
+// 河流 Page 0：接近
+river:{
+  t:"河流 · 河岸",
+  on:()=>resetRouteTokens("river"),
+  b:`你循着水声来到河边。
+
+河水从山上流下，在石块间不断撞击。
+水面反着光，看不清底部的情况。
+
+岸边湿滑，石头上长满青苔，
+显然不是一个适合久留的地方。
+`,
+  o:[
+    ["A","沿着河岸继续走","river_route"],
+    ["B","算了，回露营地","camp_intro"]
+  ]
+},
+
+// 河流 Page 1：明骰耐力
+river_route:{
+  t:"河流 · 判断路线",
+  on:()=>checkOnce("river","stamina","明投耐力(河流判断)"),
+  b:()=>{
+    const ok = S.check.river?.ok;
+
+    const suc = `
+你很快调整了呼吸和步伐。
+
+虽然水声嘈杂、地面湿滑，但你能控制住身体的重心，不至于被打乱节奏。
+
+这种地形对你来说只是消耗体力，并不会成为阻碍。`;
+
+    const fail = `
+你刚靠近河道就感觉脚下发虚。
+
+湿滑的石头和不断变化的水流让你有些吃力，每一步都要花更多力气稳住身体。
+
+不管是前进还是后退都是浪费时间。`;
+
+    return (ok ? suc : fail).trim();
+  },
+  o:[
+    ["A","顺着水流往下走","river_down"],
+    ["B","逆着水流往上走","river_up"],
+    ["C","直接踏进河道中央","river_mid"],
+    ["D","算了，回露营地","camp_intro"]
+  ]
+},
+
+
+// Page 2：顺着水流（暗骰耐力）
+river_down:{
+  t:"河流 · 顺流而下（继续）",
+  on:()=>hiddenRoll("stamina","暗骰耐力(顺流)"),
+  b:`你沿着河岸顺着水流方向前行。
+
+河水不算深，但岸边布满湿滑的石头和被水冲倒的枯枝。
+你需要不断调整步伐，避免踩进松动的泥土里。
+
+不远处，一片乱石堆挡住了河道的一角，
+水流在这里形成一个小小的回旋区。`,
+  o:[["→","走近那片乱石堆查看","river_down_con"]]
+},
+
+river_down_con:{
+  t:"河流 · 顺流而下（深入）",
+  b:`你踩着湿滑的石头靠近乱石堆。
+
+几块石头被垒成一个低矮的遮挡结构，内侧却异常干燥。
+你伸手探进去，指尖碰到一层塑料膜包裹的硬物，
+正好卡在水流打不到的位置。
+
+你发现了——？`,
+  o:[["→","揭晓结果","river_result"]]
+},
+
+
+// Page 2：逆着水流（暗骰耐力）
+river_up:{
+  t:"河流 · 逆流而上（继续）",
+  on:()=>hiddenRoll("stamina","暗骰耐力(逆流)"),
+  b:`你选择逆着水流方向前行。
+
+水流不断冲击你的脚踝，每走一步都要用力稳住身体。
+河岸逐渐变窄，两侧的树枝垂得很低，必须低头弯腰才能通过。
+
+前方出现一段被倒木和岩石挡住的河段，
+水在这里被迫分成两股，形成一个天然的遮蔽点。`,
+  o:[["→","绕过倒木，从河段中央检查","river_up_con"]]
+},
+
+river_up_con:{
+  t:"河流 · 逆流而上（深入）",
+  b:`你扶着倒木，小心挤进岩石与树干之间。
+
+这里几乎听不到远处的水声，只有贴着石壁流动的细小水线。
+你发现石头下方有一处被挖开的空隙，外面被枯枝和水草遮住。
+
+空隙内部包着防水布，奖励给逆流而上的勇者——吗？
+
+你发现了——？`,
+  o:[["→","揭晓结果","river_result"]]
+},
+
+// Page 2：河中央（暗骰耐力）
+river_mid:{
+  t:"河流 · 河道中央（继续）",
+  on:()=>hiddenRoll("stamina","暗骰耐力(河中央)"),
+  b:`你决定直接踏入河水中央。
+
+水流比岸边要急得多，冰冷的水瞬间没过小腿。
+你不得不用双手扶着石头，一点点向前移动。
+
+河中央有一块被水冲刷得很平的岩石，
+石头后方形成一道水流的盲区，从岸上几乎看不到那里。`,
+  o:[["→","扶着岩石走到水流盲区","river_mid_con"]]
+},
+
+river_mid_con:{
+  t:"河流 · 河道中央（深入）",
+  b:`你咬牙站稳身体，绕到岩石背后。
+
+这里的水流明显减缓，岩石底部被凿出一个浅浅的凹槽。
+凹槽里塞着一包用防水袋层层包裹的物品，还被石头压住固定位置。
+
+你发现了——？`,
+  o:[["→","揭晓结果","river_result"]]
+},
+
+river_result:{
+  t:"河流 · 结算",
+  b:()=>{
+    const t = tier();
+    const got = getLoot(S.group, t);
+    console.log(`[RESULT] (river) group=${S.group} tier=${t} tokens=${S.tokens} got=[${got}]`);
+
+    if(t==="高级") return `你很确定自己找到了真正的藏点。
+这些物资被放在只有靠近河道才能发现的位置，既防水，又避开普通人的视线。
+
+你迅速把能带走的东西收好。
+
+你获得了：<span class="loot">${got}</span>
+
+你没有再继续沿河探索，而是返回了露营地。`;
+
+    if(t==="一般") return `你在河道附近翻到了被保护起来的补给。
+数量不多，但足够带走。
+
+你获得了：<span class="loot">${got}</span>
+
+你离开河边，返回露营地。`;
+
+    return `你沿着河流摸索了许久了，却没能获得最想要的东西。
+也许你错过了真正的位置，也可能你只是运气太差。
+
+继续停留只会消耗体力。节目组总不至于让你饿死。
+
+你获得了：<span class="loot">${got}</span>
+
+你转身离开河边，返回露营地。`;
+  }
+}
+}
+
+
+
 
 /* render */
 function sidebar(){
@@ -667,7 +1345,7 @@ const startBtn = $("#start");
 if(startBtn) startBtn.onclick = ()=>start($("#name").value,$("#group").value);
 
 
-// ===== 名字自查浮层：按「中文在前，英文A-Z」生成 =====
+
 const isEnglishName = (n) => /^[A-Za-z]/.test(n);
 
 function buildNamePicker(){
@@ -676,7 +1354,7 @@ function buildNamePicker(){
   const enBox = document.getElementById("nameListEn");
   if(!wrap || !zhBox || !enBox) return;
 
-  // 拿 DB 的原始 key（保持你写的显示名）
+  // 拿 DB 
   const names = Object.keys(DB);
 
   const zh = names.filter(n => !isEnglishName(n))
@@ -703,7 +1381,7 @@ function buildNamePicker(){
   zh.forEach(n => zhBox.appendChild(makeChip(n)));
   en.forEach(n => enBox.appendChild(makeChip(n)));
 
-  // 关闭逻辑（点遮罩/关闭按钮）
+  // 关闭
   wrap.querySelectorAll("[data-close='1']").forEach(el=>{
     el.onclick = hideNamePicker;
   });
@@ -729,7 +1407,7 @@ function hideNamePicker(){
   const wrap = document.getElementById("namePicker");
   if(!wrap) return;
 
-  // 先移焦点
+  // 移焦点
   if (wrap.contains(document.activeElement)) document.activeElement.blur();
 
   wrap.classList.remove("show");
@@ -740,18 +1418,18 @@ function hideNamePicker(){
   if (input) input.focus({ preventScroll: true });
 }
 
-// ===== 自动弹出条件：name 为空 或 不在 DB =====
+// name 为空 或 不在 DB 
 function shouldOpenNamePicker(rawName){
   const n = (rawName || "").trim();
   if(!n) return true;
 
-  // 你已经有 normalizeName + DB_NORMALIZED 的话，就用它判断“是否命中”
+
   if(typeof normalizeName === "function" && typeof DB_NORMALIZED === "object"){
     const key = normalizeName(n);
     return !DB_NORMALIZED[key];
   }
 
-  // 没有 normalizeName 的话，就退化成原始 DB key 判断
+
   return !DB[n];
 }
 
