@@ -149,8 +149,17 @@
 (() => {
   /* 今日突发池*/
   const luckPool = [
-    { tag: "BUFF", name: "路线雷达", desc: "你今天对“看起来不对劲的小路”特别敏感。\n效果：涉及方向/选择的判定小幅有利。", weight: 14 },
+    { tag:"BUFF", name:"脚踏实地", desc:"今天走路特别稳，踩什么都很安心。\n效果：行动场景更流畅。", weight:8 },
 
+    { tag:"BUFF", name:"顺风而行", desc:"偶尔会有一阵风帮你吹开遮挡视线的东西。\n效果：探索类描写偏正面。", weight:6 },
+
+    { tag:"BUFF", name:"摸金校尉", desc:"你总会在地上发现别人没注意的小物件。\n效果：更容易触发额外细节。", weight:7 },
+
+    { tag:"BUFF", name:"心情很好", desc:"今天情绪稳定得不像是在录综艺。\n效果：面对突发状况更冷静。", weight:6 },
+
+    { tag:"BUFF", name:"幸运踩点", desc:"你总是刚好站在最舒心的位置。\n效果：危险或尴尬场面更容易化解。", weight:5 },
+
+    { tag: "BUFF", name: "路线雷达", desc: "你今天对看起来不对劲的小路特别敏感。\n效果：涉及方向/选择的判定小幅有利。", weight: 14 },
     { tag: "BUFF", name: "恒温动物", desc: "今天不容易被冷到或热到心态炸裂。\n效果：耐力相关描述偏正面。", weight: 12 },
 
     { tag: "BUFF", name: "队友滤镜", desc: "你说啥都显得很可靠。\n效果：社交/协作场景更容易被相信。", weight: 10 },
@@ -161,17 +170,31 @@
 
     { tag: "BUFF", name: "镜头宠儿", desc: "你今天似乎十分上镜。\n效果：摄影师的镜头会频繁地对准你。", weight: 7 },
 
+    
     { tag: "DEBUFF", name: "鞋带诅咒", desc: "你今天的鞋带就是很爱松。\n效果：赶路/奔跑相关场景更狼狈。", weight: 12 },
 
     { tag: "DEBUFF", name: "信号焦虑", desc: "你会忍不住担心手机没信号。\n效果：遇到未知状况更容易慌一下。", weight: 10 },
 
     { tag: "DEBUFF", name: "口渴感放大", desc: "水明明还够，但你就是觉得渴。\n效果：补给相关场景更紧张。", weight: 9 },
 
-    { tag: "DEBUFF", name: "迷路错觉", desc: "你会频繁怀疑“我们是不是走错了”。\n效果：方向相关叙述偏负面。", weight: 7 },
+    { tag: "DEBUFF", name: "迷路错觉", desc: "你会频繁怀疑是不是走错了。\n效果：方向相关叙述偏负面。", weight: 7 },
 
     { tag: "DEBUFF", name: "舌头打结", desc: "今天你的舌头总是捋不直。\n效果：说话更容易出现失误。", weight: 6 },
 
     { tag: "DEBUFF", name: "静电体质", desc: "你和别人有点来电…呀！\n效果：接触物品或他人时更容易触发静电。", weight: 8 },
+
+    { tag:"DEBUFF", name:"平地摔", desc:"你会在最不该摔的地方绊一下自己。\n效果：行动场景更狼狈。", weight:10 },
+
+    { tag:"DEBUFF", name:"衣角陷阱", desc:"你的衣服总会被树枝或岩石勾住。\n效果：移动更拖沓。", weight:8 },
+
+    { tag:"DEBUFF", name:"踩到怪东西", desc:"你可能会踩到一些湿湿黏黏的不明物体。\n效果：脚下总感觉很恶心。", weight:7 },
+
+    { tag:"DEBUFF", name:"心浮气躁", desc:"你很难静下心来判断情况。\n效果：决策相关描述更混乱。", weight:9 },
+
+    { tag:"DEBUFF", name:"注意力漂移", desc:"你总是被不重要的东西吸引注意力。\n效果：容易错过关键线索。", weight:8 },
+
+    { tag:"DEBUFF", name:"腿软时刻", desc:"你突然意识到自己站得有点久。\n效果：体力相关描写更吃力。", weight:6 },
+
 
     { tag: "WEIRD", name: "山在看你", desc: "你有一种被自然观察的微妙感觉。\n效果：任何诡异事件都更合理。", weight: 6 },
 

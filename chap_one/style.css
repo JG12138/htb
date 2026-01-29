@@ -249,11 +249,11 @@ select:hover {
 
 /* focus */
 select:focus {
-  border-color: #f7d7a8;   /* 你已有的金色变量 */
+  border-color: #f7d7a8;   
   box-shadow: 0 0 0 2px rgba(247,215,168,0.3);
 }
 
 option {
-  background: #1E2A1B; /* 和你背景一致 */
+  background: #1E2A1B; 
   color: #fff;
 }

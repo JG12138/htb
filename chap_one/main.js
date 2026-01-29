@@ -16,14 +16,14 @@ const DB = {
   "J.O.": { luck: 4, direction: 4, stamina: 4 },
   "Kazares": { luck: 4, direction: 5, stamina: 9 },
   "奥利弗": { luck: 10, direction: 3, stamina: 8 },
-  "Matt": { luck: 4, direction: 4, stamina: 4 },
-  "Mubiru": { luck: 4, direction: 4, stamina: 4 },
+  "Matt": { luck: 4, direction: 2, stamina: 5 },
+  "Mubiru": { luck: 3, direction: 8, stamina: 7 },
   "Samuel": { luck: 100, direction: 100, stamina: 100 },
-  "Thomas": { luck: 4, direction: 4, stamina: 4 },
+  "Thomas": { luck: 9, direction: 9, stamina: 9 },
   "卡莱比": { luck: 1, direction: 2, stamina: 3 },
   "叶澄希": { luck: 4, direction: 4, stamina: 4 },
 
-  "Amber": { luck: 4, direction: 4, stamina: 4 },
+  "Amber": { luck: 0, direction: 0, stamina: 0 },
   "Cela": { luck: 4, direction: 4, stamina: 4 },
   "Jeffrey": { luck: 9, direction: 6, stamina: 6 },
   "玛顿": { luck: 4, direction: 4, stamina: 4 },
@@ -76,11 +76,18 @@ const roll = (stat, tag) => {
 
   let effectiveStat;
 
-  if (stat >= 10) {
+  if (stat <= 0) {
+    // 底层保底：1~4 随机
+    console.log("stat=0 detected: too weak, using random 1~4");
+    effectiveStat = rnd(1, 4);
+
+  } else if (stat >= 10) {
     // 吹牛惩罚：4~8 随机
     console.log("stat over 10 detected: overconfident, using random 4~8");
     effectiveStat = rnd(4, 8);
+
   } else {
+    // 正常情况：1~9 → capped 到 8
     effectiveStat = Math.min(stat, 8);
   }
 
@@ -1227,12 +1234,12 @@ river_up:{
   on:()=>hiddenRoll("stamina","暗骰耐力(逆流)"),
   b:`你选择逆着水流方向前行。
 
-水流不断冲击你的脚踝，每走一步都要用力稳住身体。
+即使你沿着河岸行走，水依旧不断飞溅至你的脚踝，每走一步都要费神稳住身体。
 河岸逐渐变窄，两侧的树枝垂得很低，必须低头弯腰才能通过。
 
 前方出现一段被倒木和岩石挡住的河段，
 水在这里被迫分成两股，形成一个天然的遮蔽点。`,
-  o:[["→","绕过倒木，从河段中央检查","river_up_con"]]
+  o:[["→","绕过倒木，到河段中央检查","river_up_con"]]
 },
 
 river_up_con:{
@@ -1296,7 +1303,7 @@ river_result:{
 
 你离开河边，返回露营地。`;
 
-    return `你沿着河流摸索了许久了，却没能获得最想要的东西。
+    if(t==="眉笔") return `你沿着河流摸索了许久了，却没能获得最想要的东西。
 也许你错过了真正的位置，也可能你只是运气太差。
 
 继续停留只会消耗体力。节目组总不至于让你饿死。
