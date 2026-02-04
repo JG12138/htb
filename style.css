@@ -604,6 +604,18 @@ button[disabled]{ opacity:.55; cursor:not-allowed; }
   gap:10px;
 }
 
+/* 让 chapter 主链接在一行里占满剩余空间 */
+.choiceRow .choiceLink{
+  flex: 1;           
+  display: block;    
+  min-width: 0;      
+}
+
+
+.choiceRow .choiceLink .choice{
+  width: 100%;
+}
+
 /* 主章节仍然占大头 */
 .choiceRow .choice{
   flex:1;
