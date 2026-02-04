@@ -3,6 +3,7 @@
 
   /* ====== 配置 ====== */
   const FISHING_URL = "./side_index.html";
+  const MAIN_URL = "../index.html"
 
   const MAP_LABEL = {
     lake: "有石头滩的湖边",
@@ -11,40 +12,51 @@
     forest: "斜坡上的深林",
   };
   const DB = {
-    "橙知": { gender: "M", map: "lake" },
-    "丹": { gender: "M", map: "forest" },
-    "Eric": { gender: "M", map: "falls" },
-    "Ethan": { gender: "M", map: "wetland" },
-    "阿基米德": { gender: "M", map: "forest" },
-    "Friedrich": { gender: "M", map: "lake" },
-    "Honey": { gender: "M", map: "wetland" },
-    "J.O.": { gender: "M", map: "falls" },
-    "Kazares": { gender: "M", map: "forest" },
-    "奥利弗": { gender: "M", map: "lake" },
-    "Matt": { gender: "M", map: "wetland" },
-    "Mubiru": { gender: "M", map: "falls" },
-    "Samuel": { gender: "M", map: "forest" },
-    "Thomas": { gender: "M", map: "lake" },
-    "卡莱比": { gender: "M", map: "wetland" },
-    "叶澄希": { gender: "M", map: "falls" },
 
-    "Amber": { gender: "F", map: "lake" },
-    "Cela": { gender: "F", map: "falls" },
-    "Jeffrey": { gender: "F", map: "wetland" },
-    "玛顿": { gender: "F", map: "forest" },
-    "Maya": { gender: "F", map: "lake" },
-    "马塞拉": { gender: "F", map: "falls" },
-    "Melusine": { gender: "F", map: "wetland" },
-    "Naya": { gender: "F", map: "forest" },
-    "Romaine": { gender: "F", map: "lake" },
-    "向木林": { gender: "F", map: "wetland" },
-    "奈芙": { gender: "F", map: "forest" },
-    "Zurabia": { gender: "F", map: "falls" },
-    "Moira": { gender: "F", map: "lake" },
-    "Erla": { gender: "F", map: "wetland" },
-    "Josephine": { gender: "F", map: "forest" },
-    "Oliven": { gender: "F", map: "falls" },
-  };
+  /* ===== lake ===== */
+  "J.O.": { gender: "M", map: "lake" },
+  "Ethan": { gender: "M", map: "lake" },
+  "Samuel": { gender: "M", map: "lake" },
+  "玛顿": { gender: "F", map: "lake" },
+  "Oliven": { gender: "F", map: "lake" },
+  "Erla": { gender: "F", map: "lake" },
+
+  /* ===== falls ===== */
+  "Cela": { gender: "F", map: "falls" }, 
+  "Mubiru": { gender: "M", map: "falls", role: "biologist"},
+  "Zurabia": { gender: "F", map: "falls" },
+  "丹": { gender: "M", map: "falls" },
+  "Naya": { gender: "F", map: "falls" },
+  "Matt": { gender: "M", map: "falls" },
+  "Maya": { gender: "F", map: "falls" },
+  "橙知": { gender: "M", map: "falls" },
+  "向林木": { gender: "F", map: "falls" },
+  "阿基米德": { gender: "M", map: "falls" },
+
+  /* ===== forest ===== */
+  "Amber": { gender: "F", map: "forest" },
+  "Thomas": { gender: "M", map: "forest" },
+  "Honey": { gender: "M", map: "forest" },
+  "Jeffrey": { gender: "F", map: "forest" },
+  "Josephine": { gender: "F", map: "forest" },
+
+  /* ===== wetland ===== */
+  "马塞拉": { gender: "F", map: "wetland" },
+  "Kazares": { gender: "M", map: "wetland" },
+  "Moira": { gender: "F", map: "wetland" },
+  "Eric": { gender: "M", map: "wetland" },
+  "Melusine": { gender: "F", map: "wetland" },
+  "奥利弗": { gender: "M", map: "wetland" },
+
+  /* ===== no map (not in list) ===== */
+  "Friedrich": { gender: "M" },
+  "卡莱比": { gender: "M" },
+  "叶澄希": { gender: "M" },
+  "Romaine": { gender: "F" },
+  "奈芙": { gender: "F" },
+
+};
+
 
   /* ====== DOM ====== */
   const nameIn = $("#nameIn");
@@ -145,16 +157,19 @@
     return names.filter((n) => n !== currentName);
   }
 
-  function inferRoleByName(name) {
-    const s = (name || "").toLowerCase();
-    if (s.includes("photo") || name.includes("摄")) return "photographer";
-    if (s.includes("bio") || name.includes("生物")) return "biologist";
-    return "normal";
-  }
+function inferRoleByName(name) {
+  const fromDB = DB[name]?.role;
+  if (fromDB) return fromDB; // "biologist" / "photographer" / "normal"
+
+  const s = (name || "").toLowerCase();
+  if (s.includes("photo") || name.includes("摄")) return "photographer";
+  if (s.includes("bio") || name.includes("生物")) return "biologist";
+  return "normal";
+}
 
   function getShootThreshold() {
     // 1-10，<= threshold 成功
-    let base = 4;
+    let base = 5;
     if (role === "photographer") base += 3;
     return Math.min(10, base);
   }
@@ -178,59 +193,64 @@
   }
 
   /* ====== Picker: show/hide ====== */
-  function showNamePicker() {
-    if (!picker) return;
-    picker.hidden = false;
-    picker.inert = false;
-    const closeBtn = picker.querySelector(".pickerClose");
-    if (closeBtn) closeBtn.focus({ preventScroll: true });
-  }
-  function hideNamePicker() {
-    if (!picker) return;
-    if (picker.contains(document.activeElement)) document.activeElement.blur();
-    picker.hidden = true;
-  }
-  if (picker) {
-    picker.addEventListener("click", (e) => {
-      if (e.target === picker) hideNamePicker();
-    });
-  }
+function showNamePicker() {
+  if (!picker) return;
+  picker.hidden = false;
+  picker.inert = false;
+
+  const closeBtn = picker.querySelector(".pickerClose");
+  if (closeBtn) closeBtn.focus({ preventScroll: true });
+}
+function hideNamePicker() {
+  if (!picker) return;
+
+  if (picker.contains(document.activeElement)) document.activeElement.blur();
+  picker.hidden = true;
+  picker.inert = true; // ✅ 对称：关掉时也 inert
+}
+
 
   function buildNamePicker() {
-    if (!picker || !zhBox || !enBox) return;
+  if (!picker || !zhBox || !enBox) return;
 
-    const names = Object.keys(DB).filter(hasMap);
+  const names = Object.keys(DB);
 
-    const zh = names
-      .filter((n) => !isEnglishName(n))
-      .sort((a, b) => a.localeCompare(b, "zh-Hans-CN"));
+  const zh = names
+    .filter((n) => !isEnglishName(n))
+    .sort((a, b) => a.localeCompare(b, "zh-Hans-CN"));
 
-    const en = names
-      .filter(isEnglishName)
-      .sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+  const en = names
+    .filter(isEnglishName)
+    .sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
 
-    const makeChip = (name) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "chip";
-      btn.textContent = name;
-      btn.addEventListener("click", () => {
-        nameIn.value = name;
-        hideNamePicker();
-        nameIn.focus({ preventScroll: true });
-      });
-      return btn;
-    };
+  const makeChip = (name) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chip";
+    btn.textContent = name;
 
-    zhBox.innerHTML = "";
-    enBox.innerHTML = "";
-    zh.forEach((n) => zhBox.appendChild(makeChip(n)));
-    en.forEach((n) => enBox.appendChild(makeChip(n)));
+    btn.addEventListener("click", () => {
+      nameIn.value = name;
+      hideNamePicker();
 
-    picker.querySelectorAll("[data-close='1']").forEach((el) => {
-      el.onclick = hideNamePicker;
+      nameIn.focus({ preventScroll: true });
     });
-  }
+
+    return btn;
+  };
+
+  zhBox.innerHTML = "";
+  enBox.innerHTML = "";
+  zh.forEach((n) => zhBox.appendChild(makeChip(n)));
+  en.forEach((n) => enBox.appendChild(makeChip(n)));
+
+  picker.querySelectorAll("[data-close='1']").forEach((el) => {
+    el.onclick = hideNamePicker;
+  });
+}
+
+
+
 
   /* =========================
      ✅ Board switching (static boards in HTML)
@@ -289,18 +309,312 @@
     return false;
   }
 
+
+
+  /* =========================
+     ✅ 结算：随机/自选 嘉宾
+     ========================= */
+
+
+  function sampleK(arr, k) {
+    const a = (arr || []).slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = (Math.random() * (i + 1)) | 0;
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a.slice(0, Math.min(k, a.length));
+  }
+
+  // —— 结算用 picker（独立于入口 namePicker，避免互相干扰）——
+  let endPickerEl = null;
+
+  function ensureEndPicker() {
+    if (endPickerEl) return endPickerEl;
+
+    const overlay = document.createElement("div");
+    overlay.className = "pickerOverlay";
+    overlay.hidden = true;
+    overlay.inert = true;
+    overlay.innerHTML = `
+
+      <div class="pickerModal" role="dialog" aria-modal="true">
+        <div class="pickerTop">
+          <div class="pickerTitle">选择嘉宾</div>
+          <button class="pickerClose" type="button">关闭</button>
+        </div>
+        <div class="pickerHint">从同地图嘉宾中选择。</div>
+
+        <div class="pickerCols">
+          <div>
+            <div class="pickerSub">候选</div>
+            <div class="pickerList pickerPool"></div>
+          </div>
+          <div>
+            <div class="pickerSub">已选</div>
+            <div class="pickerList pickerPicked"></div>
+          </div>
+        </div>
+
+        <div class="pickerBottom">
+          <button class="pickerCancel" type="button">取消</button>
+          <button class="pickerOK" type="button" disabled>确定</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+const close = () => {
+  overlay.hidden = true;
+  overlay.inert = true;
+};
+
+    endPickerEl = overlay;
+    return overlay;
+  }
+
+function openEndPicker({ pool, maxPick, title, hint, requireOpposite = false }) {
+  const overlay = ensureEndPicker();
+  overlay.hidden = false;
+  overlay.inert = false;
+
+  overlay.querySelector(".pickerTitle").textContent = title || "选择嘉宾";
+  overlay.querySelector(".pickerHint").textContent = hint || "从同地图嘉宾中选择。";
+
+  const poolBox = overlay.querySelector(".pickerPool");
+  const pickedBox = overlay.querySelector(".pickerPicked");
+  const okBtn = overlay.querySelector(".pickerOK");
+  const cancelBtn = overlay.querySelector(".pickerCancel");
+  const closeBtn = overlay.querySelector(".pickerClose");
+
+  const picked = [];
+
+  function close() {
+    overlay.hidden = true;
+    overlay.inert = true;
+  }
+
+  function refresh() {
+    poolBox.innerHTML = "";
+    pickedBox.innerHTML = "";
+
+    const pickedG0 = picked[0] ? getGender(picked[0]) : null;
+
+    (pool || []).forEach((name) => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip";
+      chip.textContent = name;
+
+      const already = picked.includes(name);
+
+      let violateOpposite = false;
+      if (requireOpposite && maxPick === 2 && picked.length >= 1) {
+        const g = getGender(name);
+        if (pickedG0 && g && g === pickedG0) violateOpposite = true;
+      }
+
+      chip.disabled = already || picked.length >= maxPick || violateOpposite;
+
+      chip.addEventListener("click", () => {
+        if (picked.length < maxPick && !picked.includes(name)) {
+          picked.push(name);
+          refresh();
+        }
+      });
+
+      poolBox.appendChild(chip);
+    });
+
+    picked.forEach((name) => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip";
+      chip.textContent = name + " ×";
+      chip.addEventListener("click", () => {
+        const idx = picked.indexOf(name);
+        if (idx >= 0) picked.splice(idx, 1);
+        refresh();
+      });
+      pickedBox.appendChild(chip);
+    });
+
+    let ok = picked.length === maxPick;
+    if (ok && requireOpposite && maxPick === 2) {
+      const gA = getGender(picked[0]);
+      const gB = getGender(picked[1]);
+      ok = !!(gA && gB && gA !== gB);
+    }
+    okBtn.disabled = !ok;
+  }
+
+  refresh();
+  closeBtn?.focus?.({ preventScroll: true });
+
+  return new Promise((resolve) => {
+    const cleanup = () => {
+      okBtn.removeEventListener("click", onOK);
+      cancelBtn?.removeEventListener("click", onCancel);
+      closeBtn?.removeEventListener("click", onCancel);
+      overlay.removeEventListener("click", onMask);
+    };
+
+    const onOK = () => {
+      close();
+      cleanup();
+      resolve(picked.slice());
+    };
+
+    const onCancel = () => {
+      close();
+      cleanup();
+      resolve(null);
+    };
+
+    const onMask = (e) => {
+      if (e.target === overlay) onCancel();
+    };
+
+    okBtn.addEventListener("click", onOK);
+    cancelBtn?.addEventListener("click", onCancel);
+    closeBtn?.addEventListener("click", onCancel);
+    overlay.addEventListener("click", onMask);
+  });
+}
+
+
+  function renderClosingEvent(choice, pickedNames) {
+    // choice: "random2" | "pick2" | "pick1selfie"
+    const mapCn = MAP_LABEL[currentMapId] || currentMapId;
+
+    if (choice === "pick1selfie") {
+      const p1 = pickedNames[0] || "（无人）";
+      return `
+        <div style="line-height:1.75; opacity:.92;">
+          你拉住 <b>${p1}</b>： “来，和我拍一张。”
+          <br/>闪光一亮，照片上写着：<i>“本局不论输赢，至少留下一张证据。”</i>
+          <div style="margin-top:10px; font-size:12px; color: rgba(255,255,255,.75);">
+            地点：${mapCn}
+          </div>
+        </div>
+      `;
+    }
+
+    const p1 = pickedNames[0] || "（无人）";
+    const p2 = pickedNames[1] || "（无人）";
+    return `
+      <div style="line-height:1.75; opacity:.92;">
+        镜头最后一秒，节目组把 <b>${p1}</b> 和 <b>${p2}</b> 推到你旁边： “收官合影，别躲。”
+        <br/>你们在 <b>${mapCn}</b> 的背景音里定格了三秒。
+      </div>
+    `;
+  }
+
+
+function kickToFishing(name) {
+  setPanel(
+    "你没跟上啊！",
+    `
+    <div style="line-height:1.7; opacity:.92;">
+      <b>${name}</b> 不在本章路线名单里。
+      <br/>下次好好听广播！现在先去钓鱼吧!
+    </div>
+    `,
+    [
+      {
+        label: "去钓鱼",
+        kind: "primary",
+        onClick: () => { window.location.href = FISHING_URL; }
+      }
+    ]
+  );
+  setHint("不在路线名单：去钓鱼。");
+}
+
+
+
+/* =========================
+   ✅ 造谣：文案池 + 渲染
+   ========================= */
+function pickOne(arr){
+  return arr[(Math.random() * arr.length) | 0];
+}
+
+// mode: "pair" | "self"
+function rumorText(mode, A, B) {
+  const poolPair = [
+    `有人说 <b>${A}</b> 刚才替 <b>${B}</b> 把外套扣子扣上了——但镜头只拍到一只手。`,
+    `工作人员“无意”放出一句：<b>${A}</b> 和 <b>${B}</b> 在补妆区待太久了。`,
+    `路过的人听到 <b>${A}</b> 说“别走”，但没听清对象是不是 <b>${B}</b>。`,
+    `节目组把 <b>${A}</b> 和 <b>${B}</b> 的名字写在同一张小纸条上，还故意掉在镜头前。`,
+    `传闻：<b>${A}</b> 给 <b>${B}</b> 指了条“更近的路”，结果两人一起消失了三分钟。`,
+    `有人拍到 <b>${A}</b> 和 <b>${B}</b> 同时回头看了一眼——像约好的一样。`
+  ];
+
+  const poolSelf = [
+    `你刚说完“我没事”，镜头就剪到 <b>${B}</b> 盯着你看了两秒——弹幕立刻开香槟。`,
+    `节目组旁白：你和 <b>${B}</b> 的距离“刚好是能被误会的距离”。`,
+    `传闻：<b>${B}</b> 是第一个记住你路线的人——你否认，但没解释。`,
+    `有人说 <b>${B}</b> 在找你的时候语气太急了，像怕你突然不见。`,
+    `镜头拍到你把相机递给 <b>${B}</b> 的一瞬间：像把“解释权”也交出去了。`
+  ];
+
+  return pickOne(mode === "self" ? poolSelf : poolPair);
+}
+
+// choice: "random2" | "pick2" | "pick1selfie"
+function renderRumorEvent(choice, pickedNames){
+  const mapCn = MAP_LABEL[currentMapId] || currentMapId;
+
+  if (choice === "pick1selfie") {
+    const B = pickedNames[0] || "（无人）";
+    return `
+      <div style="line-height:1.75; opacity:.92;">
+        <b>节目组造谣：</b>${rumorText("self", currentName, B)}
+        <div style="margin-top:10px; font-size:12px; color: rgba(255,255,255,.75);">
+          地点：${mapCn}（造谣格）
+        </div>
+      </div>
+    `;
+  }
+
+  const A = pickedNames[0] || "（无人）";
+  const B = pickedNames[1] || "（无人）";
+  return `
+    <div style="line-height:1.75; opacity:.92;">
+      <b>节目组造谣：</b>${rumorText("pair", A, B)}
+      <div style="margin-top:10px; font-size:12px; color: rgba(255,255,255,.75);">
+        地点：${mapCn}（造谣格）
+      </div>
+    </div>
+  `;
+}
+
+
   /* =========================
      文案池
      ========================= */
-  function scenicText(mapId) {
-    const pool = {
-      lake: "水面很平，远处有白色的碎浪声。你鞋底踩到湿砂，留下一串浅浅脚印。",
-      falls: "瀑声把人思绪冲得很空。树叶上有亮闪闪的水珠，像没人收走的碎玻璃。",
-      wetland: "湿地的风很软，草丛里有细小的摩擦声。泥地边缘像被谁反复踩过。",
-      forest: "林子里光线断断续续，树皮纹路像某种不耐烦的暗号。",
-    };
-    return pool[mapId] || "你继续往前走，周围的景色没有太大变化。";
-  }
+function scenicText(mapId) {
+  const pool = {
+    lake: [
+      "水面很平，远处有白色的碎浪声。你鞋底踩到湿砂，留下一串浅浅脚印。",
+    ],
+    falls: [
+      "瀑声把人思绪冲得很空。树叶上有亮闪闪的水珠，像没人收走的碎玻璃。",
+    ],
+    wetland: [
+      "湿地的风很软，草丛里有细小的摩擦声。泥地边缘像被谁反复踩过。",
+    ],
+    forest: [
+      "你只听到了一阵树叶晃动的声音，却什么也没拍到。或许你应该找一位同区域嘉宾确认刚才发生了什么。",
+      "你看到一道影子快速消失在树林深处。你无法确认那究竟是什么动物。",
+      "你举起相机时，一切已经恢复了安静。只剩下风声和树影。",
+    ],
+  };
+
+  const arr = pool[mapId];
+  if (!arr || !arr.length) return "你继续往前走，周围的景色没有太大变化。";
+  return pickOne(arr);
+}
 
   function blurredAnimalDesc(mapId) {
     const pool = {
@@ -322,6 +636,81 @@
     return pool[mapId] || "未知物种";
   }
 
+
+const FOREST_ANIMALS = [
+  {
+    truth: "红狐",
+    desc: `你拍到了一对体型较大的动物。
+它们的身体细长，尾巴下垂，看起来非常蓬松，几乎和身体一样长。
+毛色以红褐色为主，腹部和下巴是浅白色的。
+它们在斜坡下方一前一后缓慢移动，看起来彼此保持着一定距离。其中一只停下来抬头观察四周，另一只继续向前探索。
+你怀疑这是某种狐狸或豺狼，具体种类你不太清楚。
+要不去问问更了解野生动物的人？`,
+  },
+  {
+    truth: "花栗鼠",
+    desc: `你抓拍到了一对体型很小、像老鼠一样的动物。
+它们在树根和落叶之间来回穿梭，动作非常迅速。
+身体上有明显的浅色与深色相间的纵向条纹，从头部一直延伸到尾巴。
+它们的尾巴较短但蓬松，停下来时会抬起头彼此对视，然后迅速分开钻进不同的方向。
+毛色以棕褐色为主，在它们用后肢站立的时候你可以看见他们腹部的浅色。
+你怀疑这是一种小型啮齿动物，但具体种类不太确定。
+也许是花栗鼠？也可能是某种地松鼠。
+要不去问问更了解自然的人？或者以这个为由去找你的心动嘉宾聊聊。`,
+  },
+  {
+    truth: "棉尾兔",
+    desc: `你拍到了一对体型中等的兔子，身体圆润，四肢较短。
+它们贴着地面一跃一停，耳朵长而直立，始终保持警觉。
+毛色以灰褐色为主，背部略深，腹部颜色偏浅。
+当其中一只转身时，你注意到尾巴底部呈现出明显的白色。
+当你靠近时，其中一只突然停住抬头观察，另一只迅速跳进低矮的灌木后方。
+你怀疑这是一种野兔或家兔的近亲，但无法确定具体是哪一种。
+或许可以去问问更了解这些动物的人。`,
+  },
+  {
+    truth: "野火鸡",
+    desc: `你拍到了一对体型明显比周围动物更大的鸟类。
+它们站在树林空地中缓慢行走，身体直立，步伐稳重。
+羽毛整体呈深棕色与黑色交错，在阳光下隐约反射出金属般的光泽。
+头部和颈部没有羽毛覆盖，裸露的皮肤看起来颜色红红的。
+它们低头在地面啄食时，会同时停下动作，像是在互相确认周围环境是否安全。
+你怀疑这是一种大型地面活动的鸟类，可能是感恩节吃的那个，也可能是别的东西，但无法确认具体种类。
+或许可以找人一起判断你刚刚看到的是什么。`,
+  },
+  {
+    truth: "红腹啄木鸟",
+    desc: `你拍到了一对体型中等的鸟类。
+它们在树干之间跳跃，不断停下来用黑色的尖喙敲击树皮。
+你重新查看照片才发现这种鸟的面部及下体呈浅灰色；背部和尾部则有黑白相间条纹。
+其中一只颈部后方有红色的羽毛，另一只的红羽则覆盖到了脑后。
+你怀疑这是一种啄木鸟，毕竟它们一直在敲树干，但无法确认它们究竟属于哪一种。
+或许可以去问问更了解鸟的人。`,
+  },
+  {
+    truth: "绒啄木鸟",
+    desc: `你拍到了一对巴掌大小的鸟类。
+它们一起从一个树洞里探出头四处张望。
+其中一只脑后有红斑的鸟率先飞了出来。
+你注意到这种鸟的翅膀主要是黑色的，夹杂着一些白色的半点。背部、喉部及腹部也是白色。
+仔细查看照片，你发现这种鸟的眼上与眼下各有一个白色条状花纹。
+你无法确认它们究竟属于哪一种鸟类。
+或许可以去问问更了解鸟的人。`,
+  },
+  {
+    truth: "暗眼灯草鹀",
+    desc: `你拍到了一对体型很小的鸟类，看起来和麻雀差不多大小。
+它们在地面和低矮灌木之间跳跃移动，看起来总是保持着彼此不远的距离。
+这对鸟浑身都是灰色，唯独腹部呈现白色，白色外尾羽在飞行时和地面跳跃时闪烁。
+放大照片才能看见它们的鸟喙是浅粉红色的。
+你不确定自己看到的是哪一种鸟类。
+或许可以去问问更了解鸟的人。`,
+  },
+];
+
+
+
+
   /* =========================
      动物格
      ========================= */
@@ -330,28 +719,39 @@
     const th = getShootThreshold();
     const ok = roll <= th;
 
-    if (ok) {
-      caughtCount += 1;
-      lastAnimalTruth = animalTruth(currentMapId);
+if (ok) {
+  caughtCount += 1;
 
-      const base = `
-        <div style="margin-bottom:8px;"><b>拍摄成功。</b>（1-10：你掷出了 <b>${roll}</b>，成功阈值 ≤ <b>${th}</b>）</div>
-        <div style="opacity:.92; line-height:1.6;">${blurredAnimalDesc(currentMapId)}</div>
-        <div style="margin-top:10px; color: rgba(255,255,255,.78); font-size:12px;">
-          不管拍到什么，节目组都只给你这段“模糊描述”。要不你去问问更了解的人？或者干脆以此为由去找你的心动嘉宾？
-        </div>
-      `;
+  let pickedAnimal = null;
+
+  if (currentMapId === "forest") {
+    pickedAnimal = pickOne(FOREST_ANIMALS);
+    lastAnimalTruth = pickedAnimal.truth;
+  } else {
+    lastAnimalTruth = animalTruth(currentMapId);
+  }
+
+  const base = `
+<div style="margin-bottom:8px;">
+  <b>拍摄成功。</b>（1-10：你掷出了 <b>${roll}</b>，成功阈值 ≤ <b>${th}</b>）
+</div>
+
+    <div style="opacity:.92; line-height:1.6;">
+      ${pickedAnimal ? pickedAnimal.desc : blurredAnimalDesc(currentMapId)}
+    </div>
+  `;
+
 
       const actions = [];
       if (role === "biologist") {
         actions.push({
-          label: "Reveal 正确答案",
+          label: "专业知识——我知道这是什么(正确答案)",
           kind: "primary",
           onClick: () => {
             setPanel(
               "正确答案已揭晓",
               `<div style="font-size:14px; line-height:1.7;">
-                你从一些细节（羽缘/足迹/叫声）确认了：<b>${lastAnimalTruth}</b>。
+                给予你的专业知识，你从一些细节确认了：<b>${lastAnimalTruth}</b>。
                </div>`
             );
           },
@@ -684,29 +1084,108 @@
     );
   }
 
-  function handleSpecialRumor() {
-    const names = getSameMapNames(currentMapId);
-    if (names.length < 2) {
-      setPanel("造谣生事", "本地图嘉宾不足两人，节目组暂时造不了谣。");
-      return;
-    }
+function handleSpecialRumor() {
+  const pool = getSameMapNames(currentMapId);
 
-    const a = names[Math.floor(Math.random() * names.length)];
-    let b = a;
-    while (b === a) b = names[Math.floor(Math.random() * names.length)];
+  setPanel(
+    "造谣生事",
+    `
+    <div style="line-height:1.7; opacity:.92;">
+      你踩中了<b>造谣格</b>。节目组搓搓手：来，安排点“似是而非的证据”。
+    </div>
+    <div style="margin-top:10px; opacity:.9;">
+      选择一个造谣方式（默认都要求<b>一男一女</b>）：
+    </div>
+    `,
+    [
+      {
+        label: "随机抓俩（异性）",
+        kind: "primary",
+        onClick: () => {
+          const picked = sampleOppositePair(pool);
+          if (!picked) {
+            setPanel(
+              "造谣失败",
+              `<div style="line-height:1.7; opacity:.92;">
+                本地图凑不出<b>一男一女</b>组合（同地图缺少某个性别）。
+              </div>`,
+              [{ label: "知道了", kind: "primary", onClick: () => setHint("继续投骰。") }]
+            );
+            return;
+          }
 
-    setPanel(
-      "造谣生事",
-      `
-      <div style="line-height:1.7; opacity:.92;">
-        节目组开始乱点鸳鸯：<b>${a}</b> 和 <b>${b}</b> 被强制安排靠在一起“复盘”。
-      </div>
-      <div style="margin-top:10px; opacity:.9; line-height:1.6;">
-        你听到一些似是而非的说法，但谁也没把话讲全。
-      </div>
-      `
-    );
-  }
+          setPanel("造谣事件：随机抓俩", renderRumorEvent("random2", picked), [
+  { label: "继续", kind: "primary", onClick: () => { setHint("继续投骰。"); } }
+]);
+
+        },
+      },
+
+      {
+        label: "我来点名俩（异性）",
+        onClick: async () => {
+          if (pool.length < 2) {
+            setPanel(
+              "造谣失败",
+              `<div style="line-height:1.7; opacity:.92;">本地图嘉宾不足两人，没法点名俩。</div>`,
+              [{ label: "知道了", kind: "primary", onClick: () => setHint("继续投骰。") }]
+            );
+            return;
+          }
+
+          const picked = await openEndPicker({
+            pool,
+            maxPick: 2,
+            title: "点名两位嘉宾（必须异性）",
+            hint: "从同地图嘉宾里选 2 个（必须一男一女）。",
+            requireOpposite: true,
+          });
+
+          if (!picked) return;
+
+          setPanel("造谣事件：点名俩", renderRumorEvent("pick2", picked), [
+  { label: "继续", kind: "primary", onClick: () => { setHint("继续投骰。"); } }
+]);
+
+        },
+      },
+
+      {
+        label: "我 + 异性嘉宾（造我自己的谣）",
+        onClick: async () => {
+          const selfG = getGender(currentName);
+          const poolOpp = pool.filter((n) => {
+            const g = getGender(n);
+            return selfG && g && g !== selfG;
+          });
+
+          if (!poolOpp.length) {
+            setPanel(
+              "造谣失败",
+              `<div style="line-height:1.7; opacity:.92;">本地图没有与你<b>异性</b>的嘉宾可选。</div>`,
+              [{ label: "知道了", kind: "primary", onClick: () => setHint("继续投骰。") }]
+            );
+            return;
+          }
+
+          const picked = await openEndPicker({
+            pool: poolOpp,
+            maxPick: 1,
+            title: "选一位异性嘉宾（你+TA）",
+            hint: "从同地图嘉宾里选 1 位异性嘉宾。",
+          });
+
+          if (!picked) return;
+
+          setPanel("造谣事件：你+TA", renderRumorEvent("pick1selfie", picked), [
+  { label: "继续", kind: "primary", onClick: () => { setHint("继续投骰。"); } }
+]);
+
+        },
+      },
+    ]
+  );
+}
 
   function handleScenicCell() {
     setPanel(
@@ -715,88 +1194,193 @@
     );
   }
 
-  function softRestartRun() {
-    if (timer) clearTimeout(timer);
-    timer = null;
-    isAnimating = false;
+function softRestartRun() {
+  if (timer) clearTimeout(timer);
+  timer = null;
+  isAnimating = false;
 
-    if (diceOut) diceOut.textContent = "-";
+  if (diceOut) diceOut.textContent = "-";
 
-    // ✅ 不换地图：回到当前棋盘的 1
-    setActive(1);
+  // 不换地图：回到当前棋盘的 1
+  setActive(1);
 
-    isTrapped = false;
-    trappedHelper = null;
+  isTrapped = false;
+  trappedHelper = null;
 
-    if (restartBtn) restartBtn.style.display = "none";
-    if (leaveBtn) leaveBtn.style.display = "none";
+  if (restartBtn) restartBtn.style.display = "none";
+  if (leaveBtn) leaveBtn.style.display = "none";
 
-    unlockRoll();
-    setHint("已重新开始本路线。继续投骰。");
+  unlockRoll();
 
-    caughtCount = 0;
-    lastAnimalTruth = null;
-  }
+  caughtCount = 0;
+  lastAnimalTruth = null;
 
-  function handleEnd() {
-    if (caughtCount <= 0) {
-      const names = getSameMapNames(currentMapId);
-      let a = names[0] || "（无人）";
-      let b = names[1] || "（无人）";
-      if (names.length >= 2) {
-        a = names[Math.floor(Math.random() * names.length)];
-        do { b = names[Math.floor(Math.random() * names.length)]; } while (b === a);
-      }
 
-      setPanel(
-        "终点：节目组强制安排",
-        `
-        <div style="line-height:1.7; opacity:.92;">
-          虽然本局没有成功拍到动物，但节目组强制安排：<b>随机抓两位同地图嘉宾靠在一起帮你复盘</b>。
-        </div>
-        <div style="margin-top:10px; opacity:.9;">本次复盘嘉宾：<b>${a}</b> ＋ <b>${b}</b></div>
-        `,
-        [
-          {
-            label: "再来一次",
-            kind: "primary",
-            onClick: () => {
-              softRestartRun();
-              handleScenicCell();
-            },
-          },
-          {
-            label: "离开",
-            onClick: () => { window.location.href = FISHING_URL; },
-          },
-        ]
-      );
-      return;
-    }
+  const mapCn = MAP_LABEL[currentMapId] || currentMapId || "起点";
+  setPanel(
+    mapCn,
+    `
+      <div style="line-height:1.7; opacity:.92;">
+        已重新开始本路线。你回到起点，准备继续投骰。
+      </div>
+    `,
+    [] // 清空按钮区
+  );
 
+  setHint("已重新开始本路线。继续投骰。");
+}
+
+
+
+
+function handleEnd() {
+  const pool = getSameMapNames(currentMapId);
+
+  // count==0 才给三选一
+  if (caughtCount <= 0) {
     setPanel(
-      "终点：收官",
+      "终点：收官（本局0只动物）",
       `
       <div style="line-height:1.7; opacity:.92;">
-        本局你成功拍到动物次数：<b>${caughtCount}</b>。节目组表示：不错，至少证明你没全程在看风景。
+        本局没有成功拍到动物（<b>${caughtCount}</b>）。
+        <br/>节目组表示：那就靠<b>收官事件</b>硬凑素材。
       </div>
-      <div style="margin-top:10px; font-size:12px; color: rgba(255,255,255,.75);">
-        （更多结算选项：随机抓俩 / 自选俩 / 自选一人+自拍 / 再来一次 —— 下一步补）
+      <div style="margin-top:10px; opacity:.9;">
+        选择一个收官事件：
       </div>
       `,
       [
         {
-          label: "再来一次",
+          label: "随机抓俩",
           kind: "primary",
-          onClick: () => { softRestartRun(); },
+          onClick: () => {
+            const picked = sampleOppositePair(pool);
+            if (!picked) {
+              setPanel(
+                "收官事件：随机抓俩",
+                `<div style="line-height:1.7; opacity:.92;">
+                  本地图凑不出<b>一男一女</b>组合（同地图缺少某个性别）。
+                 </div>`,
+                [
+                  { label: "再来一次", kind: "primary", onClick: () => softRestartRun() },
+                  { label: "离开", onClick: () => { window.location.href = MAIN_URL; } },
+                ]
+              );
+              return;
+            }
+
+            setPanel(
+              "收官事件：随机抓俩",
+              renderClosingEvent("random2", picked),
+              [
+                { label: "再来一次", kind: "primary", onClick: () => softRestartRun() },
+                { label: "离开", onClick: () => { window.location.href = MAIN_URL; } },
+              ]
+            );
+          },
         },
+
         {
-          label: "离开",
-          onClick: () => { window.location.href = FISHING_URL; },
+          label: "自己选两个",
+          onClick: async () => {
+            if (pool.length < 2) {
+              setPanel(
+                "收官事件：自己选两个",
+                `<div style="line-height:1.7; opacity:.92;">本地图嘉宾不足两人，没法自选两个。</div>`,
+                [{ label: "返回结算", kind: "primary", onClick: () => handleEnd() }]
+              );
+              return;
+            }
+
+            const picked = await openEndPicker({
+              pool,
+              maxPick: 2,
+              title: "自己选两个嘉宾",
+              hint: "从同地图嘉宾里选 2 个（必须一男一女）。",
+              requireOpposite: true,
+            });
+
+            if (!picked) return;
+
+            setPanel(
+              "收官事件：自选俩",
+              renderClosingEvent("pick2", picked),
+              [
+                { label: "再来一次", kind: "primary", onClick: () => softRestartRun() },
+                { label: "离开", onClick: () => { window.location.href = MAIN_URL; } },
+              ]
+            );
+          },
         },
+
+        {
+          label: "选一个人 + 自拍双人拍立得",
+          onClick: async () => {
+            const selfG = getGender(currentName);
+            const poolOpp = pool.filter((n) => {
+              const g = getGender(n);
+              return selfG && g && g !== selfG;
+            });
+
+            if (!poolOpp.length) {
+              setPanel(
+                "双人拍立得",
+                `<div style="line-height:1.7; opacity:.92;">
+                  本地图没有与你<b>异性</b>的嘉宾可选。
+                </div>`,
+                [
+                  { label: "再来一次", kind: "primary", onClick: () => softRestartRun() },
+                  { label: "离开", onClick: () => { window.location.href = MAIN_URL; } },
+                ]
+              );
+              return;
+            }
+
+            const picked = await openEndPicker({
+              pool: poolOpp,
+              maxPick: 1,
+              title: "选一个人拍双人拍立得",
+              hint: "从同地图嘉宾里选 1 位异性嘉宾。",
+            });
+
+            if (!picked) return;
+
+            setPanel(
+              "双人拍立得",
+              renderClosingEvent("pick1selfie", picked),
+              [
+                { label: "再来一次", kind: "primary", onClick: () => softRestartRun() },
+                { label: "离开", onClick: () => { window.location.href = MAIN_URL; } },
+              ]
+            );
+          },
+        },
+
+        // ✅ 你说 count=0 才弹出三选一：那这里不需要再放“再来一次/离开”也行
+        // 但放着也没坏处（用户不想选事件也能走）
+        { label: "再来一次（保留地图）", onClick: () => softRestartRun() },
+        { label: "离开", onClick: () => { window.location.href = MAIN_URL; } },
       ]
     );
+
+    return; // ✅ 关键：0动物分支结束后直接退出
   }
+
+  // count>0：只给再来一次 + 离开
+  setPanel(
+    "终点：正常结束",
+    `
+    <div style="line-height:1.7; opacity:.92;">
+      本局你成功拍到动物次数：<b>${caughtCount}</b>。
+      <br/>节目组：够了够了，别加戏，直接收工。
+    </div>
+    `,
+    [
+      { label: "再来一次", kind: "primary", onClick: () => softRestartRun() },
+      { label: "离开", onClick: () => { window.location.href = MAIN_URL; } },
+    ]
+  );
+}
 
   function onLand() {
     if (pos >= END_POS) { handleEnd(); return; }
@@ -811,6 +1395,31 @@
 
     return handleScenicCell();
   }
+
+
+function getGender(name){
+  return DB[name]?.gender || null; // "M" | "F" | null
+}
+
+function splitByGender(names){
+  const m = [], f = [];
+  (names || []).forEach(n=>{
+    const g = getGender(n);
+    if (g === "M") m.push(n);
+    else if (g === "F") f.push(n);
+  });
+  return { m, f };
+}
+
+// 随机抽 1男1女（顺序不重要）
+function sampleOppositePair(names){
+  const { m, f } = splitByGender(names);
+  if (!m.length || !f.length) return null;
+  const a = m[(Math.random()*m.length)|0];
+  const b = f[(Math.random()*f.length)|0];
+  return [a, b];
+}
+
 
   /* ====== 动画：减速闪格（稳定：先落点事件，再决定是否解锁 Roll） ====== */
   function animateStepsEaseOut(steps) {
@@ -926,21 +1535,34 @@
     openPickerBtn.addEventListener("click", () => showNamePicker());
   }
 
-  if (startBtn) {
-    startBtn.addEventListener("click", () => {
-      const n = normalizeName(nameIn.value);
+if (startBtn) {
+  startBtn.addEventListener("click", () => {
+    const n = normalizeName(nameIn.value);
 
-      if (!isValidName(n)) {
-        if (assignOut) assignOut.textContent = "名字未匹配到路线名单，请重新选择。";
-        setHint("请在弹出的列表中选择有效名字。");
-        showNamePicker();
-        if (nameIn) nameIn.value = "";
-        return;
-      }
 
-      startGame();
-    });
-  }
+setPanel("", "", []);   // 会把 mapTitle/mapSub 清空，同时清空 actions
+setHint("");
+
+    // 名字不在 DB：让他去 picker 选
+    if (!DB[n]) {
+      if (assignOut) assignOut.textContent = "名字不在 DB 里，请从列表选择。";
+      setHint("请在弹出的列表中选择名字。");
+      showNamePicker();
+      if (nameIn) nameIn.value = "";
+      return;
+    }
+
+    // ✅ 只有这里才提示“你没跟上”并踹去钓鱼
+    if (!hasMap(n)) {
+      kickToFishing(n);
+      return;
+    }
+
+    // 正常进入路线
+    startGame();
+  });
+}
+
 
   if (nameIn) {
     nameIn.addEventListener("keydown", (e) => {
@@ -978,12 +1600,67 @@
 
   if (leaveBtn) {
     leaveBtn.addEventListener("click", () => {
-      window.location.href = FISHING_URL;
+      window.location.href = MAIN_URL;
     });
   }
 
+if (picker) picker.inert = true;
+
   /* ====== 初始化 ====== */
+if (picker) picker.inert = true;
+
   hardResetBoardOnly();
   unlockGate();
   setHint("先输入名字并进入路线。");
+
+
+/*  window.TEST = {
+  end0: () => {
+    caughtCount = 0;
+    setActive(END_POS);
+    finishIfEnd();
+    handleEnd();
+  },
+  end1: () => {
+    caughtCount = 1;
+    setActive(END_POS);
+    finishIfEnd();
+    handleEnd();
+  }
+};*/
+
+window.TEST = window.TEST || {};
+window.TEST.rumor = () => { setActive(SPECIAL_POS); onLand(); };
+
+window.TEST = window.TEST || {};
+
+// 强制进入某个名字（会自动带出 role + map）
+window.TEST.as = (name) => {
+  const input = document.querySelector("#nameIn");
+  const btn = document.querySelector("#startBtn");
+  input.value = name;
+  btn.click();
+  return `entered as ${name}`;
+};
+
+// 强制落在动物格并触发一次动物事件（需要你当前棋盘里确实有 data-type="animal" 的格）
+window.TEST.animal = () => {
+  // 找到当前棋盘任意一个 animal 格
+  const cell = document.querySelector('.board:not([hidden]) .cell[data-type="animal"]');
+  if (!cell) return "no animal cell in current board";
+  const p = Number(cell.dataset.pos || 1);
+  // 直接把位置跳过去并触发落点事件
+  document.querySelectorAll('.board .cell.is-active').forEach(c=>c.classList.remove("is-active"));
+  cell.classList.add("is-active");
+  // 这里模仿 setActive 的最关键副作用：更新 posOut（可选）
+  const posOut = document.querySelector("#posOut");
+  if (posOut) posOut.textContent = String(p);
+  // 触发落点逻辑：直接点 Roll 不走动画更简单，但你 onLand 是局部的调不到
+  // 所以这里用一个简单方案：模拟一次 roll=0 的“落点”——直接点击 roll 让它执行 onLand
+  const rollBtn = document.querySelector("#rollBtn");
+  rollBtn.click();
+  return `moved to animal pos ${p} + rolled`;
+};
+
+
 })();

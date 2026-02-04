@@ -450,11 +450,15 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
     --padY:54px;
     --boardH:520px;
   }
+
   .tag{ display:none; }
   .pickerCols{ grid-template-columns:1fr; }
+
+  /* 中间档也建议：board 不要被压到太扁 */
+  .board{ min-height: 460px; }
 }
 
-/* ===================== 手机端：上下排列 ===================== */
+/* ===================== 手机端：上下排列（稳定不裁棋盘） ===================== */
 @media (max-width:520px){
   :root{
     --cell:52px;
@@ -468,11 +472,13 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
     align-items:stretch;
   }
 
+  /* 关键：card 仍满屏，但不再用 overflow:hidden 裁内容；
+     让“内部区域”去滚动 */
   .card{
     height: calc(100dvh - 24px);
     padding:12px;
     gap:10px;
-    overflow:hidden;
+    overflow:hidden; /* 保持满屏框架 */
   }
 
   .top h1{ font-size:14px; }
@@ -482,11 +488,16 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   button{ padding:9px 12px; }
   .stats{ gap:12px; font-size:12px; }
 
+  /* 关键：game-area 变成可滚动容器（而不是让 card 裁） */
   .game-area{
-    flex:1;
+    flex:1 1 auto;
     min-height:0;
     flex-direction:column;
     gap:var(--gapStack);
+
+    overflow-y:auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 12px;
   }
 
   #infoPanel{
@@ -500,17 +511,18 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   #mapTitle{ font-size:19px; }
   #mapSub{ font-size:16px; }
 
+  /* 关键：board 不要 flex:1 被压扁；给下限高度 */
   .board{
     order:2;
-    flex:1;
-    min-height:0;
+    flex:0 0 auto;     /* 不参与“抢高度”压缩 */
     width:100%;
     height:auto;
+    min-height: 360px; /* ✅ 防挤压；你可调 320~420 */
   }
 
   .tag{ display:none; }
 
-  /* forest 内容横向居中：算出 padX */
+  /* forest 内容横向居中：算 padX（你原本的保留） */
   .board--forest{
     --contentW: calc(var(--cell) * 5);
     --padX: calc((100% - var(--contentW)) / 2);
@@ -522,6 +534,14 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
   }
 
   .pickerCols{ grid-template-columns:1fr; }
+
+  /* ✅ 止血：你 wetland 的 grid-area 用到 row 6；
+     在手机端先把 wetland 强制成 6 列，避免布局计算炸掉。
+     （后续你要么改 wetland 的 grid-area 全部回到 1~5，
+      要么彻底做 6x6 螺旋。） */
+  .board--wetland{
+    grid-template-columns: repeat(6, var(--cell));
+  }
 }
 
 /* hidden 兜底 */
@@ -614,10 +634,10 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
 .board--falls .cell[data-pos="11"] { grid-area: 5 / 5; }
 
 /* last row */
-.board--falls .cell[data-pos="17"] { grid-area: 6 / 1; }
-.board--falls .cell[data-pos="18"] { grid-area: 6 / 2; }
-.board--falls .cell[data-pos="19"] { grid-area: 6 / 3; }
-.board--falls .cell[data-pos="20"] { grid-area: 6 / 4; }
+.board--falls .cell[data-pos="17"] { grid-area: 6 / 2; }
+.board--falls .cell[data-pos="18"] { grid-area: 6 / 3; }
+.board--falls .cell[data-pos="19"] { grid-area: 6 / 4; }
+.board--falls .cell[data-pos="20"] { grid-area: 6 / 5; }
 
 /* Wetland: square spiral (6x6) */
 /* =========================
@@ -627,7 +647,7 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
 .board--wetland{
   /* 继承 .board 的外框背景/圆角，不要删 */
   display:grid;
-  grid-template-columns: repeat(5, var(--cell));
+  grid-template-columns: repeat(6, var(--cell));
   grid-auto-rows: var(--cell);
   gap:0;
   padding: var(--padY) var(--padX);
