@@ -17,42 +17,33 @@
   --shadow:0 10px 30px rgba(0,0,0,.35);
 }
 
+*{ box-sizing:border-box; }
 
-    *{ box-sizing:border-box; }
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Arial,sans-serif;
+  background:var(--bg);
+  color:var(--txt);
+  display:flex;
+  justify-content:center;
+}
 
-    body{
-      margin:0;
-      min-height:100vh;
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Arial,sans-serif;
-      background:var(--bg);
-      color:var(--txt);
-      display:flex;
-      justify-content:center;
-    }
+body::before{
+  content:"";
+  position:fixed;
+  inset:-20%;
+  z-index:-1;
 
-    body::before{
-      content:"";
-      position:fixed;
-      inset:-20%;
-      z-index:-1;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(120,180,200,.10), transparent 55%),
+    radial-gradient(circle at 70% 60%, rgba(80,140,180,.08), transparent 60%);
 
-      background:
-        radial-gradient(
-          circle at 30% 40%,
-          rgba(120,180,200,.10),
-          transparent 55%
-        ),
-        radial-gradient(
-          circle at 70% 60%,
-          rgba(80,140,180,.08),
-          transparent 60%
-        );
+  animation: waterMove 26s linear infinite;
+  pointer-events:none;
+}
 
-      animation: waterMove 26s linear infinite;
-      pointer-events:none;
-    }
-
-    body::after{
+body::after{
   content:"";
   position:fixed;
   inset:-15%;
@@ -77,156 +68,146 @@
   to{ transform:translateX(-80px); }
 }
 
+.wrap{
+  width:min(980px,100%);
+  padding:clamp(14px,3vw,28px);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
 
+h2{ margin:0; font-size:clamp(18px,3.6vw,28px); }
+.subtitle{ color:var(--mut); font-size:12.5px; margin-top:2px; }
 
+.layout{
+  display:grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap:12px;
+  align-items:start;
+}
 
-    .wrap{
-      width:min(980px,100%);
-      padding:clamp(14px,3vw,28px);
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
+.card{
+  background:var(--card);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  box-shadow:var(--shadow);
+  padding:14px;
+}
 
-    h2{ margin:0; font-size:clamp(18px,3.6vw,28px); }
-    .subtitle{ color:var(--mut); font-size:12.5px; margin-top:2px; }
+label{
+  display:block;
+  font-size:12px;
+  color:var(--mut);
+  margin-bottom:6px;
+}
 
-  
-    .layout{
-      display:grid;
-      grid-template-columns: minmax(0, 1fr) 360px;
-      gap:12px;
-      align-items:start;
-    }
+.row{ display:flex; gap:10px; flex-wrap:wrap; }
+.row > div{ flex:1; min-width:160px; }
 
-    .card{
-      background:var(--card);
-      border:1px solid var(--bd);
-      border-radius:10px;
-      box-shadow:var(--shadow);
-      padding:14px;
-    }
+input{
+  width:100%;
+  padding:11px 12px;
+  border:1px solid var(--bd);
+  background:rgba(0,0,0,.12);
+  color:var(--txt);
+  border-radius:8px;
+  outline:none;
+}
 
-    label{
-      display:block;
-      font-size:12px;
-      color:var(--mut);
-      margin-bottom:6px;
-    }
+input:disabled{
+  opacity:1;
+  cursor:default;
+  background:rgba(0,0,0,.18);
+  border-color:var(--bd);
+  color:rgba(255,255,255,.85);
+}
 
-    .row{ display:flex; gap:10px; flex-wrap:wrap; }
-    .row > div{ flex:1; min-width:160px; }
+button{
+  border:1px solid var(--bd);
+  background:var(--btn);
+  color:var(--txt);
+  padding:11px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+button:hover{ background:var(--btn2); }
+button.primary{ background:rgba(255,255,255,.18); font-weight:600; }
+button:disabled{ opacity:.45; cursor:not-allowed; }
 
-    input{
-      width:100%;
-      padding:11px 12px;
-      border:1px solid var(--bd);
-      background:rgba(0,0,0,.12);
-      color:var(--txt);
-      border-radius:8px;
-      outline:none;
-    }
+.center{ text-align:center; }
+.hidden{ display:none; }
 
-    input:disabled{
-      opacity:1;
-      cursor:default;
-      background:rgba(0,0,0,.18);
-      border-color:var(--bd);
-      color:rgba(255,255,255,.85);
-    }
+hr{
+  border:none;
+  border-top:1px solid var(--bd);
+  margin:10px 0;
+}
 
-    button{
-      border:1px solid var(--bd);
-      background:var(--btn);
-      color:var(--txt);
-      padding:11px 12px;
-      border-radius:10px;
-      cursor:pointer;
-      white-space:nowrap;
-    }
-    button:hover{ background:var(--btn2); }
-    button.primary{ background:rgba(255,255,255,.18); font-weight:600; }
-    button:disabled{ opacity:.45; cursor:not-allowed; }
+.muted{ color:var(--mut); font-size:12px; }
 
-    .center{ text-align:center; }
-    .hidden{ display:none; }
+/* 右侧战绩 */
+.sideTitle{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:10px;
+  margin-bottom:10px;
+}
 
-    hr{
-      border:none;
-      border-top:1px solid var(--bd);
-      margin:10px 0;
-    }
+ul.log{
+  list-style:none;
+  padding:0;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
 
-    .muted{ color:var(--mut); font-size:12px; }
+.logItem{
+  padding:10px 12px;
+  border:1px solid var(--bd);
+  border-radius:10px;
+  background:rgba(0,0,0,.10);
+  line-height:1.45;
+  font-size:13px;
+}
 
-    /* 右侧战绩 */
-    .sideTitle{
-      display:flex;
-      justify-content:space-between;
-      align-items:baseline;
-      gap:10px;
-      margin-bottom:10px;
-    }
+.pill{
+  display:inline-block;
+  font-size:12px;
+  padding:2px 8px;
+  border:1px solid var(--bd);
+  border-radius:999px;
+  color:var(--mut);
+  margin-right:8px;
+  background:rgba(0,0,0,.10);
+}
 
-    ul.log{
-      list-style:none;
-      padding:0;
-      margin:0;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
+.pill.success{
+  color:#6fdc8c;
+  border-color:#2f6f4f;
+  background:rgba(111,220,140,0.08);
+}
+.pill.fail{
+  color:#ff6b6b;
+  border-color:#7a2f2f;
+  background:rgba(255,107,107,0.08);
+}
 
-    .logItem{
-      padding:10px 12px;
-      border:1px solid var(--bd);
-      border-radius:10px;
-      background:rgba(0,0,0,.10);
-      line-height:1.45;
-      font-size:13px;
-    }
-
-    .pill{
-      display:inline-block;
-      font-size:12px;
-      padding:2px 8px;
-      border:1px solid var(--bd);
-      border-radius:999px;
-      color:var(--mut);
-      margin-right:8px;
-      background:rgba(0,0,0,.10);
-    }
-
-    .pill.success{
-      color:#6fdc8c;
-      border-color:#2f6f4f;
-      background:rgba(111,220,140,0.08);
-    }
-    .pill.fail{
-      color:#ff6b6b;
-      border-color:#7a2f2f;
-      background:rgba(255,107,107,0.08);
-    }
-
-    /* mobile */
-    @media (max-width:860px){
-      .layout{
-        display:flex;
-        flex-direction:column;
-        gap:12px;
-      }
-    }
-
-    @keyframes waterMove{
-  0%{
-    transform:translate(0,0);
+/* mobile */
+@media (max-width:860px){
+  .layout{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
   }
-  50%{
-    transform:translate(-3%, -2%);
-  }
-  100%{
-    transform:translate(0,0);
-  }
+}
+
+@keyframes waterMove{
+  0%{ transform:translate(0,0); }
+  50%{ transform:translate(-3%, -2%); }
+  100%{ transform:translate(0,0); }
 }
 
 /* 抛竿水波 */
@@ -241,7 +222,7 @@
   transform:translate(-50%,-50%) scale(0.2);
   opacity:.6;
   pointer-events:none;
-  z-index:-1; /* 在卡下背景 */
+  z-index:-1;
   animation:rippleExpand 1.2s ease-out forwards;
 }
 
@@ -257,10 +238,7 @@
 }
 
 /* 轻微摇晃 */
-.shake-soft{
-  animation: shakeSoft .45s ease-out;
-}
-
+.shake-soft{ animation: shakeSoft .45s ease-out; }
 @keyframes shakeSoft{
   0%   { transform: translateX(0); }
   20%  { transform: translateX(-4px); }
@@ -270,6 +248,79 @@
   100% { transform: translateX(0); }
 }
 
+/* ====== Name Picker（大富翁同款：弹窗 + 搜索 + 选中）====== */
+.pickerMask{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  backdrop-filter: blur(2px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  z-index:99;
+}
+.pickerMask.show{ display:flex; }
+
+.pickerCard{
+  width:min(760px,100%);
+  background:rgba(20,30,40,.92);
+  border:1px solid var(--bd);
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  padding:14px;
+}
+
+.pickerTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.pickerTitle{
+  font-weight:700;
+  font-size:14px;
+}
+.pickerHint{
+  color:var(--mut);
+  font-size:12px;
+  margin-top:2px;
+}
+
+.pickerGrid{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap:8px;
+}
+@media (max-width:560px){
+  .pickerGrid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.pickerBtn{
+  text-align:left;
+  padding:10px 10px;
+  border-radius:12px;
+  border:1px solid var(--bd);
+  background:rgba(255,255,255,.06);
+  cursor:pointer;
+}
+.pickerBtn:hover{ background:rgba(255,255,255,.10); }
+
+.pickerBtn b{ font-size:13px; }
+.pickerBtn .mini{
+  color:var(--mut);
+  font-size:11px;
+  margin-top:2px;
+}
+
+.smallRow{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
 
   </style>
 </head>
@@ -285,17 +336,17 @@
       <!-- 左侧主区 -->
       <div style="display:flex; flex-direction:column; gap:12px;">
         <div class="card">
-          <label>你的名字</label>
-          <input id="pName">
+          <label>你的名字（点这里选）</label>
+          <input id="pName" placeholder="点我打开名单" readonly>
 
           <div class="row" style="margin-top:10px;">
             <div>
               <label>现在耐心如何？（1–10）</label>
-              <input id="pPat" type="number" min="1" max="10">
+              <input id="pPat" type="number" min="1" max="10" placeholder="会自动填，也可以手改">
             </div>
             <div>
               <label>还有力气吗？（1–10）</label>
-              <input id="pStr" type="number" min="1" max="10">
+              <input id="pStr" type="number" min="1" max="10" placeholder="会自动填，也可以手改">
             </div>
           </div>
 
@@ -327,7 +378,8 @@
             看什么啊，我都给你机会和 Crush 互动了！
           </div>
 
-          <input id="helperName" placeholder="你的亲亲帮手姓名为？！">
+          <label style="text-align:left;">你的亲亲帮手姓名为？（点这里选）</label>
+          <input id="helperName" placeholder="点我打开名单" readonly>
 
           <div style="margin-top:10px;">
             <button onclick="resolve(true)">找人帮忙！</button>
@@ -356,32 +408,111 @@
     </div>
   </div>
 
-<script>
+  <!-- ====== Name Picker Modal ====== -->
+  <div id="pickerMask" class="pickerMask" aria-hidden="true">
+    <div class="pickerCard">
+      <div class="pickerTop">
+        <div>
+          <div id="pickerTitle" class="pickerTitle">选择名字</div>
+          <div class="pickerHint">支持搜索；点名字即可填入。</div>
+        </div>
+        <button id="pickerCloseBtn" class="smallBtn">关闭</button>
+      </div>
 
-  
+      <div class="smallRow">
+        <input id="pickerSearch" placeholder="搜索名字（中英文都行）">
+        <button id="pickerClearBtn">清空</button>
+      </div>
+
+      <div id="pickerGrid" class="pickerGrid"></div>
+
+      <div class="muted" style="margin-top:10px;">
+        备注：选中“你的名字”时，会把 direction→耐心、stamina→力量 自动填入（并 clamp 到 1–10）。
+      </div>
+    </div>
+  </div>
+
+<script>
 /* ===== data ===== */
 const peopleDB = { 
-  "小李":true, 
-  "阿青":true, 
-  "鱼师傅":true, 
-  "猫妖JG":true 
+  "橙知": { luck: 1, direction: 7, stamina: 9 },
+  "丹": { luck: 4, direction: 4, stamina: 4 },
+  "Eric": { luck: 10, direction: 10, stamina:10 },
+  "Ethan": { luck: 4, direction: 4, stamina: 4 },
+  "阿基米德": { luck: 4, direction: 4, stamina: 4 },
+  "Friedrich": { luck: 4, direction: 4, stamina: 4 },
+  "Honey": { luck: 4, direction: 4, stamina: 4 },
+  "J.O.": { luck: 4, direction: 4, stamina: 4 },
+  "Kazares": { luck: 4, direction: 5, stamina: 9 },
+  "奥利弗": { luck: 10, direction: 3, stamina: 8 },
+  "Matt": { luck: 4, direction: 2, stamina: 5 },
+  "Mubiru": { luck: 3, direction: 8, stamina: 7 },
+  "Samuel": { luck: 100, direction: 100, stamina: 100 },
+  "Thomas": { luck: 9, direction: 9, stamina: 9 },
+  "卡莱比": { luck: 1, direction: 2, stamina: 3 },
+  "叶澄希": { luck: 4, direction: 4, stamina: 4 },
 
-
+  "Amber": { luck: 0, direction: 0, stamina: 0 },
+  "Cela": { luck: 4, direction: 4, stamina: 4 },
+  "Jeffrey": { luck: 9, direction: 6, stamina: 6 },
+  "玛顿": { luck: 4, direction: 4, stamina: 4 },
+  "Maya": { luck: 5, direction: 9, stamina: 8 },
+  "马塞拉": { luck: 8, direction: 2, stamina: 5 },
+  "Melusine": { luck: 4, direction: 6, stamina: 7 },
+  "Naya": { luck: 4, direction: 4, stamina: 4 },
+  "Romaine": { luck: 4, direction: 4, stamina: 4 },
+  "向木林": { luck: 7, direction: 7, stamina: 8.5 },
+  "奈芙": { luck: 10, direction: 10, stamina: 10 },
+  "Zurabia": { luck: 4, direction: 4, stamina: 4 },
+  "Moira": { luck: 4, direction: 4, stamina: 4 },
+  "Erla": { luck: 3, direction: 8, stamina: 7 },
+  "Josephine": { luck: 5, direction: 3, stamina: 7 },
+  "Oliven": { luck: 5, direction: 6, stamina: 7 }
 };
 
 const fishingSpot = {
   name: "湖边",
   fishPool: [
-    { name:"小鲤鱼", min:20, max:40 },
-    { name:"草鱼", min:30, max:70 },
-    { name:"黑鱼", min:50, max:100 }
+    // 常见
+    { name:"小鲤鱼", min:18, max:40 },
+    { name:"草鱼",   min:28, max:75 },
+    { name:"鲫鱼",   min:15, max:35 },
+    { name:"鳊鱼",   min:18, max:45 },
+    { name:"罗非鱼", min:22, max:55 },
+    { name:"太阳鱼", min:10, max:24 },
+    { name:"大嘴鲈鱼", min:25, max:75 },
+    { name:"小嘴鲈鱼", min:22, max:65 },
+    { name:"河鲈", min:18, max:45 },
+
+    // 稍稀有
+    { name:"黑鱼",   min:45, max:110 },
+    { name:"鲶鱼",   min:35, max:120 },
+    { name:"鳜鱼",   min:25, max:70 },
+    { name:"虹鳟鱼", min:30, max:85 },
+    { name:"翘嘴",   min:28, max:90 },
+    { name:"黑鲈",   min:30, max:80 },
+    { name:"白鲈",   min:25, max:70 },
+    { name:"鲢鱼",   min:55, max:130 },
+    { name:"鳟鱼",   min:30, max:90 },
+    { name:"大头鱼", min:60, max:160 },
+    { name:"西鲱",   min:25, max:45 },
+    { name:"狗鱼",   min:40, max:120 },
+
+    // 彩蛋
+    { name:"锦鲤（疑似来串场）", min:20, max:60 },
+    { name:"传说中的银鳞鱼",     min:50, max:140 },
+    { name:"塑料袋（不是鱼）",   min:10, max:25 },
+    { name:"破旧鱼线团",         min:8,  max:18 },
+    { name:"绿藻",               min:8,  max:18 }
   ]
 };
 
 let currentFish = null;
 let player = {};
 let castsLeft = 5;
-const CATCH_PROB = 1/3;
+
+/* 你之前想要整体更高一点：2/5 */
+const CATCH_PROB = 2/5;
 
 let locked = false;
 
@@ -391,6 +522,15 @@ const $ = (id)=>document.getElementById(id);
 function show(el){ el.classList.remove("hidden"); }
 function hide(el){ el.classList.add("hidden"); }
 function setCastEnabled(enabled){ $("castBtn").disabled = !enabled; }
+
+function clamp(n, lo, hi){
+  n = Number(n);
+  if(Number.isNaN(n)) return lo;
+  return Math.max(lo, Math.min(hi, n));
+}
+function roundClamp10(n){
+  return clamp(Math.round(Number(n)), 1, 10);
+}
 
 function updateCastsUI(){
   $("castsLeft").textContent = String(castsLeft);
@@ -423,20 +563,99 @@ function showEndUI(){
   show($("endBox"));
 }
 
-/* 主流程 */
-
+/* 抛竿水波 */
 function spawnRipple(){
   const r = document.createElement("div");
   r.className = "ripple";
   document.body.appendChild(r);
+  r.addEventListener("animationend", () => r.remove());
+}
 
-  r.addEventListener("animationend", () => {
-    r.remove();
+/* ====== Name Picker logic ====== */
+let pickerTarget = "pName"; // 当前要填哪个 input
+const nameList = Object.keys(peopleDB).sort((a,b)=>a.localeCompare(b, "zh-Hans-CN"));
+
+function openPicker(targetId, titleText){
+  pickerTarget = targetId;
+  $("pickerTitle").textContent = titleText || "选择名字";
+  $("pickerSearch").value = "";
+  renderPickerGrid("");
+  $("pickerMask").classList.add("show");
+  $("pickerMask").setAttribute("aria-hidden","false");
+  setTimeout(()=> $("pickerSearch").focus(), 0);
+}
+
+function closePicker(){
+  $("pickerMask").classList.remove("show");
+  $("pickerMask").setAttribute("aria-hidden","true");
+}
+
+function renderPickerGrid(keyword){
+  const kw = String(keyword || "").trim().toLowerCase();
+  const grid = $("pickerGrid");
+  grid.innerHTML = "";
+
+  const filtered = nameList.filter(n => n.toLowerCase().includes(kw));
+  if(filtered.length === 0){
+    const div = document.createElement("div");
+    div.className = "muted";
+    div.style.gridColumn = "1 / -1";
+    div.textContent = "没有匹配到名字。";
+    grid.appendChild(div);
+    return;
+  }
+
+  filtered.forEach(name=>{
+    const meta = peopleDB[name];
+    const btn = document.createElement("div");
+    btn.className = "pickerBtn";
+    btn.innerHTML = `
+      <b>${name}</b>
+      <div class="mini">direction: ${meta.direction} · stamina: ${meta.stamina}</div>
+    `;
+    btn.addEventListener("click", ()=>{
+      $(pickerTarget).value = name;
+
+      // 选“你的名字”时：自动填耐心/力量
+      if(pickerTarget === "pName"){
+        $("pPat").value = roundClamp10(meta.direction);
+        $("pStr").value = roundClamp10(meta.stamina);
+      }
+      closePicker();
+    });
+    grid.appendChild(btn);
   });
 }
 
+/* 点击遮罩空白处关闭 */
+$("pickerMask").addEventListener("click", (e)=>{
+  if(e.target === $("pickerMask")) closePicker();
+});
+$("pickerCloseBtn").addEventListener("click", closePicker);
+$("pickerClearBtn").addEventListener("click", ()=>{
+  $("pickerSearch").value = "";
+  renderPickerGrid("");
+  $("pickerSearch").focus();
+});
+$("pickerSearch").addEventListener("input", (e)=>{
+  renderPickerGrid(e.target.value);
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape") closePicker();
+});
+
+/* 绑定：点 input 打开 picker（锁定后不让改） */
+$("pName").addEventListener("click", ()=>{
+  if(locked) return;
+  openPicker("pName", "选择你的名字（节目组名单）");
+});
+$("helperName").addEventListener("click", ()=>{
+  openPicker("helperName", "选择帮手（同场嘉宾）");
+});
+
+/* ===== 主流程 ===== */
 function fish(){
-   spawnRipple();  
+  spawnRipple();
 
   const resultEl = $("result");
   const helpEl = $("helpBox");
@@ -447,7 +666,6 @@ function fish(){
   }
 
   showFishingUI();
-
   resultEl.innerHTML = "";
   currentFish = null;
   $("helperName").value = "";
@@ -455,21 +673,24 @@ function fish(){
   player.name = $("pName").value.trim();
   if(!player.name){
     hide(resultEl);
-    alert("先填你的名字，不然节目组怎么剪你啊！鱼竿还来！");
+    alert("先选你的名字！节目组名单里没有你就不能开赌。");
+    openPicker("pName", "先选你的名字（节目组名单）");
     return;
   }
 
   if(!peopleDB[player.name]){
     hide(resultEl);
     alert("你谁啊？节目组名单里没你。换个名字！");
+    openPicker("pName", "换个在名单里的名字");
     return;
   }
 
   player.pat = Number($("pPat").value);
   player.str = Number($("pStr").value);
+
   if(!(player.pat>=1 && player.pat<=10 && player.str>=1 && player.str<=10)){
     hide(resultEl);
-    alert("耐心和力量都要填 1–10 哦");
+    alert("耐心和力量都要填 1–10 哦（也可以点名字自动填）。");
     return;
   }
 
@@ -509,23 +730,18 @@ function fish(){
     <div>长度：${length} cm</div>
   `;
 
-if(length >= 60){
-  show(helpEl);
+  if(length >= 60){
+    show(helpEl);
 
-  // 触发轻摇
-  helpEl.classList.remove("shake-soft"); // 防止重复无效
-  void helpEl.offsetWidth;               // 强制 reflow
-  helpEl.classList.add("shake-soft");
+    helpEl.classList.remove("shake-soft");
+    void helpEl.offsetWidth;
+    helpEl.classList.add("shake-soft");
 
-  $("helperName").focus();
-  setCastEnabled(false);
+    setCastEnabled(false);
   }else{
     resolve(false);
   }
 }
-
-
-
 
 function resolve(withHelp){
   const resultEl = $("result");
@@ -542,9 +758,23 @@ function resolve(withHelp){
 
   if(withHelp){
     helperNameClean = $("helperName").value.trim();
-    if(!helperNameClean){ alert("你得输入一个名字。"); show(helpEl); return; }
-    if(helperNameClean === player.name){ alert("你不能叫自己来帮忙。"); show(helpEl); return; }
-    if(!peopleDB[helperNameClean]){ alert("这个人现在不在湖边。"); show(helpEl); return; }
+    if(!helperNameClean){
+      alert("先选一个帮手名字。");
+      show(helpEl);
+      openPicker("helperName", "先选帮手（同场嘉宾）");
+      return;
+    }
+    if(helperNameClean === player.name){
+      alert("你不能叫自己来帮忙。");
+      show(helpEl);
+      return;
+    }
+    if(!peopleDB[helperNameClean]){
+      alert("这个人现在不在湖边。");
+      show(helpEl);
+      openPicker("helperName", "换个在名单里的帮手");
+      return;
+    }
 
     bonus = 2;
     helperText = `<div>你叫来了 <b>${helperNameClean}</b> 帮忙（+2）</div>`;
@@ -606,6 +836,9 @@ function quitNow(){
 /* init */
 updateCastsUI();
 setCastEnabled(true);
+
+/* 首次渲染 picker */
+renderPickerGrid("");
 </script>
 
 </body>

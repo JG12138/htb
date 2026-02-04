@@ -707,3 +707,35 @@ button:disabled{ opacity:.45; cursor:not-allowed; }
 .board--wetland .cell[data-pos="18"]{ grid-area: 2 / 3; } 
 .board--wetland .cell[data-pos="19"]{ grid-area: 3 / 3; } 
 .board--wetland .cell[data-pos="20"]{ grid-area: 4 / 3; } 
+
+
+@media (max-width:520px){
+  /* ✅ 湖边（ring board）右上角 tag 是 ::before 生成的，不是 .tag
+     手机端直接关掉 */
+  .board--ring .cell::before{
+    content:none !important;
+    display:none !important;
+  }
+}
+
+
+@media (max-width:520px){
+  /* 1) 给滚动容器顶部留“呼吸区”，避免第一行被裁 */
+  .game-area{
+    padding-top: 12px;                 /* ✅ 关键 */
+    padding-bottom: 16px;              /* 你原本有 12px，可略加 */
+    scroll-padding-top: 12px;          /* ✅ iOS/部分浏览器更稳 */
+  }
+
+  /* 2) infoPanel 自己也留一点顶边距（双保险） */
+  #infoPanel{
+    margin-top: 2px;
+    scroll-margin-top: 12px;
+  }
+
+  /* 3) iOS 滚动合成层偶发“顶端切一刀”时的止血 */
+  .game-area{
+    transform: translateZ(0);
+    -webkit-overflow-scrolling: touch;
+  }
+}
