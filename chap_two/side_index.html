@@ -290,26 +290,35 @@ ul.log{
 }
 
 .pickerGrid{
-  margin-top:10px;
+  margin-top:8px;
   display:grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap:8px;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap:6px;
 }
+
 @media (max-width:560px){
-  .pickerGrid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pickerGrid{
+    grid-template-columns: repeat(3, minmax(0, 1fr)); /* 手机3列 */
+  }
 }
 
 .pickerBtn{
-  text-align:left;
-  padding:10px 10px;
-  border-radius:12px;
+  text-align:center;
+  padding:6px 2px;   /* 上下变薄，左右变窄 */
+  border-radius:0;
   border:1px solid var(--bd);
   background:rgba(255,255,255,.06);
   cursor:pointer;
 }
+
+.pickerBtn b{
+  font-size:12px;
+  line-height:1.1;
+}
+
 .pickerBtn:hover{ background:rgba(255,255,255,.10); }
 
-.pickerBtn b{ font-size:13px; }
+
 .pickerBtn .mini{
   color:var(--mut);
   font-size:11px;
@@ -342,11 +351,11 @@ ul.log{
           <div class="row" style="margin-top:10px;">
             <div>
               <label>现在耐心如何？（1–10）</label>
-              <input id="pPat" type="number" min="1" max="10" placeholder="会自动填，也可以手改">
+              <input id="pPat" type="number" min="1" max="10" placeholder="1-10">
             </div>
             <div>
               <label>还有力气吗？（1–10）</label>
-              <input id="pStr" type="number" min="1" max="10" placeholder="会自动填，也可以手改">
+              <input id="pStr" type="number" min="1" max="10" placeholder="1-10">
             </div>
           </div>
 
@@ -427,7 +436,6 @@ ul.log{
       <div id="pickerGrid" class="pickerGrid"></div>
 
       <div class="muted" style="margin-top:10px;">
-        备注：选中“你的名字”时，会把 direction→耐心、stamina→力量 自动填入（并 clamp 到 1–10）。
       </div>
     </div>
   </div>
@@ -476,36 +484,39 @@ const fishingSpot = {
     // 常见
     { name:"小鲤鱼", min:18, max:40 },
     { name:"草鱼",   min:28, max:75 },
-    { name:"鲫鱼",   min:15, max:35 },
     { name:"鳊鱼",   min:18, max:45 },
     { name:"罗非鱼", min:22, max:55 },
     { name:"太阳鱼", min:10, max:24 },
+    { name:"黄鲈", min:18, max:45 },
+    { name:"美洲西鲱", min:25, max:45 },
+    { name:"大眼鱼", min:35, max:80 },
+
+    // 稀有
+    { name:"鳜鱼",   min:25, max:70 },
+    { name:"虹鳟鱼",   min:30, max:85 },
+    { name:"翘嘴",   min:28, max:90 },
+    { name:"黑鲈", min:30, max:80 },
+    { name:"白鲈", min:25, max:70 },
+    { name:"鲢鱼", min:55, max:130 },
     { name:"大嘴鲈鱼", min:25, max:75 },
     { name:"小嘴鲈鱼", min:22, max:65 },
-    { name:"河鲈", min:18, max:45 },
 
-    // 稍稀有
+    // 罕见
+    { name:"湖鳟", min:30, max:90 },
+    { name:"狗鱼", min:40, max:120 },
+    { name:"大头鱼", min:60, max:160 },
     { name:"黑鱼",   min:45, max:110 },
     { name:"鲶鱼",   min:35, max:120 },
-    { name:"鳜鱼",   min:25, max:70 },
-    { name:"虹鳟鱼", min:30, max:85 },
-    { name:"翘嘴",   min:28, max:90 },
-    { name:"黑鲈",   min:30, max:80 },
-    { name:"白鲈",   min:25, max:70 },
-    { name:"鲢鱼",   min:55, max:130 },
-    { name:"鳟鱼",   min:30, max:90 },
-    { name:"大头鱼", min:60, max:160 },
-    { name:"西鲱",   min:25, max:45 },
-    { name:"狗鱼",   min:40, max:120 },
 
     // 彩蛋
     { name:"锦鲤（疑似来串场）", min:20, max:60 },
     { name:"传说中的银鳞鱼",     min:50, max:140 },
-    { name:"塑料袋（不是鱼）",   min:10, max:25 },
+    { name:"塑料袋（不是鱼）",   min:10, max:225 },
     { name:"破旧鱼线团",         min:8,  max:18 },
-    { name:"绿藻",               min:8,  max:18 }
+    { name:"绿藻",         min:8,  max:120 }
   ]
 };
+
 
 let currentFish = null;
 let player = {};
@@ -611,16 +622,9 @@ function renderPickerGrid(keyword){
     btn.className = "pickerBtn";
     btn.innerHTML = `
       <b>${name}</b>
-      <div class="mini">direction: ${meta.direction} · stamina: ${meta.stamina}</div>
     `;
     btn.addEventListener("click", ()=>{
       $(pickerTarget).value = name;
-
-      // 选“你的名字”时：自动填耐心/力量
-      if(pickerTarget === "pName"){
-        $("pPat").value = roundClamp10(meta.direction);
-        $("pStr").value = roundClamp10(meta.stamina);
-      }
       closePicker();
     });
     grid.appendChild(btn);
