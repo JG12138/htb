@@ -351,11 +351,11 @@ ul.log{
           <div class="row" style="margin-top:10px;">
             <div>
               <label>现在耐心如何？（1–10）</label>
-              <input id="pPat" type="number" min="1" max="10" placeholder="1-10">
+              <input id="pPat" type="number" min="1" max="10" placeholder="1-10（默认4）">
             </div>
             <div>
               <label>还有力气吗？（1–10）</label>
-              <input id="pStr" type="number" min="1" max="10" placeholder="1-10">
+              <input id="pStr" type="number" min="1" max="10" placeholder="1-10（默认4）">
             </div>
           </div>
 
@@ -442,6 +442,47 @@ ul.log{
 
 <script>
 /* ===== data ===== */
+
+  const PAT_TXT = {
+  low: {
+    miss: [
+      "你只盯了十几秒就开始烦了：这水面怎么一点动静都没有？",
+      "你手指都在抖，线还没沉稳，你已经想把鱼竿当武器了。",
+      "你盯着浮漂的眼神像在催债：要么上钩，要么散伙。"
+    ],
+    hit: [
+      "你几乎是“碰运气式”地一甩，结果还真给你碰到了。",
+      "你本来都要收竿走人了，浮漂偏偏在这时候动了一下。",
+      "你嘴上骂骂咧咧，手倒是很诚实——猛地一提，居然中了。"
+    ]
+  },
+
+  mid: {
+    miss: [
+      "你耐着性子等了一会儿，但水面安静得像在装死。",
+      "你调整呼吸，数着秒等浮漂，可它就像在和你冷战。",
+      "你稳稳守着节奏：线在水里，心在天边——但鱼不来。"
+    ],
+    hit: [
+      "你耐着性子守住节奏，终于等到那一下轻轻的下沉。",
+      "你不急不躁地控线，浮漂微微一顿——就是现在。",
+      "你保持了很标准的等待姿势：所以中鱼这事也很合理。"
+    ]
+  },
+
+  high: {
+    miss: [
+      "你很有耐心，连风声都听清了——但鱼还是不给你面子。",
+      "你像一块石头一样稳，稳到鱼都不敢来打扰你。",
+      "你沉得住气，水面每一次细小的纹路都被你记住了——可惜没中。"
+    ],
+    hit: [
+      "你几乎不动声色地等着，像早就知道它会来。",
+      "你一直稳着线，等到最合适的时机才起竿——漂亮。",
+      "你安静到让鱼以为世界很安全——然后你把它捞上来了。"
+    ]
+  }
+};
 const peopleDB = { 
   "橙知": { luck: 1, direction: 7, stamina: 9 },
   "丹": { luck: 4, direction: 4, stamina: 4 },
@@ -689,14 +730,17 @@ function fish(){
     return;
   }
 
-  player.pat = Number($("pPat").value);
-  player.str = Number($("pStr").value);
+let patVal = $("pPat").value.trim();
+let strVal = $("pStr").value.trim();
 
-  if(!(player.pat>=1 && player.pat<=10 && player.str>=1 && player.str<=10)){
-    hide(resultEl);
-    alert("耐心和力量都要填 1–10 哦（也可以点名字自动填）。");
-    return;
-  }
+player.pat = patVal === "" ? 4 : Number(patVal);
+player.str = strVal === "" ? 4 : Number(strVal);
+
+if(!(player.pat>=1 && player.pat<=10 && player.str>=1 && player.str<=10)){
+  hide(resultEl);
+  alert("耐心和力量要在 1–10 之间哦（不填默认是 4）。");
+  return;
+}
 
   if(!locked) lockPlayerInputs();
 
@@ -706,17 +750,14 @@ function fish(){
   const caught = Math.random() < CATCH_PROB;
 
   if(!caught){
-    const patText =
-      player.pat <= 3 ? "你很快就开始烦了。" :
-      player.pat <= 7 ? "你耐着性子等了一会儿。" :
-      "你非常有耐心，几乎不动声色。";
+const tier = patTier(player.pat);
+const patText = pick(PAT_TXT[tier].miss);
 
-    resultEl.innerHTML = `
-      <div><b>空军。</b></div>
-      <div>${patText}</div>
-      <div>你盯着水面看了半天：水面盯着你看了半天。</div>
-    `;
-
+resultEl.innerHTML = `
+  <div><b>空军。</b></div>
+  <div>${patText}</div>
+  <div>你盯着水面看了半天：水面盯着你看了半天。</div>
+`;
     addLogItem(`
       <div><span class="pill">空军</span>${player.name}：什么都没钓到。</div>
     `);
@@ -733,6 +774,12 @@ function fish(){
     <div>你在 ${fishingSpot.name} 钓到一条 <b>${currentFish.name}</b></div>
     <div>长度：${length} cm</div>
   `;
+  const tierHit = patTier(player.pat);
+const patHit = pick(PAT_TXT[tierHit].hit);
+
+resultEl.innerHTML += `
+  <div class="muted" style="margin-top:6px;">${patHit}</div>
+`;
 
   if(length >= 60){
     show(helpEl);
@@ -745,6 +792,14 @@ function fish(){
   }else{
     resolve(false);
   }
+}
+
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function patTier(pat){
+  if(pat <= 3) return "low";
+  if(pat <= 7) return "mid";
+  return "high";
 }
 
 function resolve(withHelp){
