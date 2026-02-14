@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>10×10 爆炸迷宫（邻接亮格 + 蓝门钥匙 + Name Picker）</title>
+  <style>
+    :root{
+      --bg:#1A2733;
+      --card:rgba(255,255,255,.06);
+      --bd:rgba(255,255,255,.12);
+      --txt:#fff;
+      --mut:rgba(255,255,255,.65);
+      --btn:rgba(255,255,255,.10);
+      --btn2:rgba(255,255,255,.18);
+      --shadow:0 12px 34px rgba(0,0,0,.35);
+
+      --cell:24px;
+      --gap:4px;
+      --round:16px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100dvh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:var(--bg);
+      color:var(--txt);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Arial,sans-serif;
+    }
+    .card{
+      width:min(94vw, 980px);
+      background:var(--card);
+      border:1px solid var(--bd);
+      border-radius:var(--round);
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    .layout{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:16px;
+      align-items:start;
+    }
+    @media (max-width: 820px){
+      .layout{ grid-template-columns: 1fr; }
+    }
+    .mut{ color:var(--mut); font-size:13px; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    button{
+      appearance:none;
+      border:1px solid var(--bd);
+      background:var(--btn);
+      color:var(--txt);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+    }
+    button:hover{ background:var(--btn2); }
+    button:disabled{
+      opacity:.45; cursor:not-allowed;
+    }
+    .btnTiny{ padding:7px 10px; font-size:13px; border-radius:10px; }
+    .hidden{ display:none !important; }
+    .desc{ white-space:pre-wrap; line-height:1.65; margin:12px 0; }
+
+    /* map */
+.mapWrap{
+  padding:12px;
+  border:1px solid var(--bd);
+  border-radius:14px;
+  background:rgba(0,0,0,.12);
+
+  /* 手机上别溢出：最多占屏宽 */
+  width: min(100%, calc(10 * var(--cell) + 9 * var(--gap) + 24px));
+}
+.map{
+  display:grid;
+  width:100%;
+  grid-template-columns:repeat(10, 1fr);
+  grid-template-rows:repeat(10, 1fr);
+  gap:var(--gap);
+  aspect-ratio: 1 / 1;
+}
+.cell{
+  width:auto;
+  height:auto;
+  border-radius:5px;
+  background:rgba(255,255,255,.03);
+  transition:.15s;
+  position:relative;
+}
+@media (max-width: 420px){
+  :root{ --gap:3px; }
+}
+    .mapTitle{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    /* 当前格 */
+    .cell.here{
+      background:#00e5ff;
+      box-shadow:0 0 10px rgba(0,229,255,.75);
+    }
+
+    /* 邻接可走：黑路邻接 */
+    .cell.n-open{
+      background:rgba(255,255,255,.22);
+      outline:1px solid rgba(255,255,255,.25);
+    }
+
+/* 邻接可走：红路邻接（伪装成黑路） */
+.cell.t-open{
+  background:rgba(255,255,255,.22);
+  outline:1px solid rgba(255,255,255,.25);
+}
+
+    /* 邻接：蓝门（有钥匙可过） */
+    .cell.l-open{
+      background:rgba(120,240,255,.22);
+      outline:1px dashed rgba(120,240,255,.55);
+    }
+
+    /* 邻接：蓝门（无钥匙） */
+    .cell.l-locked{
+      background:rgba(120,240,255,.10);
+      outline:1px dashed rgba(120,240,255,.35);
+      filter:saturate(.6);
+    }
+
+    /* UI */
+    .topline{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:baseline;
+      margin-bottom:10px;
+    }
+    .pill{
+      padding:4px 8px;
+      border:1px solid var(--bd);
+      border-radius:999px;
+      font-size:12px;
+      color:var(--mut);
+    }
+    .kbd{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      font-size:12px;
+      padding:2px 6px;
+      border:1px solid rgba(255,255,255,.25);
+      border-radius:6px;
+      color:rgba(255,255,255,.8);
+    }
+
+.pad{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(4, auto); /* 原来是 3 行，改成 4 行 */
+  gap:8px;
+  width: min(420px, 100%);
+  align-items:center;
+}
+
+.pad .up{ grid-column:2; grid-row:1; }
+.pad .left{ grid-column:1; grid-row:2; }
+.pad .down{ grid-column:2; grid-row:2; }
+.pad .right{ grid-column:3; grid-row:2; }
+
+.pad .home{ grid-column:1 / span 3; grid-row:3; } /* 回入口 */
+.pad .back{ grid-column:1 / span 3; grid-row:4; } /* Back */
+  </style>
+</head>
+
+<body>
+  <div class="card">
+
+    <!-- Picker -->
+    <div id="picker">
+      <div class="topline">
+        <h2 style="margin:0;">Name picker</h2>
+        <div class="pill">maze demo</div>
+      </div>
+      <div class="mut">选名字进入迷宫。部分名字会看到隐藏钥匙按钮 🔑（蓝门可开）。</div>
+
+      <div class="row" style="margin-top:12px;">
+        <button onclick="startGame('Alice')">Alice（有钥匙）</button>
+        <button onclick="startGame('Eve')">Eve（有钥匙）</button>
+        <button onclick="startGame('Bob')">Bob（无钥匙）</button>
+        <button onclick="startGame('Judy')">Judy（无钥匙）</button>
+      </div>
+      <div class="mut" style="margin-top:10px;">
+        走法：<span class="kbd">↑↓←→</span> 或点按钮。每步都能 <span class="kbd">Back</span> 回退。
+        点到“不能走”的方向＝撞墙/撞鬼 → 爆炸 → 给“回入口”按钮。
+      </div>
+    </div>
+
+    <!-- Game -->
+    <div id="game" class="hidden">
+      <div class="layout">
+
+        <div>
+          <div class="topline">
+            <div>
+              <h2 id="title" style="margin:0;">谷仓迷宫</h2>
+              <div class="mut" id="subline"></div>
+            </div>
+            <div class="row">
+              <button id="keyBtn" class="btnTiny hidden" type="button" title="只有部分名字会看到这个按钮">🔑</button>
+              <button class="btnTiny" type="button" onclick="resetToStart()">回到入口</button>
+            </div>
+          </div>
+
+          <div class="desc" id="desc"></div>
+
+          <div class="pad" id="moveBtns"></div>
+
+          <div class="mut" style="margin-top:10px;">
+            图例：白=墙；黑=正确路；红=错误路但可走；蓝门=需要钥匙；你看到亮的，就是你“现在能走到”的前后左右。
+          </div>
+        </div>
+
+        <div class="mapWrap">
+          <div class="mapTitle">
+            <div style="font-weight:600;">Map 10×10</div>
+            <div class="mut" id="mapHint">邻接亮格</div>
+          </div>
+          <div class="map" id="map"></div>
+          <div class="mut" style="margin-top:10px;">
+            当前格最亮；周围能走的格子会亮（红路/黑路/蓝门会用不同颜色提示）。
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* =========================
+   1) 名字权限（钥匙）
+========================= */
+const KEY_USERS = new Set(["Alice","Eve"]); // 只有这些人能看到🔑
+
+/* =========================
+   - # = 墙（白）
+   - N = 黑路（正确路）
+   - T = 红路（错误路，但可走）
+========================= */
+const GRID_STR = [
+  "###T##T###", // y=0
+  "#T#TTTTTNN", // y=1
+  "TTTT#T##N#", // y=2
+  "#T#NNN##NT", // y=3
+  "TT#N#NNNN#", // y=4
+  "#T#N##T#T#", // y=5
+  "#NNNN#T#T#", // y=6
+  "##N#NTTTTT", // y=7
+  "##NNN#T#TT", // y=8
+  "TTT#####T#", // y=9
+];
+
+const LOCKED_DOORS = [
+  [[3,1],[4,1]],
+  [[7,1],[8,1]],
+  [[1,1],[1,2]],
+  [[5,2],[5,3]],
+  [[3,2],[3,3]],
+  [[8,4],[8,5]],
+  [[4,7],[5,7]],
+  [[6,7],[7,7]],
+];
+
+
+const START = [1,6];
+const EXIT  = [9,1];
+
+/* =========================
+   工具：格子判定 & 蓝门集合
+========================= */
+const W=10, H=10;
+function inb(x,y){ return x>=0 && x<W && y>=0 && y<H; }
+function cellType(x,y){
+  const ch = GRID_STR[y]?.[x];
+  return ch ?? "#";
+}
+function isWalkCell(x,y){
+  const t=cellType(x,y);
+  return t==="N" || t==="T";
+}
+
+// 蓝门集合（双向）
+const LOCK = new Set();
+function keyEdge(a,b){
+  const [x1,y1]=a, [x2,y2]=b;
+  return `${x1},${y1}|${x2},${y2}`;
+}
+for(const [a,b] of LOCKED_DOORS){
+  LOCK.add(keyEdge(a,b));
+  LOCK.add(keyEdge(b,a));
+}
+function isLockedEdge(x,y,nx,ny){
+  return LOCK.has(`${x},${y}|${nx},${ny}`);
+}
+
+function canStep(x,y,nx,ny, canOpenLocks){
+  if(!inb(nx,ny)) return false;
+  if(Math.abs(nx-x)+Math.abs(ny-y)!==1) return false;
+  if(!isWalkCell(nx,ny)) return false;
+  if(isLockedEdge(x,y,nx,ny) && !canOpenLocks) return false;
+  return true;
+}
+
+// 返回邻接信息（用于亮格+按钮）
+function neighborsInfo(x,y, canOpenLocks){
+  const dirs = [
+    {k:"U", label:"↑ 上", nx:x, ny:y-1},
+    {k:"D", label:"↓ 下", nx:x, ny:y+1},
+    {k:"L", label:"← 左", nx:x-1, ny:y},
+    {k:"R", label:"→ 右", nx:x+1, ny:y},
+  ];
+  const out = [];
+  for(const d of dirs){
+    if(!inb(d.nx,d.ny)){
+      out.push({...d, exists:false, cell:"#", locked:false, ok:false});
+      continue;
+    }
+    const t = cellType(d.nx,d.ny);
+    const locked = isLockedEdge(x,y,d.nx,d.ny);
+const ok = canStep(x,y,d.nx,d.ny, canOpenLocks);
+    out.push({...d, exists:true, cell:t, locked, ok});
+  }
+  return out;
+}
+
+/* =========================
+   状态
+========================= */
+const S = {
+  name:null,
+hasKey:false,     
+keysLeft:0,    
+  pos:[...START],
+  history:[],     // 走过的路径，用于 Back
+  exploded:false,
+  fail:0,
+};
+
+/* =========================
+   DOM
+========================= */
+const $ = (id)=>document.getElementById(id);
+
+/* =========================
+   画 10×10 地图
+========================= */
+const mapEl = $("map");
+const cells = [];
+for(let y=0;y<10;y++){
+  for(let x=0;x<10;x++){
+    const d = document.createElement("div");
+    d.className = "cell";
+    mapEl.appendChild(d);
+    cells.push(d);
+  }
+}
+function cellAt(x,y){ return cells[y*10 + x]; }
+
+function updateMapAdj(){
+  // 清空 class
+  cells.forEach(c=>{
+    c.classList.remove("here","n-open","t-open","l-open","l-locked");
+  });
+
+  const [x,y]=S.pos;
+  cellAt(x,y).classList.add("here");
+
+  const ns = neighborsInfo(x, y, S.keysLeft > 0);
+
+  // 只亮“存在且不是墙(#)”的邻格；蓝门用 l-open / l-locked
+  for(const n of ns){
+    if(!n.exists) continue;
+    if(n.cell==="#") continue;
+
+    const c = cellAt(n.nx,n.ny);
+
+    if(n.locked){
+      if(n.ok) c.classList.add("l-open");
+      else c.classList.add("l-locked");
+    }else{
+      if(n.cell==="N") c.classList.add("n-open");
+      if(n.cell==="T") c.classList.add("t-open");
+    }
+  }
+}
+
+/* =========================
+   游戏流程
+========================= */
+function startGame(name){
+  S.name=name;
+S.hasKey = KEY_USERS.has(name);
+S.keysLeft = S.hasKey ? 3 : 0 ;
+  S.pos=[...START];
+  S.history=[];
+  S.exploded=false;
+  S.fail=0;
+
+  $("picker").classList.add("hidden");
+  $("game").classList.remove("hidden");
+
+const keyBtn = $("keyBtn");
+keyBtn.classList.toggle("hidden", !S.hasKey);
+keyBtn.disabled = true;
+
+  render();
+}
+
+function resetToStart(){
+  S.pos=[...START];
+  S.history=[];
+  S.exploded=false;
+  render();
+}
+
+// 点错方向：爆炸
+function boom(msg){
+  S.exploded=true;
+  S.fail++;
+  $("desc").textContent = msg + "\n\n你可以回入口，或者（如果你还有 Back）先后退离开这个位置。";
+  renderButtonsAfterBoom();
+  updateMapAdj();
+}
+
+// 移动（允许点“不能走”的方向：用于撞墙/撞鬼）
+function tryMove(dir){
+  const [x,y]=S.pos;
+const ns = neighborsInfo(x, y, S.keysLeft > 0);
+  const n = ns.find(v=>v.k===dir);
+
+  // 越界/墙：撞墙
+  if(!n.exists || n.cell==="#"){
+    return boom("你摸到了一面实心墙。谷仓里有东西在笑。");
+  }
+
+  // 蓝门但无钥匙：撞门=爆炸
+  if(n.locked && !n.ok){
+    return boom("门把手拧不动。锁孔里像有眼睛。你眨了一下——不对，是它眨了。");
+  }
+
+  // 可走：推进
+if(n.ok){
+  // 只有穿过蓝门时才消耗次数
+if(n.locked){
+  S.keysLeft = Math.max(0, S.keysLeft - 1);
+  if(S.keysLeft === 0){
+    $("desc").textContent =
+      "你把钥匙拧到最后一下。\n\n咔。很轻的一声脆响——它断了。\n\n";
+  }
+}
+
+  S.history.push([x,y]); // 记录上一步
+  S.pos=[n.nx,n.ny];
+  S.exploded=false;
+  render();
+  return;
+}
+
+  // 其他情况（理论不会到）
+  return boom("你走错了。");
+}
+
+function backStep(){
+  if(S.history.length===0) return;
+  const prev = S.history.pop();
+  S.pos=[...prev];
+  S.exploded=false;
+  render();
+}
+
+function atExit(){
+  const [x,y]=S.pos;
+  return x===EXIT[0] && y===EXIT[1];
+}
+
+/* =========================
+   渲染按钮（正常态）
+========================= */
+function renderMoveButtons(){
+  const wrap = $("moveBtns");
+  wrap.innerHTML = "";
+
+  const [x,y]=S.pos;
+const ns = neighborsInfo(x, y, S.keysLeft > 0);
+  const order = [
+    {k:"U", cls:"up"},
+    {k:"L", cls:"left"},
+    {k:"D", cls:"down"},
+    {k:"R", cls:"right"},
+  ];
+
+  for(const item of order){
+    const n = ns.find(v=>v.k===item.k);
+    const b = document.createElement("button");
+
+    let tag="";
+    if(!n.exists || n.cell==="#") tag="（墙）";
+else if(n.locked && S.keysLeft <= 0) tag="（锁）";
+    else tag=""; // 你已经把红黑隐藏了
+
+    b.textContent = `${n.label} ${tag}`;
+    b.className = item.cls;
+    b.onclick = ()=>tryMove(n.k);
+    wrap.appendChild(b);
+  }
+
+  const back=document.createElement("button");
+  back.textContent = `Back（后退）`;
+  back.className = "back";
+  back.disabled = S.history.length===0;
+  back.onclick = backStep;
+  wrap.appendChild(back);
+}
+/* 爆炸态：给“回入口” */
+function renderButtonsAfterBoom(){
+  const wrap = $("moveBtns");
+  wrap.innerHTML = "";
+
+  const home = document.createElement("button");
+  home.textContent = "原路返回到起点。";
+  home.className = "home";
+  home.onclick = resetToStart;
+  wrap.appendChild(home);
+
+  const back = document.createElement("button");
+  back.textContent = "Back（后退）";
+  back.className = "back";
+  back.disabled = S.history.length===0;
+  back.onclick = backStep;
+  wrap.appendChild(back);
+}
+/* =========================
+   主渲染
+========================= */
+function render(){
+const keyState = S.hasKey ? `万能钥匙：${S.keysLeft}/3` : "无钥匙";
+  const [x,y]=S.pos;
+
+$("subline").textContent = `name: ${S.name} · pos: (${x},${y}) · fail: ${S.fail} · ${keyState}`;
+
+if(atExit()){
+  $("desc").textContent =
+    "你走到了出口！\n\n（点确定离开；点取消可以继续乱走，或者回入口再试。）";
+
+  // 只弹一次（除非你离开出口又回来）
+  if(!exitPrompted){
+    exitPrompted = true;
+    const ok = window.confirm("你走到了出口！现在离开迷宫吗？");
+    if(ok){
+      window.location.href = EXIT_URL;
+      return; // 避免后面继续 render 造成闪一下
+    }
+  }
+}else{
+  // 只要不在出口，就允许下次再弹
+  exitPrompted = false;
+
+  // 你原本的 else if(!S.exploded) ... 继续放这里
+  if(!S.exploded){
+    const t=cellType(x,y);
+    let vibe = (t==="N")
+      ? "脚下的路很稳，像有人刻意铺出来的。"
+      : "脚下是干燥的木板路，尘土很轻。";
+
+    const ns = neighborsInfo(x, y, S.keysLeft > 0).filter(n => n.exists && n.cell !== "#");
+    const hint = ns.map(n=>{
+      if(n.locked) return `${n.label}(锁)`;
+      return `${n.label}(路)`;
+    }).join(" · ") || "四面都是墙。";
+
+    $("desc").textContent =
+      `你在谷仓迷宫里。\n${vibe}\n\n可走方向：${hint}`;
+  }
+}
+
+  if(S.exploded){
+    renderButtonsAfterBoom();
+  }else{
+    renderMoveButtons();
+  }
+
+  updateMapAdj();
+
+  const keyBtn = $("keyBtn");
+if(S.hasKey){
+  keyBtn.textContent = `万能钥匙：${S.keysLeft}/3`;
+  keyBtn.classList.toggle("hidden", false);
+}else{
+  keyBtn.classList.toggle("hidden", true);
+}
+}
+
+document.addEventListener("keydown",(e)=>{
+  if($("game").classList.contains("hidden")) return;
+
+  const k=e.key;
+  if(k==="ArrowUp") return tryMove("U");
+  if(k==="ArrowDown") return tryMove("D");
+  if(k==="ArrowLeft") return tryMove("L");
+  if(k==="ArrowRight") return tryMove("R");
+  if(k==="Backspace" || k==="z" || k==="Z") return backStep();
+});
+</script>
+</body>
+</html>
