@@ -495,7 +495,7 @@ const NAMES_DB = SORTED_NAMES.map(name => ({
       e.stopPropagation();
 
       if(scareOnCancel && modalStage === 0){
-        modalStage = 1;
+        modalStage = 1;E
         titleEl.textContent = scareTitle;
         bodyEl.textContent  = scareBody;
         okBtn.textContent   = scareOkText;
@@ -545,7 +545,7 @@ const NAMES_DB = SORTED_NAMES.map(name => ({
 
   const START = [1,6];
   const EXIT  = [9,1];
-  const EXIT_URL = "./next_page.html";
+  const EXIT_URL = "./exit_index.html";
 
   let exitPrompted = false;
   let exitAsking = false;
