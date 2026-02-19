@@ -6,38 +6,47 @@
 <title>Chapter Four - Via Ferrata</title>
 <style>
 :root{
-  /* 你的基础风格 */
+  /* ===== Base tokens ===== */
   --bg:#1E2A1B;
-  --card:rgba(255,255,255,.06);
-  --bd:rgba(255,255,255,.12);
   --txt:#fff;
   --mut:rgba(255,255,255,.72);
+
+  --card:rgba(255,255,255,.06);
+  --bd:rgba(255,255,255,.12);
   --btn:rgba(255,255,255,.10);
   --btn2:rgba(255,255,255,.16);
   --shadow:0 10px 30px rgba(0,0,0,.35);
   --round:18px;
 
- --rain: 0;  /* 0~1 */
-  /* 进度驱动：0~1 */
-  --skyBoost: 0;
+  /* ===== Progress-driven ===== */
+  --rain: 0;    /* 0~1 */
+  --storm: 0;   /* 0~1 */
+  --uiFade: 1;  /* 1->0 */
+  --skyBoost: 0;/* 0~1 */
 
-  /* 白天版但不刺眼（低饱和） */
-  --sky1:#2a5f72;   /* 顶部天空（偏灰蓝） */
-  --sky2:#3f7f8f;   /* 中段 */
-  --mist:#bfe2e0;   /* 远景雾 */
-  --field1:#2f6b3a; /* 草地 */
-  --field2:#1f3f25; /* 近景暗绿 */
+  /* ===== Day palette (soft) ===== */
+  --sky1:#2a5f72;
+  --sky2:#3f7f8f;
+  --mist:#bfe2e0;
+  --field1:#2f6b3a;
+  --field2:#1f3f25;
+
+  /* ===== Cloth material ===== */
+  --clothBase: rgba(23,34,24,.92);
+  --clothEdge: rgba(255,255,255,.10);
 }
-*{box-sizing:border-box;}
-html,body{height:100%;}
-html,body{height:100%;}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
 body{
   margin:0;
   font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Arial,sans-serif;
   color:var(--txt);
   overflow:hidden;
+  position:relative;
 
-  /* 全屏渐变：天空→雾→草地（低饱和，不刺眼） */
+  /* Sky → mist → field */
   background:
     linear-gradient(to bottom,
       color-mix(in srgb, var(--sky1) 92%, white calc(var(--skyBoost) * 8%)) 0%,
@@ -47,22 +56,47 @@ body{
       var(--field2) 100%);
 }
 
-/* 远景雾+空气颗粒：非常轻，避免刺眼 */
+/* Air / particles / haze */
 body::before{
   content:"";
   position:fixed;
   inset:-60px;
   pointer-events:none;
   background:
-    radial-gradient(900px 420px at 60% 18%, rgba(255,255,255,.10), transparent 60%),
-    radial-gradient(800px 380px at 25% 22%, rgba(255,255,255,.08), transparent 60%),
-    radial-gradient(2px 2px at 12% 18%, rgba(255,255,255,.10), transparent 60%),
-    radial-gradient(2px 2px at 38% 12%, rgba(255,255,255,.08), transparent 60%),
-    radial-gradient(2px 2px at 72% 20%, rgba(255,255,255,.06), transparent 60%);
-  opacity: calc(.35 + var(--skyBoost) * .25);
-  filter: blur(.6px);
+    radial-gradient(1100px 520px at 60% 16%, rgba(255,255,255,.10), transparent 62%),
+    radial-gradient(980px 480px at 22% 18%, rgba(255,255,255,.08), transparent 62%),
+    radial-gradient(3px 3px at 12% 18%, rgba(255,255,255,.08), transparent 60%),
+    radial-gradient(3px 3px at 38% 12%, rgba(255,255,255,.06), transparent 60%),
+    radial-gradient(3px 3px at 72% 20%, rgba(255,255,255,.05), transparent 60%),
+    linear-gradient(to bottom, rgba(255,255,255,.02), rgba(0,0,0,.10));
+  opacity: calc(.26 + var(--skyBoost) * .22 + var(--storm) * .12);
+  filter: blur(1px);
 }
 
+/* Light lift + storm overlay */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(to top,
+      rgba(255,255,255, calc(.00 + var(--skyBoost) * .10)) 0%,
+      rgba(255,255,255, calc(.03 + var(--skyBoost) * .16)) 55%,
+      rgba(255,255,255, calc(.05 + var(--skyBoost) * .20)) 100%),
+    radial-gradient(900px 520px at 50% 12%,
+      rgba(255,255,255, calc(.02 + var(--storm) * .10)),
+      transparent 62%),
+    linear-gradient(to bottom,
+      rgba(10,18,20, calc(.08 + var(--storm) * .28)) 0%,
+      rgba(10,18,20, calc(.06 + var(--storm) * .22)) 45%,
+      rgba(10,18,20, calc(.10 + var(--storm) * .34)) 100%);
+  opacity: 1;
+}
+
+/* =========================
+   Layout
+========================= */
 .wrap{
   height:100%;
   display:flex;
@@ -70,20 +104,60 @@ body::before{
   align-items:stretch;
   padding:16px;
   gap:14px;
+
+  opacity: var(--uiFade);
+  transition: opacity .25s ease;
+  position:relative;
+  z-index:1;
 }
 
 .panel{
   width:min(980px, 100%);
   border:1px solid var(--bd);
-  background:var(--card);
   border-radius:var(--round);
   box-shadow:var(--shadow);
   overflow:hidden;
   display:flex;
   flex-direction:column;
+  position:relative;
+
+  /* slight “lift” during fade */
+  transform: translateY(calc((1 - var(--uiFade)) * -8px))
+             scale(calc(.995 + var(--uiFade) * .005));
+  transition: transform .25s ease;
+
+  backdrop-filter:none !important;
 }
 
-/* 顶部 HUD */
+/* Cloth texture layer */
+.panel::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:inherit;
+  opacity:.72;
+  background:
+    radial-gradient(2px 2px at 18% 22%, rgba(0,0,0,.18), transparent 60%),
+    radial-gradient(2px 2px at 63% 48%, rgba(255,255,255,.10), transparent 60%),
+    radial-gradient(1.5px 1.5px at 78% 35%, rgba(0,0,0,.16), transparent 60%),
+    repeating-linear-gradient( 35deg, rgba(255,255,255,.055) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(-35deg, rgba(0,0,0,.16) 0 2px, transparent 2px 8px),
+    linear-gradient(to bottom, rgba(255,255,255,.02), rgba(0,0,0,.18));
+  background-color: var(--clothBase);
+}
+
+/* Keep panel children above texture */
+.panel > *{
+  position:relative;
+  z-index:1;
+}
+
+.wrap.off{ pointer-events:none; }
+
+/* =========================
+   HUD / badges
+========================= */
 .hud{
   display:flex;
   align-items:center;
@@ -113,10 +187,10 @@ body::before{
   color:rgba(255,255,255,.78);
 }
 
-/* 进度条 */
-.progressRow{
-  padding:0 14px 12px;
-}
+/* =========================
+   Progress
+========================= */
+.progressRow{ padding:0 14px 12px; }
 .bar{
   height:10px;
   background:rgba(255,255,255,.08);
@@ -130,8 +204,15 @@ body::before{
   background:rgba(255,255,255,.65);
   transition:width .25s ease;
 }
+.small{
+  font-size:12px;
+  color:rgba(255,255,255,.6);
+  margin-top:6px;
+}
 
-/* 滚动区（攀爬区） */
+/* =========================
+   Climb area
+========================= */
 .climb{
   position:relative;
   flex:1;
@@ -140,109 +221,201 @@ body::before{
   padding:18px 14px 80px;
 }
 
-/* 模拟“山壁长条” */
+/* Inner “zig” edge (sticky) */
+.climb::before,
+.climb::after{
+  content:"";
+  position:sticky;
+  left:0; right:0;
+  height:18px;
+  pointer-events:none;
+  z-index:3;
+  opacity:.55;
+  background:
+    conic-gradient(from 45deg, rgba(255,255,255,.16) 0 25%, transparent 0 100%)
+    0 0/16px 16px repeat-x;
+  filter: drop-shadow(0 8px 8px rgba(0,0,0,.22));
+}
+.climb::before{ top:0; transform: translateY(-10px); }
+.climb::after { bottom:0; transform: translateY(10px) rotate(180deg); }
+
+/* Route */
 .route{
   position:relative;
-  height:700vh; /* 控制总攀爬长度：越大越长 */
+  height:700vh;
   border:1px solid rgba(255,255,255,.10);
   border-radius:16px;
   overflow:hidden;
-  background:
-    linear-gradient(to bottom,
-      rgba(255,255,255,.02) 0%,
-      rgba(255,255,255,.03) 20%,
-      rgba(255,255,255,.01) 55%,
-      rgba(255,255,255,.04) 100%);
+  background: rgba(0,0,0,.12);
 }
 
-/* 路线虚线 */
-.route:before{
+/* Route texture */
+.route::before{
   content:"";
   position:absolute;
-  left:22px; top:18px; bottom:18px;
+  inset:0;
+  pointer-events:none;
+  opacity:.35;
+  background:
+    repeating-linear-gradient( 35deg, rgba(255,255,255,.05) 0 2px, transparent 2px 8px),
+    repeating-linear-gradient(-35deg, rgba(0,0,0,.18) 0 2px, transparent 2px 10px),
+    radial-gradient(700px 220px at 30% 20%, rgba(255,255,255,.05), transparent 60%);
+}
+
+/* Route guide line */
+.route::after{
+  content:"";
+  position:absolute;
+  left:22px;
+  top:18px;
+  bottom:18px;
   width:2px;
   background:linear-gradient(to bottom, rgba(255,255,255,.15), rgba(255,255,255,.02));
   opacity:.55;
 }
+
+/* Tick */
 .tick{
   position:absolute;
   left:14px;
-  width:18px;height:18px;
+  width:18px;
+  height:18px;
+  transform:translateY(-50%);
   border-radius:50%;
-  border:1px solid rgba(255,255,255,.16);
-  background:rgba(255,255,255,.04);
   display:grid;
   place-items:center;
+
   font-size:11px;
   color:rgba(255,255,255,.7);
+
+  background: rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.2) inset,
+    0 10px 24px rgba(0,0,0,.20);
+
+  isolation:isolate;
+}
+.tick::after{
+  content:"";
+  position:absolute;
+  left:22px;
+  top:50%;
   transform:translateY(-50%);
+  width:64px;
+  height:16px;
+  opacity:.75;
+  background:
+    conic-gradient(from 45deg, rgba(255,255,255,.18) 0 25%, transparent 0 100%)
+    0 0/10px 10px repeat-x;
+  filter: drop-shadow(0 6px 8px rgba(0,0,0,.25));
 }
 
-/* 文本卡片区 */
+/* Story cards */
 .story{
   margin-top:14px;
   display:grid;
   gap:10px;
 }
 .card{
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.18);
+  border:1px solid var(--clothEdge);
+  background: rgba(0,0,0,.12);
   border-radius:16px;
-  padding:12px 12px;
+  padding:12px;
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.35;
+  background:
+    repeating-linear-gradient( 35deg, rgba(255,255,255,.05) 0 2px, transparent 2px 8px),
+    repeating-linear-gradient(-35deg, rgba(0,0,0,.18) 0 2px, transparent 2px 10px),
+    radial-gradient(700px 220px at 30% 20%, rgba(255,255,255,.05), transparent 60%);
 }
 .card .title{
+  position:relative;
+  z-index:1;
   font-weight:700;
   font-size:13px;
-  color:rgba(255,255,255,.88);
+  color:rgba(255,255,255,.92);
   margin-bottom:6px;
 }
 .card .txt{
+  position:relative;
+  z-index:1;
   font-size:13px;
   line-height:1.6;
-  color:rgba(255,255,255,.76);
+  color:rgba(255,255,255,.80);
   white-space:pre-wrap;
 }
 
-/* 事件弹层 */
+/* =========================
+   Overlay modal
+========================= */
 .overlay{
-  position:fixed;
+  position:fixed !important;
   inset:0;
   background:rgba(0,0,0,.55);
   display:none;
   align-items:center;
   justify-content:center;
   padding:18px;
-  z-index:20;
+  z-index:999 !important;
 }
 .overlay.show{ display:flex; }
 
 .modal{
   width:min(680px, 100%);
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(15,15,16,.88);
-  backdrop-filter: blur(8px);
+  border:1px solid var(--clothEdge);
+  background: rgba(15,15,16,.88);
   border-radius:18px;
   box-shadow:0 30px 90px rgba(0,0,0,.6);
   padding:14px;
+  position:relative;
+  overflow:hidden;
+  backdrop-filter:none !important;
+}
+.modal::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.35;
+  background:
+    repeating-linear-gradient( 35deg, rgba(255,255,255,.05) 0 2px, transparent 2px 8px),
+    repeating-linear-gradient(-35deg, rgba(0,0,0,.18) 0 2px, transparent 2px 10px),
+    radial-gradient(700px 220px at 30% 20%, rgba(255,255,255,.05), transparent 60%);
 }
 .modal h2{
+  position:relative;
+  z-index:1;
   margin:0 0 10px 0;
   font-size:14px;
   letter-spacing:.5px;
-  color:rgba(255,255,255,.9);
+  color:rgba(255,255,255,.92);
 }
 .modal p{
+  position:relative;
+  z-index:1;
   margin:0 0 12px 0;
   font-size:13px;
   line-height:1.65;
-  color:rgba(255,255,255,.78);
+  color:rgba(255,255,255,.80);
   white-space:pre-wrap;
 }
 .modal .actions{
+  position:relative;
+  z-index:1;
   display:flex;
   gap:10px;
   justify-content:flex-end;
 }
+
+/* Buttons */
 .btn{
   appearance:none;
   border:1px solid rgba(255,255,255,.14);
@@ -259,16 +432,10 @@ body::before{
   border-color:rgba(255,255,255,.18);
 }
 
-.small{
-  font-size:12px;
-  color:rgba(255,255,255,.6);
-  margin-top:6px;
-}
-
-/* 轻微抖动（脚滑） */
-.shake{
-  animation:shake .28s ease;
-}
+/* =========================
+   Animations
+========================= */
+.shake{ animation:shake .28s ease; }
 @keyframes shake{
   0%{transform:translateX(0)}
   20%{transform:translateX(-6px)}
@@ -278,240 +445,7 @@ body::before{
   100%{transform:translateX(0)}
 }
 
-/* 移动端适配 */
-@media (max-width:520px){
-  .hud{flex-wrap:wrap;}
-  .badges{margin-left:0;}
-  .route{height:700vh;}
-}
-
-/* ====== 粗麻布材质（替代玻璃）====== */
-
-/* 统一一个“布料底色”：偏暗绿+棕 */
-:root{
-  --clothBase: rgba(23,34,24,.92);
-  --clothInk: rgba(255,255,255,.08);
-  --clothInk2: rgba(0,0,0,.22);
-  --clothEdge: rgba(255,255,255,.10);
-}
-
-/* 麻布纹理：交叉纤维 + 轻微脏点 */
-.cloth{
-  background:
-    /* 脏点（很淡） */
-    radial-gradient(2px 2px at 18% 22%, rgba(0,0,0,.18), transparent 60%),
-    radial-gradient(2px 2px at 63% 48%, rgba(255,255,255,.10), transparent 60%),
-    radial-gradient(1.5px 1.5px at 78% 35%, rgba(0,0,0,.16), transparent 60%),
-
-    /* 纤维：两组斜向线叠加 */
-    repeating-linear-gradient( 35deg, rgba(255,255,255,.055) 0 2px, transparent 2px 7px),
-    repeating-linear-gradient(-35deg, rgba(0,0,0,.16) 0 2px, transparent 2px 8px),
-
-    /* 布底 */
-    linear-gradient(to bottom, rgba(255,255,255,.03), rgba(0,0,0,.16));
-  background-color: var(--clothBase);
-}
-
-/* panel 改“麻布板” */
-.panel{
-  border: 1px solid var(--bd);
-  border-radius: var(--round);
-  box-shadow: var(--shadow);
-  overflow:hidden;
-  position:relative;
-}
-.panel::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  opacity:.98;
-  border-radius:inherit;
-  /* 套用麻布纹理 */
-  background:
-    radial-gradient(2px 2px at 18% 22%, rgba(0,0,0,.18), transparent 60%),
-    radial-gradient(2px 2px at 63% 48%, rgba(255,255,255,.10), transparent 60%),
-    radial-gradient(1.5px 1.5px at 78% 35%, rgba(0,0,0,.16), transparent 60%),
-    repeating-linear-gradient( 35deg, rgba(255,255,255,.055) 0 2px, transparent 2px 7px),
-    repeating-linear-gradient(-35deg, rgba(0,0,0,.16) 0 2px, transparent 2px 8px),
-    linear-gradient(to bottom, rgba(255,255,255,.02), rgba(0,0,0,.18));
-  background-color: var(--clothBase);
-}
-
-/* 把原本透明背景去掉（否则会叠成玻璃） */
-.panel > *{
-  position:relative;
-  z-index:1;
-}
-
-/* route / card / modal 都做成“布/纸”块 */
-.route,
-.card,
-.modal{
-  border:1px solid var(--clothEdge);
-  background: rgba(0,0,0,.12);
-  position:relative;
-  overflow:hidden;
-}
-
-/* 给块内部再叠一层纤维纹理 */
-.route::before,
-.card::before,
-.modal::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  opacity:.55;
-  background:
-    repeating-linear-gradient( 35deg, rgba(255,255,255,.05) 0 2px, transparent 2px 8px),
-    repeating-linear-gradient(-35deg, rgba(0,0,0,.18) 0 2px, transparent 2px 10px),
-    radial-gradient(700px 220px at 30% 20%, rgba(255,255,255,.05), transparent 60%);
-}
-
-/* 文本稍微“网文纸感”一点：更暖一点 */
-.card .txt,
-.modal p{
-  color: rgba(255,255,255,.80);
-}
-.card .title,
-.modal h2{
-  color: rgba(255,255,255,.92);
-}
-
-/* 去掉玻璃关键：别 blur / 别 screen 叠亮 */
-.panel{ backdrop-filter: none !important; }
-.modal{ backdrop-filter: none !important; }
-
-/* ====== 天气 FX 层（不挡交互）====== */
-.fx{
-  position:fixed;
-  inset:-20vh -10vw;
-  pointer-events:none;
-  z-index:0; /* 在 panel 下面 */
-}
-
-/* 云：大块软边，慢慢飘 */
-.fxCloud{
-  opacity:.65;
-  filter: blur(0.4px);
-  background:
-    radial-gradient(260px 140px at 18% 28%, rgba(255,255,255,.10), transparent 70%),
-    radial-gradient(340px 180px at 42% 18%, rgba(255,255,255,.08), transparent 72%),
-    radial-gradient(420px 220px at 70% 26%, rgba(255,255,255,.07), transparent 74%),
-    radial-gradient(520px 260px at 85% 14%, rgba(255,255,255,.06), transparent 76%),
-    radial-gradient(700px 360px at 55% 36%, rgba(255,255,255,.05), transparent 78%);
-  animation: cloudDrift 32s linear infinite;
-  mix-blend-mode: screen;
-}
-
-/* 雾：更贴近地面，横向漂 */
-.fxCloud::after{
-  content:"";
-  position:absolute;
-  inset:40vh -10vw -10vh -10vw;
-  background:
-    radial-gradient(520px 220px at 20% 70%, rgba(255,255,255,.06), transparent 70%),
-    radial-gradient(640px 260px at 55% 78%, rgba(255,255,255,.05), transparent 72%),
-    radial-gradient(820px 340px at 85% 82%, rgba(255,255,255,.04), transparent 76%);
-  opacity:.9;
-  filter: blur(1.2px);
-  animation: mistDrift 22s linear infinite;
-}
-
-@keyframes cloudDrift{
-  from{ transform: translateX(-6vw) translateY(0); }
-  to  { transform: translateX( 6vw) translateY(-1vh); }
-}
-@keyframes mistDrift{
-  from{ transform: translateX(4vw); }
-  to  { transform: translateX(-4vw); }
-}
-
-/* 确保你的主 UI 在天气之上 */
-.wrap, .panel{ position:relative; z-index:1; }
-
-/* ====== 雨 ====== */
-.fxRain{
-  opacity: var(--rain);
-  transition: opacity .6s ease;
-  background:
-    /* 雨丝：用重复斜线模拟 */
-    repeating-linear-gradient(
-      115deg,
-      rgba(255,255,255,.12) 0 1px,
-      rgba(255,255,255,0) 1px 10px
-    );
-  mix-blend-mode: screen;
-  filter: blur(.2px);
-  animation: rainFall .45s linear infinite;
-}
-
-@keyframes rainFall{
-  from{ background-position: 0 0; }
-  to  { background-position: 0 18px; }
-}
-
-/* ===== 阴雨天气：一层灰冷罩子（随 --storm 变化） ===== */
-:root{
-  --storm: 0;     /* 0~1 阴天程度 */
-  --uiFade: 1;    /* 1->0 UI 渐隐 */
-}
-
-body{
-  position:relative;
-}
-
-body::after{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  /* 同时包含：轻微提亮(随 skyBoost) + 阴天遮罩(随 storm) */
-  background:
-    linear-gradient(to top,
-      rgba(255,255,255, calc(.00 + var(--skyBoost) * .10)) 0%,
-      rgba(255,255,255, calc(.03 + var(--skyBoost) * .16)) 55%,
-      rgba(255,255,255, calc(.05 + var(--skyBoost) * .20)) 100%),
-    radial-gradient(900px 520px at 50% 12%,
-      rgba(255,255,255, calc(.02 + var(--storm) * .10)),
-      transparent 62%),
-    linear-gradient(to bottom,
-      rgba(10,18,20, calc(.08 + var(--storm) * .28)) 0%,
-      rgba(10,18,20, calc(.06 + var(--storm) * .22)) 45%,
-      rgba(10,18,20, calc(.10 + var(--storm) * .34)) 100%);
-  mix-blend-mode: normal;
-  opacity: 1;
-}
-
-/* 云雾在阴天时更厚一点 */
-.fxCloud{
-  opacity: calc(.45 + var(--storm) * .40);
-  filter: blur(calc(.4px + var(--storm) * 1.2px));
-}
-
-/* 雨在阴天时更明显（你已有 fxRain，用 storm 再加一点可见度） */
-.fxRain{
-  opacity: calc(var(--rain) * (0.65 + var(--storm) * 0.65));
-  filter: blur(calc(.15px + var(--storm) * .35px));
-}
-
-/* ===== UI 渐隐：越往上越透明，到顶完全消失 ===== */
-.wrap{
-  opacity: var(--uiFade);
-  transition: opacity .25s ease;
-}
-
-/* 可选：让 panel 也跟着轻微“失焦”变薄一点（更像风吹走） */
-.panel{
-  transform: translateY(calc((1 - var(--uiFade)) * -8px)) scale(calc(.995 + var(--uiFade) * .005));
-  transition: transform .25s ease;
-}
-
-/* ===== 整块抖动（吓人用） ===== */
-.panel.panic{
-  animation: panicShake .42s ease;
-}
+.panel.panic{ animation: panicShake .42s ease; }
 @keyframes panicShake{
   0%   { transform: translateY(0) rotate(0deg); }
   12%  { transform: translateY(-2px) rotate(-0.6deg); }
@@ -522,62 +456,44 @@ body::after{
   100% { transform: translateY(0) rotate(0deg); }
 }
 
-/* 如果登顶消失后你不想还能滚动/点到东西，可把 wrap pointer-events 也关掉 */
-.wrap.off{
-  pointer-events:none;
-}
-
-.panel::before{ opacity:.72; }
-.route::before,
-.card::before,
-.modal::before{ opacity:.35; }
-
-/* 兜底：确保弹层永远是全屏盖在最上面 */
-.overlay{
-  position:fixed !important;
-  inset:0;
-  z-index:999 !important;
-}
-
 /* =========================
-   FX：雾 + 雨（更自然）
-   ========================= */
-
-/* 让 fx 层更柔一点，避免突兀 */
+   FX layers (cloud / rain)
+========================= */
 .fx{
+  position:fixed;
+  inset:-20vh -10vw;
+  pointer-events:none;
   z-index:0;
   opacity:1;
   filter: saturate(.92);
 }
 
-/* 雾（Cloud）改成：高空薄云 + 贴地浓雾，两层速度不一样 */
+/* Clouds + ground mist */
 .fxCloud{
-  /* 顶部薄云：更大、更淡、更慢 */
+  opacity: calc(.28 + var(--storm) * .30);
+  filter: blur(calc(1.6px + var(--storm) * 2.2px));
+  mix-blend-mode: screen;
+  animation: cloudDrift 46s linear infinite;
   background:
     radial-gradient(520px 260px at 18% 20%, rgba(255,255,255,.09), transparent 70%),
     radial-gradient(680px 320px at 48% 14%, rgba(255,255,255,.07), transparent 72%),
     radial-gradient(820px 380px at 78% 22%, rgba(255,255,255,.06), transparent 74%),
     radial-gradient(980px 420px at 88% 10%, rgba(255,255,255,.05), transparent 76%);
-  opacity: calc(.28 + var(--storm) * .30);      /* 阴天更厚 */
-  filter: blur(calc(1.6px + var(--storm) * 2.2px));
-  mix-blend-mode: screen;
-  animation: cloudDrift 46s linear infinite;
 }
-
-/* 贴地雾：更“地面”，更横向流动 */
 .fxCloud::after{
+  content:"";
+  position:absolute;
   inset: 46vh -12vw -16vh -12vw;
+  opacity: calc(.65 + var(--storm) * .45);
+  filter: blur(calc(3.2px + var(--storm) * 4.6px));
+  animation: mistDrift 26s linear infinite;
   background:
     radial-gradient(920px 360px at 20% 78%, rgba(255,255,255,.06), transparent 72%),
     radial-gradient(1120px 420px at 55% 84%, rgba(255,255,255,.05), transparent 74%),
     radial-gradient(1320px 520px at 88% 86%, rgba(255,255,255,.04), transparent 76%),
     linear-gradient(to top, rgba(255,255,255,.05), transparent 55%);
-  opacity: calc(.65 + var(--storm) * .45);
-  filter: blur(calc(3.2px + var(--storm) * 4.6px));
-  animation: mistDrift 26s linear infinite;
 }
 
-/* 雾漂移更慢更“横” */
 @keyframes cloudDrift{
   from{ transform: translateX(-8vw) translateY(0); }
   to  { transform: translateX( 8vw) translateY(-1.4vh); }
@@ -587,7 +503,7 @@ body::after{
   to  { transform: translateX(-6vw); }
 }
 
-/* 雨：两层雨丝 + 轻微“水迹”层 */
+/* Rain */
 .fxRain{
   opacity: calc(var(--rain) * (0.55 + var(--storm) * 0.70));
   transition: opacity .6s ease;
@@ -595,43 +511,38 @@ body::after{
   filter: blur(calc(.25px + var(--storm) * .45px));
   animation: rainFallFast .38s linear infinite;
   background:
-    /* 细雨丝（主层） */
     repeating-linear-gradient(
       112deg,
       rgba(255,255,255,.14) 0 1px,
       rgba(255,255,255,0) 1px 11px
     );
 }
-
-/* 第二层雨：更粗更稀（叠加在 ::before） */
 .fxRain::before{
   content:"";
   position:absolute;
   inset:0;
+  opacity:.65;
+  filter: blur(.15px);
+  animation: rainFallSlow .72s linear infinite;
   background:
     repeating-linear-gradient(
       112deg,
       rgba(255,255,255,.10) 0 1px,
       rgba(255,255,255,0) 1px 18px
     );
-  opacity: .65;
-  animation: rainFallSlow .72s linear infinite;
-  filter: blur(.15px);
 }
-
-/* 水迹层：轻微纵向“流痕”，只在雨大时显一点点 */
 .fxRain::after{
   content:"";
   position:absolute;
   inset:0;
+  opacity: calc(var(--rain) * .12);
+  filter: blur(6px);
+  transform: translateY(-10%);
   background:
     linear-gradient(to bottom,
       rgba(255,255,255,0) 0%,
       rgba(255,255,255,.06) 40%,
       rgba(255,255,255,0) 100%);
-  opacity: calc(var(--rain) * .12);
-  filter: blur(6px);
-  transform: translateY(-10%);
 }
 
 @keyframes rainFallFast{
@@ -644,195 +555,16 @@ body::after{
 }
 
 /* =========================
-   Panel / wrap：边缘尖角波浪线 + 梯子
-   ========================= */
-
-/* 让 wrap 变成“有边框装饰”的容器 */
-.wrap{
-  position:relative;
+   Mobile
+========================= */
+@media (max-width:520px){
+  .hud{ flex-wrap:wrap; }
+  .badges{ margin-left:0; }
+  .route{ height:700vh; }
 }
 
-/* 左右梯子：用 ::before/::after 画出来，顶天立地 */
-.wrap::before,
-.wrap::after{
-  content:"";
-  position:absolute;
-  top:18px;
-  bottom:18px;
-  width:54px;
-  pointer-events:none;
-  opacity: .92;
-  filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
-}
 
-/* 左梯子 */
-.wrap::before{
-  left: calc(50% - min(980px, 100%) / 2 - 64px);
-  background:
-    /* 两条立柱 */
-    linear-gradient(to bottom, rgba(255,255,255,.16), rgba(255,255,255,.08)) left/10px 100% no-repeat,
-    linear-gradient(to bottom, rgba(255,255,255,.16), rgba(255,255,255,.08)) right/10px 100% no-repeat,
-    /* 横档 */
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255,255,255,.18) 0 3px,
-      rgba(255,255,255,0) 3px 28px
-    ) center/100% 100% no-repeat;
-  border-radius: 12px;
-}
-
-/* 右梯子 */
-.wrap::after{
-  right: calc(50% - min(980px, 100%) / 2 - 64px);
-  background:
-    linear-gradient(to bottom, rgba(255,255,255,.16), rgba(255,255,255,.08)) left/10px 100% no-repeat,
-    linear-gradient(to bottom, rgba(255,255,255,.16), rgba(255,255,255,.08)) right/10px 100% no-repeat,
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255,255,255,.18) 0 3px,
-      rgba(255,255,255,0) 3px 28px
-    ) center/100% 100% no-repeat;
-  border-radius: 12px;
-}
-
-/* 手机端：梯子别挤爆屏幕 */
-@media (max-width: 820px){
-  .wrap::before, .wrap::after{
-    width:40px;
-    opacity:.75;
-  }
-  .wrap::before{
-    left: 10px;
-  }
-  .wrap::after{
-    right: 10px;
-  }
-}
-
-/* Panel 外围做一个“尖角波浪线”（锯齿）边框 */
-.panel{
-  position:relative;
-}
-
-/* 顶部 + 底部锯齿（不裁切内容） */
-.panel::after{
-  content:"";
-  position:absolute;
-  left:-2px; right:-2px;
-  top:-14px;
-  height:28px;
-  pointer-events:none;
-  opacity:.85;
-  background:
-    /* 顶部锯齿 */
-    conic-gradient(from 45deg, rgba(255,255,255,.18) 0 25%, transparent 0 100%) 0 0/18px 18px repeat-x;
-  filter: drop-shadow(0 8px 10px rgba(0,0,0,.28));
-}
-
-.panel::marker{ content:none; } /* 保险 */
-
-/* 底部锯齿单独再做一条 */
-.panel{
-  --zig: 18px; /* 锯齿密度 */
-}
-.panel > .hud{ position:relative; } /* 保持层级 */
-.panel::before{
-  /* 你原本 panel::before 是麻布纹理，这里不能覆盖它
-     所以：把锯齿放到一个新伪元素上（我们用 outlineZig） */
-}
-
-/* 用一个额外的“装饰层”不抢你现有 ::before：挂到 .panel 里 */
-.panel .outlineZig{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  z-index:2;
-}
-
-/* 如果你不想改 HTML，加这个：用 box-shadow 模拟底部锯齿 */
-.panel{
-  box-shadow:
-    var(--shadow),
-    0 0 0 1px rgba(255,255,255,.08) inset;
-}
-
-/* 底部锯齿：用 background 放在 panel 自己的 background-image 里不行（你有纹理）；
-   所以我们放在 .climb 顶/底的“遮罩”上，看起来像包边 */
-.climb{
-  position:relative;
-}
-
-/* climb 顶部锯齿内嵌（更像“包了一圈”） */
-.climb::before,
-.climb::after{
-  content:"";
-  position:sticky;
-  left:0; right:0;
-  height:18px;
-  pointer-events:none;
-  z-index:3;
-  opacity:.55;
-  background:
-    conic-gradient(from 45deg, rgba(255,255,255,.16) 0 25%, transparent 0 100%) 0 0/16px 16px repeat-x;
-  filter: drop-shadow(0 8px 8px rgba(0,0,0,.22));
-}
-.climb::before{
-  top:0;
-  transform: translateY(-10px);
-}
-.climb::after{
-  bottom:0;
-  transform: translateY(10px) rotate(180deg);
-}
-
-/* =========================
-   “每个 point 位置”的尖角波浪标记
-   ========================= */
-
-/* tick 本身更像路标：加一个小锯齿旗 */
-.tick{
-  position:absolute;
-  isolation:isolate;
-}
-.tick::after{
-  content:"";
-  position:absolute;
-  left: 22px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 64px;
-  height: 16px;
-  opacity: .75;
-  background:
-    conic-gradient(from 45deg, rgba(255,255,255,.18) 0 25%, transparent 0 100%) 0 0/10px 10px repeat-x;
-  filter: drop-shadow(0 6px 8px rgba(0,0,0,.25));
-}
-
-/* 让路线上“点”更融入雾：轻发光但不刺眼 */
-.tick{
-  background: rgba(255,255,255,.05);
-  border-color: rgba(255,255,255,.18);
-  box-shadow:
-    0 0 0 1px rgba(0,0,0,.2) inset,
-    0 10px 24px rgba(0,0,0,.20);
-}
-
-/* =========================
-   把背景突兀感压掉：整体加一层“空气透镜”
-   ========================= */
-body::before{
-  /* 你已有 before，我们补充一点柔和层次 */
-  background:
-    radial-gradient(1100px 520px at 60% 16%, rgba(255,255,255,.10), transparent 62%),
-    radial-gradient(980px 480px at 22% 18%, rgba(255,255,255,.08), transparent 62%),
-    radial-gradient(3px 3px at 12% 18%, rgba(255,255,255,.08), transparent 60%),
-    radial-gradient(3px 3px at 38% 12%, rgba(255,255,255,.06), transparent 60%),
-    radial-gradient(3px 3px at 72% 20%, rgba(255,255,255,.05), transparent 60%),
-    linear-gradient(to bottom, rgba(255,255,255,.02), rgba(0,0,0,.10));
-  opacity: calc(.26 + var(--skyBoost) * .22 + var(--storm) * .12);
-  filter: blur(1.0px);
-}
-
+.hidden{ display:none !important; }
 </style>
 </head>
 <body>
@@ -870,7 +602,7 @@ body::before{
       <div class="story">
         <div class="card">
           <div class="title" id="sceneTitle">起点</div>
-          <div class="txt" id="sceneText">你把手套套紧，扣上锁扣。\n钢索很冷，像一条不太情愿被你握住的线。\n\n往上滚动，开始爬。</div>
+          <div class="txt" id="sceneText">你把手套套紧，扣上锁扣。<br>钢索很冷，像一条不太情愿被你握住的线。<br>往上滚动，开始爬。</div>
         </div>
       </div>
     </div>
@@ -893,136 +625,290 @@ body::before{
 (() => {
   const $ = (s) => document.querySelector(s);
 
-  const climbEl = $("#climb");
-  const routeEl = $("#route");
-  const barFill = $("#barFill");
+  /* =========================
+     DOM
+  ========================= */
+  const climbEl   = $("#climb");
+  const routeEl   = $("#route");
+  const barFill   = $("#barFill");
 
   const staminaOut = $("#staminaOut");
-  const fearOut = $("#fearOut");
-  const trustOut = $("#trustOut");
+  const fearOut    = $("#fearOut");
+  const trustOut   = $("#trustOut");
 
   const sceneTitle = $("#sceneTitle");
   const sceneText  = $("#sceneText");
 
-  const overlay = $("#overlay");
-  const modal = $("#modal");
+  const overlay  = $("#overlay");
+  const modal    = $("#modal");
   const evtTitle = $("#evtTitle");
   const evtText  = $("#evtText");
-  const btnA = $("#btnOptionA");
-  const btnB = $("#btnOptionB");
-  const panel = document.querySelector(".panel");
+  const btnA     = $("#btnOptionA");
+  const btnB     = $("#btnOptionB");
 
+  const panel    = document.querySelector(".panel");
+
+  /* =========================
+     Config
+  ========================= */
   const CELEBRATE_URL = "./stage.html";
 
+  // 进度触发点（%）
+  const TRIGGERS = [8, 18, 30, 44, 58, 72, 86, 96];
+
+  // 事件间最小间隔（避免连弹）
+  const MIN_GAP_PCT = 12;
+
+  // 登顶判定：接近顶就算到顶（修复“96 快划卡住到不了100”）
+  const SUMMIT_PCT = 99;
+  const TOP_SNAP_PX = 24; // 顶部吸附阈值（px）
+
+  // 滚轮摩擦（轻回拉）
+  const FRICTION = 0.10;   // 0.06~0.12
+  const COOLDOWN_MS = 1100;
+
+  /* =========================
+     State
+  ========================= */
   const S = {
     stamina: 3,
     fear: 0,
     trust: 0,
 
     locked: false,
-    triggers: [8, 18, 30, 44, 58, 72, 86, 96],
-    fired: new Set(),
-
-    lastP: 0,
-    hasBooted: false,
-
     finished: false,
-    lastEvtKey: null,
 
-    cooldownUntil: 0,
+    fired: new Set(),
+    lastP: 0,
     lastEvtAtP: -999,
+    lastEvtKey: null,
+    cooldownUntil: 0,
+
+    booted: false,
+     choosing: false, 
+  };
+const EVENT_POOL = [
+  {
+    key: "slip",
+    title: "脚滑",
+    text: "鞋底在岩面上打了一下空。\n你整个人往下一坠，锁扣发出很轻的“咔”。\n\n",
+    ok: {
+      label: "继续。",
+      effect: () => {
+        S.stamina -= 1;
+        S.fear += 1;
+        shake(modal);
+        pushScene("你没说话，只是呼吸重了一点。");
+      },
+    },
+  },
+  {
+    key: "lookdown",
+    title: "往下看了一眼",
+    text: "你不小心低头。\n下面的树像缩小的模型，风声忽然变得很近。\n\n",
+    ok: {
+      label: "继续。",
+      effect: () => {
+        S.stamina -= 1;
+        S.fear += 1;
+        pushScene("你把视线钉回岩面，像在和自己较劲。");
+      },
+    },
+  },
+  {
+    key: "help",
+    title: "横移段",
+    text: "前方是一个横移段。\n你得把重量交给钢索，再挪过去。\n\n",
+    ok: {
+      label: "继续。",
+      effect: () => {
+        S.stamina -= 1;
+        S.fear += 1;
+        pushScene("你自己数拍子，但手心开始出汗。");
+      },
+    },
+  },
+  {
+    key: "rest",
+    title: "小平台",
+    text: "你踩到一个小平台，终于能直起腰。\n风从山谷里穿过来。\n\n",
+    ok: {
+      label: "继续。",
+      effect: () => {
+        S.stamina += 1;
+        pushScene("你喝了一口水，甜味像回魂。");
+      },
+    },
+  },
+];
+
+  /* =========================
+     Helpers: UI + Math
+  ========================= */
+  function clampStats() {
+    S.stamina = clamp(S.stamina, 0, 8);
+    S.fear    = clamp(S.fear, 0, 10);
+    S.trust   = clamp(S.trust, 0, 10);
+  }
+
+  function clamp(v, a, b) {
+    return Math.max(a, Math.min(b, v));
+  }
+
+  function updateHUD() {
+    staminaOut.textContent = S.stamina;
+    fearOut.textContent    = S.fear;
+    trustOut.textContent   = S.trust;
+  }
+
+  function pushScene(text) {
+    sceneTitle.textContent = `进度：${getProgressPercent()}%`;
+    sceneText.textContent  = text;
+  }
+
+  function shake(el) {
+    el.classList.remove("shake");
+    void el.offsetWidth;
+    el.classList.add("shake");
+  }
+
+  function panicPanel() {
+    panel.classList.remove("panic");
+    void panel.offsetWidth;
+    panel.classList.add("panic");
+    setTimeout(() => panel.classList.remove("panic"), 520);
+  }
+
+  function lockScroll(on) {
+    S.locked = on;
+  }
+
+function openOverlay(evt) {
+  btnA.classList.remove("hidden");
+btnB.classList.add("primary");
+  lockScroll(true);
+  overlay.classList.add("show");
+  overlay.setAttribute("aria-hidden", "false");
+
+  evtTitle.textContent = evt.title;
+  evtText.textContent  = evt.text;
+
+  // ===== 单按钮模式 =====
+  if (evt.ok) {
+    btnA.classList.add("hidden");
+    btnB.classList.add("primary"); // 保持主按钮样式
+    btnB.textContent = evt.ok.label || "继续";
+
+    btnB.onclick = () => {
+      if (S.choosing) return;
+      S.choosing = true;
+      try {
+        evt.ok.effect && evt.ok.effect();
+        afterEvent();
+        const p = getProgressPercent();
+        setProgressUI(p);
+        S.lastP = p;
+      } finally {
+        closeOverlay();
+        S.choosing = false;
+      }
+    };
+    return;
+  }
+
+  // ===== 兼容：双按钮模式（以后要用再用）=====
+  btnA.classList.remove("hidden");
+
+  btnA.textContent = evt.options[0].label;
+  btnB.textContent = evt.options[1].label;
+
+  const handlePick = (idx) => {
+    if (S.choosing) return;
+    S.choosing = true;
+    try {
+      evt.options[idx].effect();
+      afterEvent();
+      const p = getProgressPercent();
+      setProgressUI(p);
+      S.lastP = p;
+    } finally {
+      closeOverlay();
+      S.choosing = false;
+    }
   };
 
-  const EVENT_POOL = [
-    {
-      key:"slip",
-      title:"脚滑",
-      text:"鞋底在岩面上打了一下空。\n你整个人往下一坠，锁扣发出很轻的“咔”。\n\n你会怎么做？",
-      options:[
-        { label:"硬扛住，假装没事", effect: () => { S.stamina -= 1; S.fear += 1; shake(); pushScene("你没说话，只是呼吸重了一点。"); } },
-        { label:"开口求稳，让他拉一下", effect: () => { S.trust += 1; S.fear = Math.max(0, S.fear-1); pushScene("你听到他回了一声“好”。然后你的腰带被稳稳带住。"); } },
-      ]
-    },
-    {
-      key:"lookdown",
-      title:"往下看了一眼",
-      text:"你不小心低头。\n下面的树像缩小的模型，风声忽然变得很近。\n\n现在继续爬，还是停一下？",
-      options:[
-        { label:"继续爬（别想）", effect: () => { S.stamina -= 1; S.fear += 1; pushScene("你把视线钉回岩面，像在和自己较劲。"); } },
-        { label:"停一下，调整呼吸", effect: () => { S.fear = Math.max(0, S.fear-1); pushScene("你停住，数到四，再把手往上移。"); } },
-      ]
-    },
-    {
-      key:"camera",
-      title:"节目组要你说点什么",
-      text:"耳机里传来一句：\n“可以说点什么吗？观众想听。”\n\n你怎么回？",
-      options:[
-        { label:"嘴硬：没事", effect: () => { S.fear += 1; pushScene("你说“没事”。但你的指节有点白。"); } },
-        { label:"诚实：有点怕", effect: () => { S.trust += 1; pushScene("你说“我有点怕”。身后的人说：‘那我慢一点。’"); } },
-      ]
-    },
-    {
-      key:"help",
-      title:"横移段",
-      text:"前方是一个横移段。\n你得把重量交给钢索，再挪过去。\n\n要不要让对方指挥节奏？",
-      options:[
-        { label:"自己来", effect: () => { S.stamina -= 1; S.fear += 1; pushScene("你自己数拍子，但手心开始出汗。"); } },
-        { label:"让他数节奏", effect: () => { S.trust += 1; pushScene("他在后面数：一、二、三。\n你发现你真的会跟着放松一点。"); } },
-      ]
-    },
-    {
-      key:"rest",
-      title:"小平台",
-      text:"你踩到一个小平台，终于能直起腰。\n风从山谷里穿过来。\n\n现在做什么？",
-      options:[
-        { label:"喝水/补给", effect: () => { S.stamina += 1; pushScene("你喝了一口水，甜味像回魂。"); } },
-        { label:"说句话（恋综版）", effect: () => { S.trust += 1; pushScene("你说：‘你刚刚其实很稳。’\n他笑了一下：‘那你也别往下看。’"); } },
-      ]
-    },
-  ];
+  btnA.onclick = () => handlePick(0);
+  btnB.onclick = () => handlePick(1);
+}
 
-  function updateHUD(){
-    staminaOut.textContent = S.stamina;
-    fearOut.textContent = S.fear;
-    trustOut.textContent = S.trust;
+function closeOverlay() {
+  overlay.classList.remove("show");
+  overlay.setAttribute("aria-hidden", "true");
+
+  S.cooldownUntil = Date.now() + COOLDOWN_MS;
+
+  if (!S.finished) {
+    // 给浏览器一帧时间，避免“关弹窗→立刻滚动事件”抢跑
+    requestAnimationFrame(() => lockScroll(false));
   }
-  function clampStats(){
-    S.stamina = Math.max(0, Math.min(8, S.stamina));
-    S.fear = Math.max(0, Math.min(10, S.fear));
-    S.trust = Math.max(0, Math.min(10, S.trust));
+}
+function afterEvent() {
+  clampStats();
+  updateHUD();
+
+  if (S.stamina <= 0) {
+    S.stamina = 1;
+    S.fear += 1;
+    clampStats();
+    updateHUD();
+    pushScene("你感觉手臂像不是自己的。\n你被迫停下来——节目组说这是“安全休息”。");
   }
-  function getMaxScroll(){
+
+  lockScroll(false);
+
+  const p = getProgressPercent();
+  setProgressUI(p);
+  S.lastP = p;
+}
+  function getMaxScroll() {
     return Math.max(0, climbEl.scrollHeight - climbEl.clientHeight);
   }
 
   // 顶部=100 底部=0
-  function getProgressPercent(){
+  function getProgressPercent() {
     const max = getMaxScroll();
-    if(max <= 0) return 0;
+    if (max <= 0) return 0;
+
+    // 顶部吸附：接近 0 就算登顶（修复快速上滑被摩擦回拉拽下去）
+    if (climbEl.scrollTop <= TOP_SNAP_PX) return 100;
+
     const raw = climbEl.scrollTop / max; // 顶部0 底部1
     const climb = 1 - raw;
-    return Math.max(0, Math.min(100, Math.round(climb * 100)));
+    return clamp(Math.round(climb * 100), 0, 100);
   }
 
-  function setProgressUI(p){
-    const t = p / 100;
+  function setProgressUI(pct) {
+    const t = pct / 100;
 
     document.documentElement.style.setProperty("--skyBoost", t.toFixed(2));
-    barFill.style.width = `${p}%`;
+    barFill.style.width = `${pct}%`;
 
-    const rainStart = 86;
     const stormStart = 78;
-    const rain  = (p >= rainStart)  ? Math.min(1, (p - rainStart) / 10)  : 0;
-    const storm = (p >= stormStart) ? Math.min(1, (p - stormStart) / 18) : 0;
-    document.documentElement.style.setProperty("--rain",  rain.toFixed(2));
+    const rainStart  = 86;
+
+    const storm = (pct >= stormStart) ? Math.min(1, (pct - stormStart) / 18) : 0;
+    const rain  = (pct >= rainStart)  ? Math.min(1, (pct - rainStart) / 10)  : 0;
+
     document.documentElement.style.setProperty("--storm", storm.toFixed(2));
+    document.documentElement.style.setProperty("--rain",  rain.toFixed(2));
 
     const fade = Math.max(0, 1 - Math.pow(t, 2.1));
     document.documentElement.style.setProperty("--uiFade", fade.toFixed(3));
 
+    // route 视觉随进度轻变（保留你原来的观感）
     const baseA1 = 0.04 + t * 0.10;
     const baseA2 = 0.02 + t * 0.08;
-    const dark = 0.08 + storm * 0.20;
+    const dark   = 0.08 + storm * 0.20;
 
     routeEl.style.background =
       `linear-gradient(to bottom,
@@ -1031,191 +917,143 @@ body::before{
         rgba(0,0,0,${dark.toFixed(3)}) 100%)`;
   }
 
-  function pushScene(text){
-    sceneTitle.textContent = `进度：${getProgressPercent()}%`;
-    sceneText.textContent = text;
-  }
+  /* =========================
+     Trigger logic
+  ========================= */
+  function pickCrossedTrigger(prevP, nowP) {
+    if (nowP <= prevP) return null;
 
-  function shake(){
-    modal.classList.remove("shake");
-    void modal.offsetWidth;
-    modal.classList.add("shake");
-  }
-
-  function lockScroll(lock){
-    S.locked = lock;
-    // 弹窗期间阻止滚动输入（不改 overflow / pointer-events，避免 scrollTop 乱）
-  }
-
-  function openEvent(evt){
-    lockScroll(true);
-
-    overlay.classList.add("show");
-    overlay.setAttribute("aria-hidden","false");
-
-    evtTitle.textContent = evt.title;
-    evtText.textContent  = evt.text;
-
-    btnA.textContent = evt.options[0].label;
-    btnB.textContent = evt.options[1].label;
-
-    btnA.onclick = () => { closeEvent(); evt.options[0].effect(); afterEvent(); };
-    btnB.onclick = () => { closeEvent(); evt.options[1].effect(); afterEvent(); };
-  }
-
-  function closeEvent(){
-    overlay.classList.remove("show");
-    overlay.setAttribute("aria-hidden","true");
-
-    // 事件冷却：避免连弹
-    S.cooldownUntil = Date.now() + 1100;
-
-    if (!S.finished) {
-      lockScroll(false);
-      S.lastP = getProgressPercent();
-    }
-  }
-
-  function afterEvent(){
-    clampStats();
-    updateHUD();
-
-    if(S.stamina <= 0){
-      S.stamina = 1;
-      S.fear += 1;
-      updateHUD();
-      pushScene("你感觉手臂像不是自己的。\n你被迫停下来——节目组说这是“安全休息”。");
-    }
-
-    lockScroll(false);
-    S.lastP = getProgressPercent();
-  }
-
-  function pickCrossedTrigger(prevP, nowP){
-    if(nowP <= prevP) return null;
-    const crossed = S.triggers
+    const crossed = TRIGGERS
       .filter(t => !S.fired.has(t) && prevP < t && nowP >= t)
-      .sort((a,b) => a-b);
+      .sort((a, b) => a - b);
+
     return crossed.length ? crossed[0] : null;
   }
 
-  function showSummit(){
+  function pickEvent() {
+    let pool = EVENT_POOL;
+    if (S.lastEvtKey) pool = EVENT_POOL.filter(e => e.key !== S.lastEvtKey);
+    const evt = pool[Math.floor(Math.random() * pool.length)];
+    S.lastEvtKey = evt.key;
+    return evt;
+  }
+
+  function showSummit() {
     S.finished = true;
     lockScroll(true);
 
     overlay.classList.add("show");
-    overlay.setAttribute("aria-hidden","false");
+    overlay.setAttribute("aria-hidden", "false");
 
     evtTitle.textContent = "登顶";
     evtText.textContent =
 `你终于踩到最后一段岩阶。
-风把你吹得有点发笑。
+风和雨把你吹得有点发笑。
 
 （结算）
 体力：${S.stamina}
 恐高：${S.fear}
 信任：${S.trust}
 
-你可以在这里跳转到“山顶告白/合照/庆祝酒局”。`;
+我的老天你终于爬完了！
+但现在已经开始下小雨，，还是快点到平地去吧！`;
 
-    btnA.textContent = "再看一会儿";
-    btnB.textContent = "进入庆祝";
-    btnA.onclick = () => { closeEvent(); };
+    btnB.textContent = "解开绳索，进入空地。";
+
+    btnA.classList.add("hidden");
     btnB.onclick = () => { window.location.href = CELEBRATE_URL; };
   }
 
-  function maybeTrigger(prevP, nowP){
+  function maybeTrigger(prevP, nowP) {
     if (S.finished) return;
     if (S.locked) return;
-
     if (Date.now() < S.cooldownUntil) return;
-
-    const MIN_GAP_PCT = 12;
     if (nowP - S.lastEvtAtP < MIN_GAP_PCT) return;
 
-    if(nowP >= 100){
+    // 先判登顶：避免 96 附近事件把你卡在顶点前
+    if (nowP >= SUMMIT_PCT) {
       showSummit();
       return;
     }
 
     const t = pickCrossedTrigger(prevP, nowP);
-    if(t == null) return;
+    if (t == null) return;
 
     S.fired.add(t);
     S.lastEvtAtP = nowP;
 
-    let pool = EVENT_POOL;
-    if (S.lastEvtKey) pool = EVENT_POOL.filter(e => e.key !== S.lastEvtKey);
-    const evt = pool[Math.floor(Math.random() * pool.length)];
-    S.lastEvtKey = evt.key;
+    // 恐怖一下：你原来 72/86 触发 panic，我保留
+    if (t === 72 || t === 86) panicPanel();
 
-    if(t === 86 || t === 72){
-      panel.classList.remove("panic");
-      void panel.offsetWidth;
-      panel.classList.add("panic");
-      setTimeout(() => panel.classList.remove("panic"), 520);
-    }
-
-    openEvent(evt);
+    openOverlay(pickEvent());
   }
 
-  // ===== 轻阻力（不接管滚动，触控板/鼠标都自然）=====
-  // 原理：浏览器滚完后，我们“轻轻拉回一点点” => 体感略沉，但不抽搐
-  const FRICTION = 0.10;     // 0.06 很轻 / 0.12 明显（你嫌猛就 0.06~0.10）
-  const TOP_SNAP = 2;        // px：接近顶部就直接贴到 0，保证能到 100%
+  /* =========================
+     Input: wheel / scroll / touch / keys
+  ========================= */
+climbEl.addEventListener("wheel", (e) => {
+  if (!S.booted) return;
 
-  climbEl.addEventListener("wheel", (e) => {
-    if (!S.hasBooted) return;
-    if (S.locked) { e.preventDefault(); return; }
+  if (S.locked) {
+    e.preventDefault();
+    return;
+  }
 
-    const dy = e.deltaY;
+  const dy = e.deltaY;
+  const isTrackpad = Math.abs(dy) < 50;
+  const k = isTrackpad ? (FRICTION * 0.55) : FRICTION;
 
-    // 触控板通常 delta 很小很密：摩擦更轻，避免“抖”
-    const isTrackpad = Math.abs(dy) < 50;
-    const k = isTrackpad ? (FRICTION * 0.55) : FRICTION;
+  requestAnimationFrame(() => {
+    // ✅ 先读“默认滚动之后”的位置
+    const before = climbEl.scrollTop;
 
-    requestAnimationFrame(() => {
-      // 只抵消一小部分
-      climbEl.scrollTop -= dy * k;
+    // ✅ 如果正在上滑且已经很靠近顶，就直接贴顶，不做回拉
+    if (dy < 0 && before <= TOP_SNAP_PX + 80) {
+      climbEl.scrollTop = 0;
+      return;
+    }
 
-      // 顶部吸附：避免永远差一点点
-      if (climbEl.scrollTop < TOP_SNAP) climbEl.scrollTop = 0;
-    });
-  }, { passive:false });
+    // ✅ 否则再做摩擦回拉
+    climbEl.scrollTop = before - dy * k;
 
-  // 弹窗期间：把触控滚动也拦了（移动端）
-  window.addEventListener("touchmove", (e) => {
-    if (S.locked) e.preventDefault();
-  }, { passive:false });
+    // ✅ 兜底吸附（回拉后仍可能接近顶）
+    if (dy < 0 && climbEl.scrollTop <= TOP_SNAP_PX) climbEl.scrollTop = 0;
+    if (climbEl.scrollTop < 0) climbEl.scrollTop = 0;
+  });
+}, { passive: false });
 
-  // 弹窗期间：键盘也拦
+  // 弹窗期间拦截键盘滚动
   window.addEventListener("keydown", (e) => {
     if (!S.locked) return;
     const keys = ["ArrowUp","ArrowDown","PageUp","PageDown","Home","End"," "];
     if (keys.includes(e.key)) e.preventDefault();
-  }, { passive:false });
+  }, { passive: false });
 
-  // scroll：更新进度 + 触发
+  // scroll：更新进度 + 触发事件
   climbEl.addEventListener("scroll", () => {
-    if(S.locked || !S.hasBooted) return;
+    if (!S.booted || S.locked) return;
 
     const nowP = getProgressPercent();
     setProgressUI(nowP);
 
     const prevP = S.lastP;
     S.lastP = nowP;
-
+if (!S.finished && nowP >= SUMMIT_PCT) {
+  showSummit();
+  return;
+}
     maybeTrigger(prevP, nowP);
-  }, { passive:true });
+  }, { passive: true });
 
-  function jumpToBottomStable(){
+  /* =========================
+     Init: start at bottom
+  ========================= */
+  function jumpToBottomStable() {
     const prev = climbEl.style.scrollBehavior;
     climbEl.style.scrollBehavior = "auto";
 
     const doJump = () => {
-      const max = getMaxScroll();
-      climbEl.scrollTop = max;
-
+      climbEl.scrollTop = getMaxScroll();
       const p = getProgressPercent();
       setProgressUI(p);
       S.lastP = p;
@@ -1230,8 +1068,7 @@ body::before{
   updateHUD();
   setProgressUI(getProgressPercent());
   jumpToBottomStable();
-  setTimeout(() => { S.hasBooted = true; }, 180);
-
+  setTimeout(() => { S.booted = true; }, 180);
 })();
 </script>
 </body>
