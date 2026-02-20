@@ -1,0 +1,1014 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Celebrate · 暴雨舞台</title>
+  <style>
+    :root{
+      --bg0:#07090c;
+      --bg1:#0b0f16;
+      --card:rgba(255,255,255,.06);
+      --bd:rgba(255,255,255,.12);
+      --txt:rgba(255,255,255,.92);
+      --mut:rgba(255,255,255,.68);
+      --gold:#f1d6a6;
+      --shadow:0 18px 55px rgba(0,0,0,.55);
+      --round:18px;
+      --gap:14px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color:var(--txt);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Arial,sans-serif;
+      background: radial-gradient(1200px 700px at 50% -10%, #1a2540 0%, var(--bg1) 38%, var(--bg0) 100%);
+      overflow-x:hidden;
+    }
+
+    /* ====== 场景容器 ====== */
+    .stage{
+      min-height:100dvh;
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:36px 16px;
+    }
+
+    /* 舞台灯光（上方光束） */
+    .stage::before{
+      content:"";
+      position:absolute; inset:-20% -20% auto -20%;
+      height:70%;
+      background:
+        radial-gradient(closest-side at 20% 10%, rgba(170,210,255,.20), transparent 55%),
+        radial-gradient(closest-side at 80% 10%, rgba(255,210,180,.16), transparent 55%),
+        conic-gradient(from 220deg at 50% 0%,
+          rgba(120,180,255,.18), transparent 30%,
+          rgba(255,210,170,.16), transparent 62%,
+          rgba(120,180,255,.12));
+      filter: blur(2px);
+      opacity:.9;
+      pointer-events:none;
+      mix-blend-mode:screen;
+    }
+
+    /* 地面湿反光 */
+    .floor{
+      position:absolute; left:0; right:0; bottom:-10px;
+      height:40vh;
+      background:
+        radial-gradient(1100px 350px at 50% 0%,
+          rgba(255,255,255,.12), transparent 62%),
+        linear-gradient(to bottom,
+          rgba(255,255,255,.06), rgba(0,0,0,.0) 30%,
+          rgba(0,0,0,.55) 100%);
+      transform: skewY(-1.2deg);
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    /* ====== 雨幕（多层） ====== */
+    .rain, .rain::before, .rain::after{
+      content:"";
+      position:absolute; inset:0;
+      pointer-events:none;
+      background-repeat:repeat;
+      opacity:.65;
+      mix-blend-mode:screen;
+    }
+    .rain{
+      background-image: linear-gradient(120deg, rgba(180,210,255,.0) 0%, rgba(180,210,255,.0) 46%, rgba(180,210,255,.25) 50%, rgba(180,210,255,.0) 54%, rgba(180,210,255,.0) 100%);
+      background-size: 10px 24px;
+      animation: rainMove 0.38s linear infinite;
+      filter: blur(.1px);
+    }
+    .rain::before{
+      background-image: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 46%, rgba(255,255,255,.18) 50%, rgba(255,255,255,0) 54%, rgba(255,255,255,0) 100%);
+      background-size: 14px 34px;
+      animation: rainMove 0.55s linear infinite;
+      opacity:.45;
+      filter: blur(.2px);
+    }
+    .rain::after{
+      background-image: linear-gradient(120deg, rgba(120,170,255,0) 0%, rgba(120,170,255,0) 46%, rgba(120,170,255,.16) 50%, rgba(120,170,255,0) 54%, rgba(120,170,255,0) 100%);
+      background-size: 18px 44px;
+      animation: rainMove 0.75s linear infinite;
+      opacity:.35;
+      filter: blur(.3px);
+    }
+    @keyframes rainMove{
+      from{ transform: translate3d(-40px,-60px,0); }
+      to{ transform: translate3d(40px,60px,0); }
+    }
+
+    /* ====== 闪电（JS会加 .flash） ====== */
+    .lightning{
+      position:absolute; inset:-20% -10%;
+      background: radial-gradient(800px 420px at 50% 15%, rgba(255,255,255,.70), transparent 60%);
+      opacity:0;
+      pointer-events:none;
+      mix-blend-mode:screen;
+      filter: blur(1px);
+      transition: opacity .18s ease;
+    }
+    .lightning.flash{ opacity:.40; }
+
+    /* ====== 顶部 UI：右上角歌单 ====== */
+.topbar{
+  position:absolute;
+  top:14px;
+  left:14px;
+  right:14px;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  pointer-events:none;
+  z-index:50;   /* ← 加这一行 */
+}
+    .badge{
+      pointer-events:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border:1px solid var(--bd);
+      background:rgba(0,0,0,.22);
+      border-radius:999px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+    .badge .dot{
+      width:8px; height:8px; border-radius:999px;
+      background: rgba(255,255,255,.75);
+      box-shadow: 0 0 18px rgba(200,220,255,.55);
+      opacity:.85;
+    }
+    .badge small{ color:var(--mut); }
+
+    .playlist{
+      pointer-events:auto;
+      position:relative;
+      width:min(240px, 72vw);
+    }
+    .plBtn{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 14px;
+      border:1px solid var(--bd);
+      background:rgba(0,0,0,.25);
+      color:var(--txt);
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      cursor:pointer;
+    }
+    .plBtn b{ font-weight:700; letter-spacing:.2px; }
+    .plBtn span{ color:var(--mut); font-size:12px; }
+    .chev{
+      width:10px; height:10px;
+      border-right:2px solid rgba(255,255,255,.7);
+      border-bottom:2px solid rgba(255,255,255,.7);
+      transform: rotate(45deg);
+      margin-left:6px;
+      opacity:.85;
+      transition: transform .18s ease;
+    }
+    .playlist.open .chev{ transform: rotate(-135deg); }
+
+    .plPanel{
+      position:absolute;
+      top:54px; right:0;
+      width:100%;
+      border:1px solid var(--bd);
+      background: rgba(10,12,16,.70);
+      border-radius: var(--round);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow:hidden;
+      transform-origin: top right;
+      transform: scale(.98);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .playlist.open .plPanel{
+      opacity:1;
+      transform: scale(1);
+      pointer-events:auto;
+    }
+
+    .plHeader{
+      padding:12px 14px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .now{
+      display:flex; flex-direction:column; gap:2px;
+      min-width:0;
+    }
+    .now .t{
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .now .s{
+      font-size:12px; color:var(--mut);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .miniBtns{
+      display:flex; gap:8px; flex-shrink:0;
+    }
+    .miniBtns button{
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      color:var(--txt);
+      border-radius:10px;
+      padding:8px 10px;
+      cursor:pointer;
+    }
+
+    .trackList{
+      max-height:min(44vh, 380px);
+      overflow:auto;
+    }
+    .track{
+      padding:12px 14px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex;
+      gap:10px;
+      cursor:pointer;
+      align-items:flex-start;
+    }
+    .track:hover{ background: rgba(255,255,255,.06); }
+    .track .idx{
+      width:22px; flex:0 0 22px;
+      color:rgba(255,255,255,.55);
+      font-variant-numeric: tabular-nums;
+    }
+    .track .meta{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .track .meta b{
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .track .meta span{
+      font-size:12px;
+      color:var(--mut);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .track.active b{ color: var(--gold); }
+    .track.active .idx{ color: rgba(241,214,166,.85); }
+
+    .playerBar{
+      padding:10px 14px;
+      border-top:1px solid rgba(255,255,255,.10);
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    audio{
+      width:100%;
+      height:32px;
+      filter: saturate(1.1);
+    }
+
+    /* ====== 中央节目单 ====== */
+    .sheet{
+      position:relative;
+      width:min(860px, 94vw);
+      border:1px solid var(--bd);
+      background:rgba(0,0,0,.28);
+      border-radius: calc(var(--round) + 6px);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      padding:18px;
+      overflow:hidden;
+    }
+    .sheet::before{
+      content:"";
+      position:absolute; inset:-40%;
+      background:
+        radial-gradient(closest-side at 30% 25%, rgba(190,220,255,.12), transparent 60%),
+        radial-gradient(closest-side at 75% 35%, rgba(255,215,185,.10), transparent 60%);
+      opacity:.85;
+      pointer-events:none;
+      filter: blur(1px);
+    }
+
+    .sheetTop{
+      position:relative;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 10px 16px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .sheetTop h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.4px;
+    }
+    .sheetTop .sub{
+      margin:6px 0 0;
+      color:var(--mut);
+      font-size:13px;
+      line-height:1.5;
+    }
+    .tag{
+      flex-shrink:0;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      border-radius:999px;
+      font-size:12px;
+      color:rgba(255,255,255,.78);
+    }
+
+    .grid{
+      position:relative;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: var(--gap);
+      padding:16px 10px 10px;
+    }
+    .panel{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      border-radius: var(--round);
+      padding:14px;
+    }
+    .panel h2{
+      margin:0 0 10px;
+      font-size:14px;
+      color: rgba(255,255,255,.86);
+      letter-spacing:.2px;
+    }
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .item{
+      padding:10px 12px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      border-radius: 14px;
+    }
+    .item .line1{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      font-variant-numeric: tabular-nums;
+    }
+    .item .time{
+      color: rgba(241,214,166,.92);
+      font-weight:650;
+      letter-spacing:.3px;
+    }
+    .item .name{
+      color: rgba(255,255,255,.92);
+      font-weight:650;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .item .line2{
+      margin-top:6px;
+      color: var(--mut);
+      font-size:12px;
+      line-height:1.55;
+    }
+
+    .note{
+      color:rgba(255,255,255,.75);
+      font-size:12px;
+      line-height:1.65;
+    }
+    .note b{ color: var(--gold); }
+
+    /* 手机：单列 */
+    @media (max-width: 780px){
+      .grid{ grid-template-columns: 1fr; }
+      .sheetTop{ align-items:flex-start; flex-direction:column; }
+      .playlist{ width:min(360px, 88vw); }
+    }
+
+    /* 可选：一点“阴间”的微抖动（雨太大，牌子有点晃） */
+    @media (prefers-reduced-motion: no-preference){
+      .sheet{ animation: sway 8s ease-in-out infinite; }
+      @keyframes sway{
+        0%,100%{ transform: translate3d(0,0,0) rotate(0deg); }
+        50%{ transform: translate3d(0,1px,0) rotate(-0.12deg); }
+      }
+    }
+
+    .danmuPanel{ padding:12px; }
+
+.danmuTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.danmuCtrl{ display:flex; gap:8px; }
+.danmuCtrl button{
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+  color:var(--txt);
+  border-radius:10px;
+  padding:7px 10px;
+  cursor:pointer;
+}
+
+.danmuBox{
+  height:min(42vh, 340px);
+  overflow:auto;
+  padding:10px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.18);
+  border-radius: var(--round);
+}
+
+.dmLine{
+  display:flex;
+  gap:10px;
+  padding:10px 10px;
+  border-bottom:1px dashed rgba(255,255,255,.10);
+}
+.dmLine:last-child{ border-bottom:none; }
+
+.dmTime{
+  flex:0 0 auto;
+  font-variant-numeric: tabular-nums;
+  color:rgba(241,214,166,.85);
+  font-size:12px;
+}
+
+.dmText{
+  min-width:0;
+  color:rgba(255,255,255,.86);
+  font-size:13px;
+  line-height:1.5;
+  word-break: break-word;
+}
+
+.danmuInput{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+.danmuInput input{
+  flex:1;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06);
+  color:var(--txt);
+  outline:none;
+}
+.danmuInput button{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.08);
+  color:var(--txt);
+  cursor:pointer;
+}
+.floatDm{
+  position:absolute; inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+
+.fly{
+  position:absolute;
+  right:-40%;
+  top:10%;
+  white-space:nowrap;
+  padding:8px 12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.22);
+  border-radius:999px;
+  box-shadow:0 12px 40px rgba(0,0,0,.45);
+  backdrop-filter: blur(8px);
+  color:rgba(255,255,255,.86);
+  font-size:13px;
+  transform: translate3d(0,0,0);
+  animation: flyLeft linear forwards;
+}
+@keyframes flyLeft{
+  from{ transform: translateX(0); opacity:.0; }
+  8%{ opacity:.95; }
+  92%{ opacity:.85; }
+  to{ transform: translateX(-160vw); opacity:0; }
+}
+  </style>
+</head>
+<body>
+  <main class="stage" aria-label="暴雨舞台">
+    <div class="floatDm" id="floatDm" aria-hidden="true"></div>
+    <div class="rain" aria-hidden="true"></div>
+    <div class="lightning" id="lightning" aria-hidden="true"></div>
+    <div class="floor" aria-hidden="true"></div>
+
+    <div class="topbar">
+      <div class="badge">
+        <span class="dot"></span>
+        <div>
+          <div style="font-size:13px;font-weight:650;">恋综现场 · 露天舞台</div>
+          <small>雨不会停，但节目要继续。</small>
+        </div>
+      </div>
+
+      <!-- 右上角 Playlist -->
+      <section class="playlist" id="playlist">
+        <button class="plBtn" id="plBtn" type="button" aria-expanded="false">
+          <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+            <b>▶ Playlist</b>
+            <span id="plHint">点开，下拉选歌（真的能播）</span>
+          </div>
+          <i class="chev" aria-hidden="true"></i>
+        </button>
+
+        <div class="plPanel" role="dialog" aria-label="播放列表">
+          <div class="plHeader">
+            <div class="now">
+              <div class="t" id="nowTitle">未选择歌曲</div>
+              <div class="s" id="nowSub">右侧点一首开始</div>
+            </div>
+            <div class="miniBtns">
+              <button type="button" id="prevBtn" title="上一首">⟵</button>
+              <button type="button" id="nextBtn" title="下一首">⟶</button>
+            </div>
+          </div>
+
+          <div class="trackList" id="trackList"></div>
+
+          <div class="playerBar">
+            <audio id="audio" controls preload="none"></audio>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 中央节目单 -->
+    <section class="sheet" aria-label="节目单">
+      <div class="sheetTop">
+        <div>
+          <h1>《暴雨也要营业》特别庆祝场</h1>
+          <p class="sub">
+            你们走到这里，说明真的活下来了。<br/>
+            现在是 <b style="color:var(--gold);">任意唱歌 / 任意躲雨 / 任意起哄</b> 时间。
+          </p>
+        </div>
+        <div class="tag">露天 · 录音开着 · 镜头淋雨中</div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h2>节目单（主舞台）</h2>
+          <div class="list" id="programList">
+            <!-- JS填充，也可以手写 -->
+          </div>
+        </div>
+
+        <div class="panel danmuPanel" aria-label="实时弹幕">
+  <div class="danmuTop">
+    <h2 style="margin:0;font-size:14px;">实时弹幕</h2>
+    <div class="danmuCtrl">
+      <button type="button" id="dmToggle">暂停</button>
+      <button type="button" id="dmClear">清空</button>
+    </div>
+  </div>
+
+  <div class="danmuBox" id="danmuBox"></div>
+
+</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+
+  /* ========= 工具 ========= */
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#39;");
+  }
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  function nowHM(){
+    const d = new Date();
+    return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  }
+
+  /* ========= 1) 节目单 ========= */
+  const program = [
+    { time: "20:00", name: "开场：雨幕灯光秀", desc: "主持人说一切都在计划内。雨：不配合。" },
+    { time: "20:08", name: "嘉宾表演时间！", desc: "下雨天也需要满足剪辑的 KPI。" },
+    { time: "20:50", name: "特别环节：在雨里跳一段", desc: "舞台很滑。你也知道，但你还是会跳。" },
+    { time: "21:05", name: "自由活动——点歌time！", desc: "也可以卡拉OK，虽然没有更多麦克风了。" },
+  ];
+
+  const programList = $("#programList");
+  if(programList){
+    programList.innerHTML = program.map(p => `
+      <div class="item">
+        <div class="line1">
+          <div class="time">${escapeHtml(p.time)}</div>
+          <div class="name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</div>
+        </div>
+        <div class="line2">${escapeHtml(p.desc)}</div>
+      </div>
+    `).join("");
+  }
+
+  /* ========= 2) Playlist ========= */
+  const tracks = [
+    { title: "雨中曲", artist: "主持人 to 全体嘉宾", url: "./Singin_in_the_Rain.mp3" },
+    { title: "Yesterday Once More", artist: "智能模块 to 全体嘉宾", url: "./Yesterday_Once_More.mp3" },
+    { title: "Dance The Night", artist: "全体节目组 to 全体嘉宾", url: "./Dance_The_Night.mp3" },
+
+    { title: "I Want You", artist: "Eric to Oliven", url: "./I_Want_You.mp3" },
+    { title: "You'll Find Someone To Fart With", artist: "Eric to Amber", url: "./You_ll_Find_Someone_To_Fart_With.mp3" },
+    { title: "Transcendental Cha Cha Cha", artist: "Eric to Moira", url: "./ranscendental_Cha_Cha_Cha.mp3" },
+
+    { title: "Good Morning", artist: "Eric to Naya", url: "./Good_Morning.mp3" },
+    { title: "I Love You Like An Alcoholic", artist: "Eric to 向林木", url: "./I Love You Like An Alcoholic.mp3" },
+
+    { title: "死ぬな！", artist: "Eric to Melusine", url: "./死ぬな.mp3" },
+
+    { title: "Java Jive", artist: "Eric to 奥利弗", url: "./Java Jive.mp3" },
+    { title: "成龍很酷", artist: "Eric to 橙知", url: "./成龙很酷.mp3" },
+
+    { title: "The Fly", artist: "Eric to Thomas", url: "./The Fly.mp3" },
+
+    { title: "BFF", artist: "Thomas to Maya", url: "./BFF.mp3" },
+
+      { title: "This Is Me", artist: "Maya to Thomas", url: "./This Is Me.mp3" },
+   
+   
+   
+   
+  ];
+
+  const playlist = $("#playlist");
+  const plBtn = $("#plBtn");
+  const trackList = $("#trackList");
+  const nowTitle = $("#nowTitle");
+  const nowSub = $("#nowSub");
+  const audio = $("#audio");
+  const prevBtn = $("#prevBtn");
+  const nextBtn = $("#nextBtn");
+  const plHint = $("#plHint");
+
+  let songIdx = -1;
+
+  if(trackList){
+    trackList.innerHTML = tracks.map((t,i)=>`
+      <div class="track" data-i="${i}">
+        <div class="idx">${String(i+1).padStart(2,"0")}</div>
+        <div class="meta">
+          <b>${escapeHtml(t.title)}</b>
+          <span>${escapeHtml(t.artist)}</span>
+        </div>
+      </div>
+    `).join("");
+
+    trackList.addEventListener("click", (e)=>{
+      const row = e.target.closest(".track");
+      if(!row) return;
+      setActiveTrack(Number(row.dataset.i), { userSelected: true });
+    });
+  }
+
+  function setActiveTrack(i, { userSelected=false } = {}){
+    if(!tracks.length) return;
+    songIdx = Math.max(0, Math.min(i, tracks.length - 1));
+    const t = tracks[songIdx];
+
+    if(trackList){
+      [...trackList.querySelectorAll(".track")].forEach(el => el.classList.remove("active"));
+      const activeEl = trackList.querySelector(`.track[data-i="${songIdx}"]`);
+      if(activeEl) activeEl.classList.add("active");
+    }
+
+    if(nowTitle) nowTitle.textContent = t.title;
+    if(nowSub) nowSub.textContent = t.artist;
+    if(plHint) plHint.textContent = `正在准备播放：${t.title}`;
+
+    if(audio){
+      audio.src = t.url;
+      audio.play().catch(()=>{});
+    }
+
+    // ✅ 只有“用户真的点了歌”才触发爆炸
+    if(userSelected) triggerDmBoost();
+  }
+
+  prevBtn?.addEventListener("click", ()=>{
+    if(!tracks.length) return;
+    const next = (songIdx <= 0) ? tracks.length - 1 : songIdx - 1;
+    setActiveTrack(next, { userSelected: true });
+  });
+
+  nextBtn?.addEventListener("click", ()=>{
+    if(!tracks.length) return;
+    const next = (songIdx >= tracks.length - 1) ? 0 : songIdx + 1;
+    setActiveTrack(next, { userSelected: true });
+  });
+
+  audio?.addEventListener("ended", ()=> nextBtn?.click());
+
+  plBtn?.addEventListener("click", ()=>{
+    if(!playlist) return;
+    const open = playlist.classList.toggle("open");
+    plBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  document.addEventListener("click", (e)=>{
+    if(!playlist || !plBtn) return;
+    if(!playlist.contains(e.target)){
+      playlist.classList.remove("open");
+      plBtn.setAttribute("aria-expanded","false");
+    }
+  });
+
+  // 默认选第一首：不触发爆炸
+  if(tracks.length) setActiveTrack(0, { userSelected:false });
+
+  // ✅ 更严格：如果自动播放被拦了，用户手动点播放时也触发爆炸
+  audio?.addEventListener("play", triggerDmBoost);
+
+  /* ========= 3) 闪电 ========= */
+  const lightning = $("#lightning");
+  function flashOnce(){
+    if(!lightning) return;
+    lightning.classList.add("flash");
+    setTimeout(()=> lightning.classList.remove("flash"), 160);
+  }
+  (function scheduleLightning(){
+    const gap = 2800 + Math.random()*5200;
+    setTimeout(()=>{
+      flashOnce();
+      if(Math.random() < 0.35) setTimeout(flashOnce, 220 + Math.random()*260);
+      scheduleLightning();
+    }, gap);
+  })();
+
+  /* ========= 4) 弹幕（面板 + 漂浮） ========= */
+  const danmuBox = $("#danmuBox");
+  const dmToggle = $("#dmToggle");
+  const dmClear  = $("#dmClear");
+  const floatDm  = $("#floatDm");
+
+const DM_POOL = [
+    "导演：雨太大了，收音全靠命。",
+    "这段我建议别剪…不然太假了",
+    "他俩怎么又靠这么近？？",
+    "员工好敬业",
+    "别装 笑死",
+    "暴雨是第33位神秘嘉宾。",
+    "救命，舞台地面反光像水镜",
+    "主持人：我们就当这是氛围。",
+    "节目组：别回头。",
+    "摄影师加鸡腿",
+    "我快忘了这是恋综了",
+    "怎么就要完结了没看够啊",
+    "回来看我cp",
+    "哈哈哈哈哈哈哈哈哈哈",
+    "哈哈哈哈",
+    "选择了弹幕最多的玩法",
+    "这里真的没剧本吗",
+    "来了",
+    "明年我也想去这里爬山",
+    "想去打卡",
+    "她真的好可爱啊",
+    "这雨下得怪有意境的",
+    "前面的笑死我了",
+    "这个恋综的嘉宾命真硬啊",
+    "三刷了",
+    "我觉得他俩能成",
+    "最喜欢这对 很搭",
+    "没人觉得他很帅吗？",
+    "真是素人吗这么有节目效果",
+    "节目组咋这样对嘉宾 举报了",
+    "他真的好会。",
+    "求这里的bgm呜呜呜",
+    "不要剧透啊啊啊",
+    "舍不得……",
+    "我去好抓马",
+    "前面的罚你看上一集",
+    "名场面打卡",
+    "你们一定要幸福啊！",
+    "多穿点啊 心疼",
+    "嘉宾们拍完做什么都会成功的",
+    "辛苦了辛苦了",
+    "我竟然有点想哭",
+    "以为磕到了 原来是磕到头了",
+    "这节目咋又穷又有钱的",
+    "雨唱得真好",
+    "家人们记得看花絮啊",
+    "怎么感觉有嘉宾录入后再也没出场，咋了的",
+    "要看中国功夫",
+"咱亚洲刻板印象还能救吗橙哥？",
+    "丁口老师在吗？丁口老师！丁口丁口",  
+"什么时候再回去演戏啊JO",
+    "Maya抱走了",
+"Maya这孩子蘑菇一点没看到都是男人的错",
+"弹幕别引战",
+    "这节目有真素人吗 我替我朋友问的",
+    "没人觉得Honey很帅吗",
+"蜂蜜男落汤鸡也帅 神颜！",
+    "OMG",
+    "安全员在吗，我需要更多安全员的镜头！",
+"请问你愿意了解一下我们的宗教 多马耶稣教义吗？",
+"花蝴蝶安全员冲鸭",
+    "我产能不能麦一下",
+"有海藻头融入背景了咋回事",
+"宅宅看起来要寄了，有没有人管管宅宅的死活",
+"宅宅的痛衣要死掉了",
+"我感觉这对有戏",
+"奥利文姐姐囊我一拳我也愿意",
+"弹幕能不能控制一下自己",
+"湿身诱惑这是我可以免费看的吗",
+"Olive的头发还好吗？孩子还行吗？",
+"心疼小奥利弗的头发",
+"老师我们小奥利弗还有戏吗？",
+"给我们哥们Eric打个广告频道可查",
+"Gogogo Eric",
+"Eric啥时候剪还回来吃饭吗",
+"能不能对我们小梅梅好一点，小梅前面才洗个澡",
+"小梅不要感冒",
+"节目对梅好差",
+"Oh no 乃亚的小帽子,,,,",
+"你们好，这是我们村最好的图书馆小姐",
+"没人觉得乃亚是最强氛围组吗，节目组应该给她钱",
+"\杰弗里！/\杰弗里！/\杰弗里！/",
+"自信魅力女人杰弗里出来！",
+"杰弗里姐，眼镜呆就不？",
+"事已至此我吃一口amber和草的产品",
+"安柏就这样茁壮成长中",
+"安柏像个奶牛猫似的谁她驱一下魔",
+"快呀闪电链接外星球莫伊拉莫伊拉",
+"有人看了莫伊拉的新书吗？",
+"兄弟小说家走这么远不容易",
+"有人在意一下我们小祖拉的鼻子吗",
+"祖拉祖拉想你了小祖拉你一定要幸福",
+"节目组咋只给调酒不给调香，针对我们祖拉比亚",
+"小向是不是有crush",
+"向木木木",
+"能成吗向妹子，我会等待ins更新的",
+"小马宝莉加油",
+"乔乔就这样静悄悄",
+"没有避开我反而向我走来了吗！乔乔！"
+  ];
+
+
+
+
+  let dmPaused = false;
+
+  function addDanmu(text){
+    if(!danmuBox) return;
+    const line = document.createElement("div");
+    line.className = "dmLine";
+    line.innerHTML = `<div class="dmTime">${nowHM()}</div><div class="dmText"></div>`;
+    line.querySelector(".dmText").textContent = text;
+    danmuBox.appendChild(line);
+    danmuBox.scrollTop = danmuBox.scrollHeight;
+  }
+
+  dmToggle?.addEventListener("click", ()=>{
+    dmPaused = !dmPaused;
+    dmToggle.textContent = dmPaused ? "继续" : "暂停";
+  });
+
+  dmClear?.addEventListener("click", ()=>{
+    if(danmuBox) danmuBox.innerHTML = "";
+  });
+
+  // ---- 爆炸模式参数（关键） ----
+  let dmBoost = false;
+  let MAX_FLY = 6;        // 默认同屏 6
+  let flyCount = 0;       // 当前同屏数量
+  let flyTimer = null;    // 漂浮调度器
+  let panelTimer = null;  // 面板调度器
+
+  function getFlyTick(){
+    return dmBoost ? (220 + Math.random()*160) : (1100 + Math.random()*700);
+  }
+  function getFlyChance(){
+    return dmBoost ? 0.98 : 0.45;
+  }
+function getFlyDur(){
+  return dmBoost ? (11.5 + Math.random()*4.5) : (14.0 + Math.random()*7.0);
+}
+
+  function spawnFly(text){
+    if(!floatDm) return;
+    if(flyCount >= MAX_FLY) return;
+
+    const el = document.createElement("div");
+    el.className = "fly";
+    el.textContent = text;
+
+    el.style.top = (6 + Math.random()*78) + "%";
+    el.style.animationDuration = getFlyDur() + "s";
+    el.style.scale = (0.92 + Math.random()*0.18); // ✅ 不覆盖 transform
+
+    floatDm.appendChild(el);
+    flyCount++;
+
+    el.addEventListener("animationend", ()=>{
+      el.remove();
+      flyCount--;
+    });
+  }
+
+  function startPanelLoop(){
+    stopPanelLoop();
+    const tick = () => {
+      if(!dmPaused){
+        const t = DM_POOL[Math.floor(Math.random()*DM_POOL.length)];
+        addDanmu(t);
+      }
+      panelTimer = setTimeout(tick, 1200 + Math.random()*900);
+    };
+    tick();
+  }
+  function stopPanelLoop(){
+    if(panelTimer) clearTimeout(panelTimer);
+    panelTimer = null;
+  }
+
+  function startFlyLoop(){
+    stopFlyLoop();
+    const tick = () => {
+      if(!dmPaused && Math.random() < getFlyChance()){
+        const t = DM_POOL[Math.floor(Math.random()*DM_POOL.length)];
+        spawnFly(t);
+      }
+      flyTimer = setTimeout(tick, getFlyTick());
+    };
+    tick();
+  }
+  function stopFlyLoop(){
+    if(flyTimer) clearTimeout(flyTimer);
+    flyTimer = null;
+  }
+
+  function triggerDmBoost(){
+    if(dmBoost) return;
+    dmBoost = true;
+    MAX_FLY = 25;
+    addDanmu("系统：检测到你开始选歌。弹幕热度上升。");
+    // 立刻补几条“爆炸开场”
+    for(let k=0;k<10;k++){
+      spawnFly(DM_POOL[Math.floor(Math.random()*DM_POOL.length)]);
+    }
+    // 重新启动漂浮 loop 以应用更快的 tick
+    startFlyLoop();
+  }
+
+  // 开场
+  addDanmu("系统：弹幕已接入。");
+  addDanmu("系统：暴雨模式在线。");
+  startPanelLoop();
+  startFlyLoop();
+
+})();
+</script>
+</body>
+</html>

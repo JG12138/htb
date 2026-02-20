@@ -1,0 +1,741 @@
+:root{
+  --bg:#1A2733;
+  --panel:rgba(255,255,255,.06);
+  --bd:rgba(255,255,255,.14);
+  --txt:#fff;
+  --mut:rgba(255,255,255,.72);
+  --shadow:0 12px 34px rgba(0,0,0,.35);
+
+  /* 棋盘尺寸（桌面） */
+  --boardW:920px;
+  --boardH:560px;
+
+  /* forest 棋盘格参数（桌面） */
+  --cell:72px;
+  --rowGap:34px;
+
+  /* forest 内容起始偏移（桌面） */
+  --padX:60px;
+  --padY:70px;
+
+  /* 间距 */
+  --gapSide:20px;   /* 桌面左右间距 */
+  --gapStack:18px;  /* 手机上下间距 */
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  min-height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:24px;
+  background:
+    radial-gradient(1200px 700px at 20% 10%, rgba(255,255,255,.10), transparent 60%),
+    radial-gradient(900px 600px at 80% 0%, rgba(255,255,255,.07), transparent 60%),
+    var(--bg);
+  color:var(--txt);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+
+/* ===================== Card ===================== */
+.card{
+  width:min(980px, 100%);
+  background:var(--panel);
+  border:1px solid var(--bd);
+  box-shadow:var(--shadow);
+  padding:18px;
+
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+/* 顶部 */
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:12px;
+}
+.top h1{ font-size:15px; margin:0; letter-spacing:.5px; }
+.top .hint{ font-size:12px; color:var(--mut); }
+
+/* 入口 */
+.gate{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.gate input{
+  min-width:220px;
+  padding:10px 12px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(0,0,0,.20);
+  color:var(--txt);
+  outline:none;
+}
+.gate input:disabled{ opacity:.6; }
+.metaLine{
+  width:100%;
+  font-size:12px;
+  color:var(--mut);
+  margin-top:4px;
+}
+
+/* HUD */
+.hud{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.stats{
+  font-size:13px;
+  color:rgba(255,255,255,.9);
+  display:flex;
+  gap:16px;
+}
+
+button{
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.08);
+  color:var(--txt);
+  padding:10px 14px;
+  font-weight:700;
+}
+button:hover{ background:rgba(255,255,255,.14); }
+button:disabled{ opacity:.45; cursor:not-allowed; }
+
+/* ===================== 游戏区布局 ===================== */
+.game-area{
+  display:flex;
+  flex-direction:row;
+  align-items:flex-start;
+  justify-content:center;
+  gap:var(--gapSide);
+}
+
+/* ===================== Info Panel ===================== */
+#infoPanel{
+  flex: 0 0 360px;
+  max-width: 540px;
+  padding: 22px 22px;
+  text-align:left;
+
+  background: rgba(255,255,255,.05);
+  border: 1px dashed rgba(255,255,255,.16);
+  border-radius: 18px;
+
+  font-size:15px;
+  line-height:1.75;
+}
+
+#mapTitle{
+  font-size:20px;
+  font-weight:850;
+  margin:0 0 10px 0;
+}
+
+#mapSub{
+  font-size:15px;
+  line-height:1.75;
+  color:rgba(255,255,255,.82);
+}
+
+/* 动态按钮区 */
+#infoPanel .panelActions{
+  margin-top:14px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-start;
+}
+#infoPanel .panelActions button{
+  padding:9px 14px;
+  font-size:14px;
+  border-radius:12px;
+}
+
+
+.board{
+  position:relative;
+  width:min(860px, 100%);
+  height:var(--boardH);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  background:
+    radial-gradient(900px 520px at 52% 48%, rgba(255,255,255,.06), transparent 65%),
+    rgba(0,0,0,.18);
+  overflow:hidden;
+
+  flex:1;
+  min-width:0;
+}
+
+/* 初始空棋盘 */
+.board.is-empty{
+  opacity:.3;
+  filter:grayscale(1);
+  pointer-events:none;
+}
+.board.is-empty .row{ display:none !important; }
+
+/* =====================
+   Forest: 行与格（absolute rows）
+   ===================== */
+.row{ position:absolute; display:flex; gap:0; }
+.row.r1{ left:var(--padX); top:var(--padY); }
+.row.r2{ left:var(--padX); top: calc(var(--padY) + var(--cell) + var(--rowGap)); }
+.row.r3{ left:var(--padX); top: calc(var(--padY) + (var(--cell) + var(--rowGap)) * 2); }
+.row.r4{ left:var(--padX); top: calc(var(--padY) + (var(--cell) + var(--rowGap)) * 3); }
+.row.rev{ flex-direction:row-reverse; }
+
+.cell{
+  width:var(--cell);
+  height:var(--cell);
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 8px 22px rgba(0,0,0,.28);
+  position:relative;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  padding:8px;
+  user-select:none;
+  overflow:visible;
+  z-index:1;
+}
+.row .cell + .cell{ margin-left:-1px; }
+
+.n{ font-weight:800; font-size:14px; opacity:.95; }
+.tag{
+  font-size:11px;
+  opacity:.78;
+  padding:2px 7px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(0,0,0,.16);
+}
+
+/* 纹理 */
+.cell::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  opacity:.55;
+  mix-blend-mode:overlay;
+  pointer-events:none;
+}
+.cell[data-type="animal"]::after{
+  background:
+    repeating-radial-gradient(
+      circle,
+      rgba(255,255,255,.4) 0 5px,
+      transparent 5px 12px
+    );
+}
+
+.cell[data-type="trap"]::after{
+  background:repeating-linear-gradient(45deg, rgba(255,255,255,.32) 0 6px, transparent 6px 12px);
+  opacity:.65;
+}
+.cell[data-type="lost"]::after{
+  background:
+    radial-gradient(circle at 30% 40%, rgba(255,255,255,.22), transparent 60%),
+    radial-gradient(circle at 70% 35%, rgba(255,255,255,.16), transparent 60%),
+    radial-gradient(circle at 55% 75%, rgba(255,255,255,.18), transparent 65px);
+}
+.cell[data-type="scenic"]::after{
+  background:
+    linear-gradient(rgba(255,255,255,.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.16) 1px, transparent 1px);
+  background-size:14px 14px;
+  opacity:.45;
+}
+
+/* 高亮 */
+.cell.is-active{
+  outline:2px solid rgba(255,255,255,.58);
+  box-shadow:0 0 0 6px rgba(255,255,255,.08), 0 12px 28px rgba(0,0,0,.35);
+  transition:box-shadow .08s, outline .08s;
+  z-index:3;
+}
+
+/* 连接块：turn-down（你要的“连接小方块/走廊”效果） */
+.cell.turn-down::before{
+  content:"";
+  position:absolute;
+  left:-1px; right:-1px;
+  height: calc(var(--rowGap) + 2px);
+  bottom: calc(-1 * var(--rowGap) - 1px);
+  background: rgba(255,255,255,.06);
+  border-left:1px solid rgba(255,255,255,.16);
+  border-right:1px solid rgba(255,255,255,.16);
+  border-bottom:1px solid rgba(255,255,255,.16);
+  z-index:0;
+}
+
+
+.board--forest .cell{ border-radius:0; }
+.board--forest{ border-radius:18px; } /* 外框依旧圆角 */
+
+
+.board--ring{
+  height:auto;
+  padding:10px;
+
+  display:grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap:10px;
+
+  width:min(520px, 92vw);
+  margin: 0;              /* 交给 game-area 控制 */
+  background: rgba(255,255,255,.03);
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+
+
+.board--ring .cell{
+  width:100%;
+  border-radius:0;     
+  box-shadow:0 8px 22px rgba(0,0,0,.22);
+}
+
+
+.board--ring .cell.is-active{
+  outline: 2px solid rgba(247,215,168,.55);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(247,215,168,.08);
+}
+
+
+.board--ring .cell[data-type="animal"]{ background: rgba(255,255,255,.07); }
+.board--ring .cell[data-type="trap"]{ background: rgba(255,255,255,.055); }
+.board--ring .cell[data-type="lost"]{ background: rgba(255,255,255,.05); }
+
+.board--ring .cell.cell--end{
+  background: rgba(255,255,255,.09);
+  border-color: rgba(247,215,168,.22);
+}
+
+
+.board--ring .cell[data-pos="1"]{ grid-area: 1 / 1; }
+.board--ring .cell[data-pos="2"]{ grid-area: 1 / 2; }
+.board--ring .cell[data-pos="3"]{ grid-area: 1 / 3; }
+.board--ring .cell[data-pos="4"]{ grid-area: 1 / 4; }
+.board--ring .cell[data-pos="5"]{ grid-area: 1 / 5; }
+.board--ring .cell[data-pos="6"]{ grid-area: 1 / 6; }
+
+.board--ring .cell[data-pos="7"]{ grid-area: 2 / 6; }
+.board--ring .cell[data-pos="8"]{ grid-area: 3 / 6; }
+.board--ring .cell[data-pos="9"]{ grid-area: 4 / 6; }
+.board--ring .cell[data-pos="10"]{ grid-area: 5 / 6; }
+
+.board--ring .cell[data-pos="11"]{ grid-area: 6 / 6; }
+.board--ring .cell[data-pos="12"]{ grid-area: 6 / 5; }
+.board--ring .cell[data-pos="13"]{ grid-area: 6 / 4; }
+.board--ring .cell[data-pos="14"]{ grid-area: 6 / 3; }
+.board--ring .cell[data-pos="15"]{ grid-area: 6 / 2; }
+
+.board--ring .cell[data-pos="16"]{ grid-area: 6 / 1; }
+.board--ring .cell[data-pos="17"]{ grid-area: 5 / 1; }
+.board--ring .cell[data-pos="18"]{ grid-area: 4 / 1; }
+.board--ring .cell[data-pos="19"]{ grid-area: 3 / 1; }
+.board--ring .cell[data-pos="20"]{ grid-area: 2 / 1; }
+
+/* 中间“湖面”装饰 */
+.board--ring .boardCenter{
+  grid-area: 2 / 2 / 6 / 6; /* row 2-5, col 2-5 */
+  border-radius: 16px;
+  background: rgba(0,0,0,.10);
+  border: 1px dashed rgba(255,255,255,.10);
+  position: relative;
+  overflow: hidden;
+}
+.board--ring .boardCenter .lakeGlow{
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255,255,255,.14), transparent 55%),
+    radial-gradient(circle at 70% 65%, rgba(255,255,255,.10), transparent 60%);
+  filter: blur(2px);
+  opacity: .9;
+}
+.board--ring .boardCenter .lakeLabel{
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  font-size: 12px;
+  opacity: .75;
+  letter-spacing: .08em;
+}
+
+/* ===================== Picker Modal ===================== */
+.pickerOverlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  z-index:9999;
+}
+.pickerOverlay[hidden]{ display:none !important; }
+
+.pickerModal{
+  width:min(860px, 100%);
+  background:rgba(20,28,36,.98);
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 18px 60px rgba(0,0,0,.55);
+  padding:14px;
+}
+.pickerTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding-bottom:10px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+.pickerTitle{ font-weight:800; letter-spacing:.5px; }
+.pickerClose{ padding:8px 10px; background:rgba(255,255,255,.08); }
+
+.pickerHint{ margin:10px 0 12px; font-size:12px; color:var(--mut); }
+
+.pickerCols{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.pickerSub{ font-size:12px; color:rgba(255,255,255,.85); margin-bottom:8px; }
+.pickerList{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:10px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  min-height:120px;
+}
+.chip{
+  padding:8px 10px;
+  font-weight:700;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+}
+.chip:hover{ background:rgba(255,255,255,.12); }
+
+.pickerBottom{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:12px;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.10);
+}
+
+/* ===================== 900~521：轻量缩小 ===================== */
+@media (max-width:900px) and (min-width:521px){
+  :root{
+    --cell:62px;
+    --rowGap:28px;
+    --padX:24px;
+    --padY:54px;
+    --boardH:520px;
+  }
+
+  .tag{ display:none; }
+  .pickerCols{ grid-template-columns:1fr; }
+
+  /* 中间档也建议：board 不要被压到太扁 */
+  .board{ min-height: 460px; }
+}
+
+/* ===================== 手机端：上下排列（稳定不裁棋盘） ===================== */
+@media (max-width:520px){
+  :root{
+    --cell:52px;
+    --rowGap:18px;
+    --padY:18px;
+    --gapStack:22px;
+  }
+
+  body{
+    padding:12px;
+    align-items:stretch;
+  }
+
+  /* 关键：card 仍满屏，但不再用 overflow:hidden 裁内容；
+     让“内部区域”去滚动 */
+  .card{
+    height: calc(100dvh - 24px);
+    padding:12px;
+    gap:10px;
+    overflow:hidden; /* 保持满屏框架 */
+  }
+
+  .top h1{ font-size:14px; }
+  .top .hint{ font-size:11px; }
+  .gate{ gap:8px; }
+  .gate input{ min-width:0; flex:1 1 auto; width:100%; }
+  button{ padding:9px 12px; }
+  .stats{ gap:12px; font-size:12px; }
+
+  /* 关键：game-area 变成可滚动容器（而不是让 card 裁） */
+  .game-area{
+    flex:1 1 auto;
+    min-height:0;
+    flex-direction:column;
+    gap:var(--gapStack);
+
+    overflow-y:auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 12px;
+  }
+
+  #infoPanel{
+    flex:none;
+    width:100%;
+    max-width:none;
+    padding:18px 16px;
+    font-size:16px;
+    order:1;
+  }
+  #mapTitle{ font-size:19px; }
+  #mapSub{ font-size:16px; }
+
+  /* 关键：board 不要 flex:1 被压扁；给下限高度 */
+  .board{
+    order:2;
+    flex:0 0 auto;     /* 不参与“抢高度”压缩 */
+    width:100%;
+    height:auto;
+    min-height: 360px; /* ✅ 防挤压；你可调 320~420 */
+  }
+
+  .tag{ display:none; }
+
+  /* forest 内容横向居中：算 padX（你原本的保留） */
+  .board--forest{
+    --contentW: calc(var(--cell) * 5);
+    --padX: calc((100% - var(--contentW)) / 2);
+  }
+
+  .cell.turn-down::before{
+    height: calc(var(--rowGap) + 1px);
+    background: rgba(255,255,255,.05);
+  }
+
+  .pickerCols{ grid-template-columns:1fr; }
+
+  /* ✅ 止血：你 wetland 的 grid-area 用到 row 6；
+     在手机端先把 wetland 强制成 6 列，避免布局计算炸掉。
+     （后续你要么改 wetland 的 grid-area 全部回到 1~5，
+      要么彻底做 6x6 螺旋。） */
+  .board--wetland{
+    grid-template-columns: repeat(6, var(--cell));
+  }
+}
+
+/* hidden 兜底 */
+[hidden]{ display:none !important; }
+
+/* ===== board-ring: 右上角角标（自动从 data-type 生成） ===== */
+.board--ring .cell{
+  position: relative;          /* 让角标定位在格子里 */
+}
+
+/* tag 本体 */
+.board--ring .cell::before{
+  content: attr(data-type);    /* 默认显示 data-type 文本 */
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 11px;
+  line-height: 1;
+  padding: 2px 7px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(0,0,0,.16);
+  opacity: .78;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 想要更像 forest 的大写风格可加这句 */
+.board--ring .cell::before{
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+/* 如果你不想 start/end/scenic 出 tag，可以隐藏 */
+.board--ring .cell[data-type="scenic"]::before{ content: "SCENIC"; }
+.board--ring .cell[data-type="animal"]::before{ content: "ANIMAL"; }
+.board--ring .cell[data-type="trap"]::before{ content: "TRAP"; }
+.board--ring .cell[data-type="lost"]::before{ content: "BACK"; }
+
+/* special 用中文更贴你现在的设定 */
+.board--ring .cell[data-type="special"]::before{ content: "RUMOR"; }
+
+/* ========== Falls board layout (L-shape) ========== */
+
+/* 1) 瀑布仍然保留 .board 的外框和背景，只改成 grid 排版 */
+.board--falls{
+  display:grid;
+  grid-template-columns: repeat(6, var(--cell));
+  grid-auto-rows: var(--cell);
+  gap:0;
+
+  /* ✅ 给内部留白：避免内容贴边/溢出，看起来也更像“在框里” */
+  padding: var(--padY) var(--padX);
+  place-content:start;
+}
+
+/* 2) 瀑布格子：尖角 + 不溢出 */
+.board--falls .cell{
+  border-radius:0;
+  overflow:hidden;
+}
+
+/* 3) 瀑布纹理：不要往外顶 */
+.board--falls .cell::after{
+  inset:0;
+}
+
+/* 4) Ring：关闭自动角标（避免和 HTML 的 .tag 叠加） */
+/*.board--ring .cell::before{ content:none !important; }*/
+
+/* row 1 */
+.board--falls .cell[data-pos="1"] { grid-area: 1 / 1; }
+.board--falls .cell[data-pos="2"] { grid-area: 1 / 2; }
+.board--falls .cell[data-pos="3"] { grid-area: 1 / 3; }
+.board--falls .cell[data-pos="4"] { grid-area: 1 / 4; }
+.board--falls .cell[data-pos="5"] { grid-area: 1 / 5; }
+.board--falls .cell[data-pos="6"] { grid-area: 1 / 6; }
+
+/* right column */
+.board--falls .cell[data-pos="7"]  { grid-area: 2 / 6; }
+.board--falls .cell[data-pos="8"]  { grid-area: 3 / 6; }
+.board--falls .cell[data-pos="9"]  { grid-area: 4 / 6; }
+.board--falls .cell[data-pos="10"] { grid-area: 5 / 6; }
+
+/* middle bottom row */
+.board--falls .cell[data-pos="16"] { grid-area: 6 / 1; }
+.board--falls .cell[data-pos="15"] { grid-area: 5 / 1; }
+.board--falls .cell[data-pos="14"] { grid-area: 5 / 2; }
+.board--falls .cell[data-pos="13"] { grid-area: 5 / 3; }
+.board--falls .cell[data-pos="12"] { grid-area: 5 / 4; }
+.board--falls .cell[data-pos="11"] { grid-area: 5 / 5; }
+
+/* last row */
+.board--falls .cell[data-pos="17"] { grid-area: 6 / 2; }
+.board--falls .cell[data-pos="18"] { grid-area: 6 / 3; }
+.board--falls .cell[data-pos="19"] { grid-area: 6 / 4; }
+.board--falls .cell[data-pos="20"] { grid-area: 6 / 5; }
+
+/* Wetland: square spiral (6x6) */
+/* =========================
+   Wetland board: 强回旋螺旋 (5x5) — pos20 落中心
+   ========================= */
+
+.board--wetland{
+  /* 继承 .board 的外框背景/圆角，不要删 */
+  display:grid;
+  grid-template-columns: repeat(6, var(--cell));
+  grid-auto-rows: var(--cell);
+  gap:0;
+  padding: var(--padY) var(--padX);
+  width: fit-content;
+  height: fit-content;
+  align-content:start;
+  justify-content:start;
+}
+
+/* 让沼泽格子保持“尖角+正方形”，且内容不飞出格子 */
+.board--wetland .cell{
+  width:100%;
+  height:100%;
+  border-radius:0;
+  overflow:hidden;            /* ✅ 防止内部装饰/after 飞出去 */
+}
+
+/* 可选：做一点“沼泽雾/泥泡”的中心氛围（不影响格子） */
+.board--wetland::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(220px 180px at 58% 52%, rgba(255,255,255,.10), transparent 60%),
+    radial-gradient(260px 220px at 44% 62%, rgba(255,255,255,.08), transparent 65%);
+  opacity:.75;
+}
+
+/* —— 强螺旋路径：pos1 从右上侧开始，20 落正中间 —— */
+/* 坐标系：row / col 都是 1~5 */
+
+
+.board--wetland .cell[data-pos="1"]{  grid-area: 1 / 5; } 
+.board--wetland .cell[data-pos="2"]{  grid-area: 2 / 5; } 
+.board--wetland .cell[data-pos="3"]{  grid-area: 3 / 5; } 
+.board--wetland .cell[data-pos="4"]{  grid-area: 4 / 5; }
+
+.board--wetland .cell[data-pos="5"]{  grid-area: 5 / 5; } 
+.board--wetland .cell[data-pos="6"]{  grid-area: 6 / 5; } 
+.board--wetland .cell[data-pos="7"]{  grid-area: 6 / 4; }
+.board--wetland .cell[data-pos="8"]{  grid-area: 6 / 3; } 
+
+.board--wetland .cell[data-pos="9"]{  grid-area: 6 / 2; } 
+.board--wetland .cell[data-pos="10"]{ grid-area: 6 / 1; } 
+.board--wetland .cell[data-pos="11"]{ grid-area: 5 / 1; } 
+
+.board--wetland .cell[data-pos="12"]{ grid-area: 4 / 1; } 
+.board--wetland .cell[data-pos="13"]{ grid-area: 3 / 1; } 
+.board--wetland .cell[data-pos="14"]{ grid-area: 2 / 1; } 
+
+
+.board--wetland .cell[data-pos="15"]{ grid-area: 1 / 1; } 
+.board--wetland .cell[data-pos="16"]{ grid-area: 1 / 2; } 
+.board--wetland .cell[data-pos="17"]{ grid-area: 1 / 3; }
+
+.board--wetland .cell[data-pos="18"]{ grid-area: 2 / 3; } 
+.board--wetland .cell[data-pos="19"]{ grid-area: 3 / 3; } 
+.board--wetland .cell[data-pos="20"]{ grid-area: 4 / 3; } 
+
+
+@media (max-width:520px){
+  /* ✅ 湖边（ring board）右上角 tag 是 ::before 生成的，不是 .tag
+     手机端直接关掉 */
+  .board--ring .cell::before{
+    content:none !important;
+    display:none !important;
+  }
+}
+
+
+@media (max-width:520px){
+  /* 1) 给滚动容器顶部留“呼吸区”，避免第一行被裁 */
+  .game-area{
+    padding-top: 12px;                 /* ✅ 关键 */
+    padding-bottom: 16px;              /* 你原本有 12px，可略加 */
+    scroll-padding-top: 12px;          /* ✅ iOS/部分浏览器更稳 */
+  }
+
+  /* 2) infoPanel 自己也留一点顶边距（双保险） */
+  #infoPanel{
+    margin-top: 2px;
+    scroll-margin-top: 12px;
+  }
+
+  /* 3) iOS 滚动合成层偶发“顶端切一刀”时的止血 */
+  .game-area{
+    transform: translateZ(0);
+    -webkit-overflow-scrolling: touch;
+  }
+}

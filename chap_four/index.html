@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chapter Four - Via Ferrata</title>
+<style>
+:root{
+  /* ===== Base tokens ===== */
+  --bg:#1E2A1B;
+  --txt:#fff;
+  --mut:rgba(255,255,255,.72);
+
+  --card:rgba(255,255,255,.06);
+  --bd:rgba(255,255,255,.12);
+  --btn:rgba(255,255,255,.10);
+  --btn2:rgba(255,255,255,.16);
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --round:18px;
+
+  /* ===== Progress-driven ===== */
+  --rain: 0;    /* 0~1 */
+  --storm: 0;   /* 0~1 */
+  --uiFade: 1;  /* 1->0 */
+  --skyBoost: 0;/* 0~1 */
+
+  /* ===== Day palette (soft) ===== */
+  --sky1:#2a5f72;
+  --sky2:#3f7f8f;
+  --mist:#bfe2e0;
+  --field1:#2f6b3a;
+  --field2:#1f3f25;
+
+  /* ===== Cloth material ===== */
+  --clothBase: rgba(23,34,24,.92);
+  --clothEdge: rgba(255,255,255,.10);
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Arial,sans-serif;
+  color:var(--txt);
+  overflow:hidden;
+  position:relative;
+
+  /* Sky → mist → field */
+  background:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--sky1) 92%, white calc(var(--skyBoost) * 8%)) 0%,
+      color-mix(in srgb, var(--sky2) 92%, white calc(var(--skyBoost) * 10%)) 30%,
+      color-mix(in srgb, var(--mist) 88%, white calc(var(--skyBoost) * 12%)) 55%,
+      color-mix(in srgb, var(--field1) 92%, white calc(var(--skyBoost) * 6%)) 75%,
+      var(--field2) 100%);
+}
+
+/* Air / particles / haze */
+body::before{
+  content:"";
+  position:fixed;
+  inset:-60px;
+  pointer-events:none;
+  background:
+    radial-gradient(1100px 520px at 60% 16%, rgba(255,255,255,.10), transparent 62%),
+    radial-gradient(980px 480px at 22% 18%, rgba(255,255,255,.08), transparent 62%),
+    radial-gradient(3px 3px at 12% 18%, rgba(255,255,255,.08), transparent 60%),
+    radial-gradient(3px 3px at 38% 12%, rgba(255,255,255,.06), transparent 60%),
+    radial-gradient(3px 3px at 72% 20%, rgba(255,255,255,.05), transparent 60%),
+    linear-gradient(to bottom, rgba(255,255,255,.02), rgba(0,0,0,.10));
+  opacity: calc(.26 + var(--skyBoost) * .22 + var(--storm) * .12);
+  filter: blur(1px);
+}
+
+/* Light lift + storm overlay */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(to top,
+      rgba(255,255,255, calc(.00 + var(--skyBoost) * .10)) 0%,
+      rgba(255,255,255, calc(.03 + var(--skyBoost) * .16)) 55%,
+      rgba(255,255,255, calc(.05 + var(--skyBoost) * .20)) 100%),
+    radial-gradient(900px 520px at 50% 12%,
+      rgba(255,255,255, calc(.02 + var(--storm) * .10)),
+      transparent 62%),
+    linear-gradient(to bottom,
+      rgba(10,18,20, calc(.08 + var(--storm) * .28)) 0%,
+      rgba(10,18,20, calc(.06 + var(--storm) * .22)) 45%,
+      rgba(10,18,20, calc(.10 + var(--storm) * .34)) 100%);
+  opacity: 1;
+}
+
+/* =========================
+   Layout
+========================= */
+.wrap{
+  height:100%;
+  display:flex;
+  justify-content:center;
+  align-items:stretch;
+  padding:16px;
+  gap:14px;
+
+  opacity: var(--uiFade);
+  transition: opacity .25s ease;
+  position:relative;
+  z-index:1;
+}
+
+.panel{
+  width:min(980px, 100%);
+  border:1px solid var(--bd);
+  border-radius:var(--round);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+
+  /* slight “lift” during fade */
+  transform: translateY(calc((1 - var(--uiFade)) * -8px))
+             scale(calc(.995 + var(--uiFade) * .005));
+  transition: transform .25s ease;
+
+  backdrop-filter:none !important;
+}
+
+/* Cloth texture layer */
+.panel::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:inherit;
+  opacity:.72;
+  background:
+    radial-gradient(2px 2px at 18% 22%, rgba(0,0,0,.18), transparent 60%),
+    radial-gradient(2px 2px at 63% 48%, rgba(255,255,255,.10), transparent 60%),
+    radial-gradient(1.5px 1.5px at 78% 35%, rgba(0,0,0,.16), transparent 60%),
+    repeating-linear-gradient( 35deg, rgba(255,255,255,.055) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(-35deg, rgba(0,0,0,.16) 0 2px, transparent 2px 8px),
+    linear-gradient(to bottom, rgba(255,255,255,.02), rgba(0,0,0,.18));
+  background-color: var(--clothBase);
+}
+
+/* Keep panel children above texture */
+.panel > *{
+  position:relative;
+  z-index:1;
+}
+
+.wrap.off{ pointer-events:none; }
+
+/* =========================
+   HUD / badges
+========================= */
+.hud{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 14px 10px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.hud h1{
+  margin:0;
+  font-size:14px;
+  letter-spacing:.6px;
+  font-weight:650;
+  color:rgba(255,255,255,.85);
+}
+.badges{
+  display:flex;
+  gap:8px;
+  margin-left:auto;
+  flex-wrap:wrap;
+}
+.badge{
+  font-size:12px;
+  padding:6px 10px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:999px;
+  background:rgba(255,255,255,.04);
+  color:rgba(255,255,255,.78);
+}
+
+/* =========================
+   Progress
+========================= */
+.progressRow{ padding:0 14px 12px; }
+.bar{
+  height:10px;
+  background:rgba(255,255,255,.08);
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.10);
+}
+.bar > div{
+  height:100%;
+  width:0%;
+  background:rgba(255,255,255,.65);
+  transition:width .25s ease;
+}
+.small{
+  font-size:12px;
+  color:rgba(255,255,255,.6);
+  margin-top:6px;
+}
+
+/* =========================
+   Climb area
+========================= */
+.climb{
+  position:relative;
+  flex:1;
+  overflow:auto;
+  scroll-behavior:smooth;
+  padding:18px 14px 80px;
+}
+
+/* Inner “zig” edge (sticky) */
+.climb::before,
+.climb::after{
+  content:"";
+  position:sticky;
+  left:0; right:0;
+  height:18px;
+  pointer-events:none;
+  z-index:3;
+  opacity:.55;
+  background:
+    conic-gradient(from 45deg, rgba(255,255,255,.16) 0 25%, transparent 0 100%)
+    0 0/16px 16px repeat-x;
+  filter: drop-shadow(0 8px 8px rgba(0,0,0,.22));
+}
+.climb::before{ top:0; transform: translateY(-10px); }
+.climb::after { bottom:0; transform: translateY(10px) rotate(180deg); }
+
+/* Route */
+.route{
+  position:relative;
+  height:700vh;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  overflow:hidden;
+  background: rgba(0,0,0,.12);
+}
+
+/* Route texture */
+.route::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.35;
+  background:
+    repeating-linear-gradient( 35deg, rgba(255,255,255,.05) 0 2px, transparent 2px 8px),
+    repeating-linear-gradient(-35deg, rgba(0,0,0,.18) 0 2px, transparent 2px 10px),
+    radial-gradient(700px 220px at 30% 20%, rgba(255,255,255,.05), transparent 60%);
+}
+
+/* Route guide line */
+.route::after{
+  content:"";
+  position:absolute;
+  left:22px;
+  top:18px;
+  bottom:18px;
+  width:2px;
+  background:linear-gradient(to bottom, rgba(255,255,255,.15), rgba(255,255,255,.02));
+  opacity:.55;
+}
+
+/* Tick */
+.tick{
+  position:absolute;
+  left:14px;
+  width:18px;
+  height:18px;
+  transform:translateY(-50%);
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+
+  font-size:11px;
+  color:rgba(255,255,255,.7);
+
+  background: rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.2) inset,
+    0 10px 24px rgba(0,0,0,.20);
+
+  isolation:isolate;
+}
+.tick::after{
+  content:"";
+  position:absolute;
+  left:22px;
+  top:50%;
+  transform:translateY(-50%);
+  width:64px;
+  height:16px;
+  opacity:.75;
+  background:
+    conic-gradient(from 45deg, rgba(255,255,255,.18) 0 25%, transparent 0 100%)
+    0 0/10px 10px repeat-x;
+  filter: drop-shadow(0 6px 8px rgba(0,0,0,.25));
+}
+
+/* Story cards */
+.story{
+  margin-top:14px;
+  display:grid;
+  gap:10px;
+}
+.card{
+  border:1px solid var(--clothEdge);
+  background: rgba(0,0,0,.12);
+  border-radius:16px;
+  padding:12px;
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.35;
+  background:
+    repeating-linear-gradient( 35deg, rgba(255,255,255,.05) 0 2px, transparent 2px 8px),
+    repeating-linear-gradient(-35deg, rgba(0,0,0,.18) 0 2px, transparent 2px 10px),
+    radial-gradient(700px 220px at 30% 20%, rgba(255,255,255,.05), transparent 60%);
+}
+.card .title{
+  position:relative;
+  z-index:1;
+  font-weight:700;
+  font-size:13px;
+  color:rgba(255,255,255,.92);
+  margin-bottom:6px;
+}
+.card .txt{
+  position:relative;
+  z-index:1;
+  font-size:13px;
+  line-height:1.6;
+  color:rgba(255,255,255,.80);
+  white-space:pre-wrap;
+}
+
+/* =========================
+   Overlay modal
+========================= */
+.overlay{
+  position:fixed !important;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  z-index:999 !important;
+}
+.overlay.show{ display:flex; }
+
+.modal{
+  width:min(680px, 100%);
+  border:1px solid var(--clothEdge);
+  background: rgba(15,15,16,.88);
+  border-radius:18px;
+  box-shadow:0 30px 90px rgba(0,0,0,.6);
+  padding:14px;
+  position:relative;
+  overflow:hidden;
+  backdrop-filter:none !important;
+}
+.modal::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.35;
+  background:
+    repeating-linear-gradient( 35deg, rgba(255,255,255,.05) 0 2px, transparent 2px 8px),
+    repeating-linear-gradient(-35deg, rgba(0,0,0,.18) 0 2px, transparent 2px 10px),
+    radial-gradient(700px 220px at 30% 20%, rgba(255,255,255,.05), transparent 60%);
+}
+.modal h2{
+  position:relative;
+  z-index:1;
+  margin:0 0 10px 0;
+  font-size:14px;
+  letter-spacing:.5px;
+  color:rgba(255,255,255,.92);
+}
+.modal p{
+  position:relative;
+  z-index:1;
+  margin:0 0 12px 0;
+  font-size:13px;
+  line-height:1.65;
+  color:rgba(255,255,255,.80);
+  white-space:pre-wrap;
+}
+.modal .actions{
+  position:relative;
+  z-index:1;
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+}
+
+/* Buttons */
+.btn{
+  appearance:none;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+  color:rgba(255,255,255,.86);
+  padding:10px 12px;
+  border-radius:12px;
+  font-size:13px;
+  cursor:pointer;
+}
+.btn:active{ transform:translateY(1px); }
+.btn.primary{
+  background:rgba(255,255,255,.14);
+  border-color:rgba(255,255,255,.18);
+}
+
+/* =========================
+   Animations
+========================= */
+.shake{ animation:shake .28s ease; }
+@keyframes shake{
+  0%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+  100%{transform:translateX(0)}
+}
+
+.panel.panic{ animation: panicShake .42s ease; }
+@keyframes panicShake{
+  0%   { transform: translateY(0) rotate(0deg); }
+  12%  { transform: translateY(-2px) rotate(-0.6deg); }
+  25%  { transform: translateY( 2px) rotate(0.7deg); }
+  40%  { transform: translateY(-1px) rotate(-0.5deg); }
+  58%  { transform: translateY( 1px) rotate(0.4deg); }
+  75%  { transform: translateY(-1px) rotate(-0.3deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* =========================
+   FX layers (cloud / rain)
+========================= */
+.fx{
+  position:fixed;
+  inset:-20vh -10vw;
+  pointer-events:none;
+  z-index:0;
+  opacity:1;
+  filter: saturate(.92);
+}
+
+/* Clouds + ground mist */
+.fxCloud{
+  opacity: calc(.28 + var(--storm) * .30);
+  filter: blur(calc(1.6px + var(--storm) * 2.2px));
+  mix-blend-mode: screen;
+  animation: cloudDrift 46s linear infinite;
+  background:
+    radial-gradient(520px 260px at 18% 20%, rgba(255,255,255,.09), transparent 70%),
+    radial-gradient(680px 320px at 48% 14%, rgba(255,255,255,.07), transparent 72%),
+    radial-gradient(820px 380px at 78% 22%, rgba(255,255,255,.06), transparent 74%),
+    radial-gradient(980px 420px at 88% 10%, rgba(255,255,255,.05), transparent 76%);
+}
+.fxCloud::after{
+  content:"";
+  position:absolute;
+  inset: 46vh -12vw -16vh -12vw;
+  opacity: calc(.65 + var(--storm) * .45);
+  filter: blur(calc(3.2px + var(--storm) * 4.6px));
+  animation: mistDrift 26s linear infinite;
+  background:
+    radial-gradient(920px 360px at 20% 78%, rgba(255,255,255,.06), transparent 72%),
+    radial-gradient(1120px 420px at 55% 84%, rgba(255,255,255,.05), transparent 74%),
+    radial-gradient(1320px 520px at 88% 86%, rgba(255,255,255,.04), transparent 76%),
+    linear-gradient(to top, rgba(255,255,255,.05), transparent 55%);
+}
+
+@keyframes cloudDrift{
+  from{ transform: translateX(-8vw) translateY(0); }
+  to  { transform: translateX( 8vw) translateY(-1.4vh); }
+}
+@keyframes mistDrift{
+  from{ transform: translateX(6vw); }
+  to  { transform: translateX(-6vw); }
+}
+
+/* Rain */
+.fxRain{
+  opacity: calc(var(--rain) * (0.55 + var(--storm) * 0.70));
+  transition: opacity .6s ease;
+  mix-blend-mode: screen;
+  filter: blur(calc(.25px + var(--storm) * .45px));
+  animation: rainFallFast .38s linear infinite;
+  background:
+    repeating-linear-gradient(
+      112deg,
+      rgba(255,255,255,.14) 0 1px,
+      rgba(255,255,255,0) 1px 11px
+    );
+}
+.fxRain::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  opacity:.65;
+  filter: blur(.15px);
+  animation: rainFallSlow .72s linear infinite;
+  background:
+    repeating-linear-gradient(
+      112deg,
+      rgba(255,255,255,.10) 0 1px,
+      rgba(255,255,255,0) 1px 18px
+    );
+}
+.fxRain::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  opacity: calc(var(--rain) * .12);
+  filter: blur(6px);
+  transform: translateY(-10%);
+  background:
+    linear-gradient(to bottom,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,.06) 40%,
+      rgba(255,255,255,0) 100%);
+}
+
+@keyframes rainFallFast{
+  from{ background-position: 0 0; }
+  to  { background-position: 0 26px; }
+}
+@keyframes rainFallSlow{
+  from{ background-position: 0 0; }
+  to  { background-position: 0 16px; }
+}
+
+/* =========================
+   Mobile
+========================= */
+@media (max-width:520px){
+  .hud{ flex-wrap:wrap; }
+  .badges{ margin-left:0; }
+  .route{ height:700vh; }
+}
+
+
+.hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+
+<div class="fx fxCloud"></div>
+<div class="fx fxRain"></div>
+
+<div class="wrap">
+  <div class="panel">
+    <div class="hud">
+      <h1>VIA FERRATA · 攀爬中</h1>
+      <div class="badges">
+        <div class="badge">体力：<span id="staminaOut">3</span></div>
+        <div class="badge">恐高：<span id="fearOut">0</span></div>
+        <div class="badge">信任：<span id="trustOut">0</span></div>
+      </div>
+    </div>
+
+    <div class="progressRow">
+      <div class="bar"><div id="barFill"></div></div>
+      <div class="small">滚动=往上爬。触发事件时会暂时锁住滚动。</div>
+    </div>
+
+    <div class="climb" id="climb">
+      <div class="route" id="route">
+        <!-- 标记点（可删可加） -->
+        <div class="tick" style="top:18%;">1</div>
+        <div class="tick" style="top:36%;">2</div>
+        <div class="tick" style="top:54%;">3</div>
+        <div class="tick" style="top:72%;">4</div>
+        <div class="tick" style="top:90%;">5</div>
+      </div>
+
+      <div class="story">
+        <div class="card">
+          <div class="title" id="sceneTitle">起点</div>
+          <div class="txt" id="sceneText">你把手套套紧，扣上锁扣。<br>钢索很冷，像一条不太情愿被你握住的线。<br>往上滚动，开始爬。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 事件弹层 -->
+<div class="overlay" id="overlay" aria-hidden="true">
+  <div class="modal" id="modal">
+    <h2 id="evtTitle">事件</h2>
+    <p id="evtText"></p>
+    <div class="actions" id="evtActions">
+      <button class="btn" id="btnOptionA">选项A</button>
+      <button class="btn primary" id="btnOptionB">选项B</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+
+  /* =========================
+     DOM
+  ========================= */
+  const climbEl   = $("#climb");
+  const routeEl   = $("#route");
+  const barFill   = $("#barFill");
+
+  const staminaOut = $("#staminaOut");
+  const fearOut    = $("#fearOut");
+  const trustOut   = $("#trustOut");
+
+  const sceneTitle = $("#sceneTitle");
+  const sceneText  = $("#sceneText");
+
+  const overlay  = $("#overlay");
+  const modal    = $("#modal");
+  const evtTitle = $("#evtTitle");
+  const evtText  = $("#evtText");
+  const btnA     = $("#btnOptionA");
+  const btnB     = $("#btnOptionB");
+
+  const panel    = document.querySelector(".panel");
+
+  /* =========================
+     Config
+  ========================= */
+  const CELEBRATE_URL = "./stage.html";
+
+  // 进度触发点（%）
+  const TRIGGERS = [8, 18, 30, 44, 58, 72, 86, 96];
+
+  // 事件间最小间隔（避免连弹）
+  const MIN_GAP_PCT = 12;
+
+  // 登顶判定：接近顶就算到顶（修复“96 快划卡住到不了100”）
+  const SUMMIT_PCT = 99;
+  const TOP_SNAP_PX = 24; // 顶部吸附阈值（px）
+
+  // 滚轮摩擦（轻回拉）
+  const FRICTION = 0.10;   // 0.06~0.12
+  const COOLDOWN_MS = 1100;
+
+  /* =========================
+     State
+  ========================= */
+  const S = {
+    stamina: 3,
+    fear: 0,
+    trust: 0,
+
+    locked: false,
+    finished: false,
+
+    fired: new Set(),
+    lastP: 0,
+    lastEvtAtP: -999,
+    lastEvtKey: null,
+    cooldownUntil: 0,
+
+    booted: false,
+     choosing: false, 
+  };
+const EVENT_POOL = [
+  {
+    key: "slip",
+    title: "脚滑",
+    text: "鞋底在岩面上打了一下空。\n你整个人往下一坠，锁扣发出很轻的“咔”。\n\n",
+    ok: {
+      label: "继续。",
+      effect: () => {
+        S.stamina -= 1;
+        S.fear += 1;
+        shake(modal);
+        pushScene("你没说话，只是呼吸重了一点。");
+      },
+    },
+  },
+  {
+    key: "lookdown",
+    title: "往下看了一眼",
+    text: "你不小心低头。\n下面的树像缩小的模型，风声忽然变得很近。\n\n",
+    ok: {
+      label: "继续。",
+      effect: () => {
+        S.stamina -= 1;
+        S.fear += 1;
+        pushScene("你把视线钉回岩面，像在和自己较劲。");
+      },
+    },
+  },
+  {
+    key: "help",
+    title: "横移段",
+    text: "前方是一个横移段。\n你得把重量交给钢索，再挪过去。\n\n",
+    ok: {
+      label: "继续。",
+      effect: () => {
+        S.stamina -= 1;
+        S.fear += 1;
+        pushScene("你自己数拍子，但手心开始出汗。");
+      },
+    },
+  },
+  {
+    key: "rest",
+    title: "小平台",
+    text: "你踩到一个小平台，终于能直起腰。\n风从山谷里穿过来。\n\n",
+    ok: {
+      label: "继续。",
+      effect: () => {
+        S.stamina += 1;
+        pushScene("你喝了一口水，甜味像回魂。");
+      },
+    },
+  },
+];
+
+  /* =========================
+     Helpers: UI + Math
+  ========================= */
+  function clampStats() {
+    S.stamina = clamp(S.stamina, 0, 8);
+    S.fear    = clamp(S.fear, 0, 10);
+    S.trust   = clamp(S.trust, 0, 10);
+  }
+
+  function clamp(v, a, b) {
+    return Math.max(a, Math.min(b, v));
+  }
+
+  function updateHUD() {
+    staminaOut.textContent = S.stamina;
+    fearOut.textContent    = S.fear;
+    trustOut.textContent   = S.trust;
+  }
+
+  function pushScene(text) {
+    sceneTitle.textContent = `进度：${getProgressPercent()}%`;
+    sceneText.textContent  = text;
+  }
+
+  function shake(el) {
+    el.classList.remove("shake");
+    void el.offsetWidth;
+    el.classList.add("shake");
+  }
+
+  function panicPanel() {
+    panel.classList.remove("panic");
+    void panel.offsetWidth;
+    panel.classList.add("panic");
+    setTimeout(() => panel.classList.remove("panic"), 520);
+  }
+
+  function lockScroll(on) {
+    S.locked = on;
+  }
+
+function openOverlay(evt) {
+  btnA.classList.remove("hidden");
+btnB.classList.add("primary");
+  lockScroll(true);
+  overlay.classList.add("show");
+  overlay.setAttribute("aria-hidden", "false");
+
+  evtTitle.textContent = evt.title;
+  evtText.textContent  = evt.text;
+
+  // ===== 单按钮模式 =====
+  if (evt.ok) {
+    btnA.classList.add("hidden");
+    btnB.classList.add("primary"); // 保持主按钮样式
+    btnB.textContent = evt.ok.label || "继续";
+
+    btnB.onclick = () => {
+      if (S.choosing) return;
+      S.choosing = true;
+      try {
+        evt.ok.effect && evt.ok.effect();
+        afterEvent();
+        const p = getProgressPercent();
+        setProgressUI(p);
+        S.lastP = p;
+      } finally {
+        closeOverlay();
+        S.choosing = false;
+      }
+    };
+    return;
+  }
+
+  // ===== 兼容：双按钮模式（以后要用再用）=====
+  btnA.classList.remove("hidden");
+
+  btnA.textContent = evt.options[0].label;
+  btnB.textContent = evt.options[1].label;
+
+  const handlePick = (idx) => {
+    if (S.choosing) return;
+    S.choosing = true;
+    try {
+      evt.options[idx].effect();
+      afterEvent();
+      const p = getProgressPercent();
+      setProgressUI(p);
+      S.lastP = p;
+    } finally {
+      closeOverlay();
+      S.choosing = false;
+    }
+  };
+
+  btnA.onclick = () => handlePick(0);
+  btnB.onclick = () => handlePick(1);
+}
+
+function closeOverlay() {
+  overlay.classList.remove("show");
+  overlay.setAttribute("aria-hidden", "true");
+
+  S.cooldownUntil = Date.now() + COOLDOWN_MS;
+
+  if (!S.finished) {
+    // 给浏览器一帧时间，避免“关弹窗→立刻滚动事件”抢跑
+    requestAnimationFrame(() => lockScroll(false));
+  }
+}
+function afterEvent() {
+  clampStats();
+  updateHUD();
+
+  if (S.stamina <= 0) {
+    S.stamina = 1;
+    S.fear += 1;
+    clampStats();
+    updateHUD();
+    pushScene("你感觉手臂像不是自己的。\n你被迫停下来——节目组说这是“安全休息”。");
+  }
+
+  lockScroll(false);
+
+  const p = getProgressPercent();
+  setProgressUI(p);
+  S.lastP = p;
+}
+  function getMaxScroll() {
+    return Math.max(0, climbEl.scrollHeight - climbEl.clientHeight);
+  }
+
+  // 顶部=100 底部=0
+  function getProgressPercent() {
+    const max = getMaxScroll();
+    if (max <= 0) return 0;
+
+    // 顶部吸附：接近 0 就算登顶（修复快速上滑被摩擦回拉拽下去）
+    if (climbEl.scrollTop <= TOP_SNAP_PX) return 100;
+
+    const raw = climbEl.scrollTop / max; // 顶部0 底部1
+    const climb = 1 - raw;
+    return clamp(Math.round(climb * 100), 0, 100);
+  }
+
+  function setProgressUI(pct) {
+    const t = pct / 100;
+
+    document.documentElement.style.setProperty("--skyBoost", t.toFixed(2));
+    barFill.style.width = `${pct}%`;
+
+    const stormStart = 78;
+    const rainStart  = 86;
+
+    const storm = (pct >= stormStart) ? Math.min(1, (pct - stormStart) / 18) : 0;
+    const rain  = (pct >= rainStart)  ? Math.min(1, (pct - rainStart) / 10)  : 0;
+
+    document.documentElement.style.setProperty("--storm", storm.toFixed(2));
+    document.documentElement.style.setProperty("--rain",  rain.toFixed(2));
+
+    const fade = Math.max(0, 1 - Math.pow(t, 2.1));
+    document.documentElement.style.setProperty("--uiFade", fade.toFixed(3));
+
+    // route 视觉随进度轻变（保留你原来的观感）
+    const baseA1 = 0.04 + t * 0.10;
+    const baseA2 = 0.02 + t * 0.08;
+    const dark   = 0.08 + storm * 0.20;
+
+    routeEl.style.background =
+      `linear-gradient(to bottom,
+        rgba(255,255,255,${(baseA1 * (1 - storm*0.55)).toFixed(3)}) 0%,
+        rgba(255,255,255,${(baseA2 * (1 - storm*0.60)).toFixed(3)}) 40%,
+        rgba(0,0,0,${dark.toFixed(3)}) 100%)`;
+  }
+
+  /* =========================
+     Trigger logic
+  ========================= */
+  function pickCrossedTrigger(prevP, nowP) {
+    if (nowP <= prevP) return null;
+
+    const crossed = TRIGGERS
+      .filter(t => !S.fired.has(t) && prevP < t && nowP >= t)
+      .sort((a, b) => a - b);
+
+    return crossed.length ? crossed[0] : null;
+  }
+
+  function pickEvent() {
+    let pool = EVENT_POOL;
+    if (S.lastEvtKey) pool = EVENT_POOL.filter(e => e.key !== S.lastEvtKey);
+    const evt = pool[Math.floor(Math.random() * pool.length)];
+    S.lastEvtKey = evt.key;
+    return evt;
+  }
+
+  function showSummit() {
+    S.finished = true;
+    lockScroll(true);
+
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden", "false");
+
+    evtTitle.textContent = "登顶";
+    evtText.textContent =
+`你终于踩到最后一段岩阶。
+风和雨把你吹得有点发笑。
+
+（结算）
+体力：${S.stamina}
+恐高：${S.fear}
+信任：${S.trust}
+
+我的老天你终于爬完了！
+但现在已经开始下小雨，，还是快点到平地去吧！`;
+
+    btnB.textContent = "解开绳索，进入空地。";
+
+    btnA.classList.add("hidden");
+    btnB.onclick = () => { window.location.href = CELEBRATE_URL; };
+  }
+
+  function maybeTrigger(prevP, nowP) {
+    if (S.finished) return;
+    if (S.locked) return;
+    if (Date.now() < S.cooldownUntil) return;
+    if (nowP - S.lastEvtAtP < MIN_GAP_PCT) return;
+
+    // 先判登顶：避免 96 附近事件把你卡在顶点前
+    if (nowP >= SUMMIT_PCT) {
+      showSummit();
+      return;
+    }
+
+    const t = pickCrossedTrigger(prevP, nowP);
+    if (t == null) return;
+
+    S.fired.add(t);
+    S.lastEvtAtP = nowP;
+
+    // 恐怖一下：你原来 72/86 触发 panic，我保留
+    if (t === 72 || t === 86) panicPanel();
+
+    openOverlay(pickEvent());
+  }
+
+  /* =========================
+     Input: wheel / scroll / touch / keys
+  ========================= */
+climbEl.addEventListener("wheel", (e) => {
+  if (!S.booted) return;
+
+  if (S.locked) {
+    e.preventDefault();
+    return;
+  }
+
+  const dy = e.deltaY;
+  const isTrackpad = Math.abs(dy) < 50;
+  const k = isTrackpad ? (FRICTION * 0.55) : FRICTION;
+
+  requestAnimationFrame(() => {
+    // ✅ 先读“默认滚动之后”的位置
+    const before = climbEl.scrollTop;
+
+    // ✅ 如果正在上滑且已经很靠近顶，就直接贴顶，不做回拉
+    if (dy < 0 && before <= TOP_SNAP_PX + 80) {
+      climbEl.scrollTop = 0;
+      return;
+    }
+
+    // ✅ 否则再做摩擦回拉
+    climbEl.scrollTop = before - dy * k;
+
+    // ✅ 兜底吸附（回拉后仍可能接近顶）
+    if (dy < 0 && climbEl.scrollTop <= TOP_SNAP_PX) climbEl.scrollTop = 0;
+    if (climbEl.scrollTop < 0) climbEl.scrollTop = 0;
+  });
+}, { passive: false });
+
+  // 弹窗期间拦截键盘滚动
+  window.addEventListener("keydown", (e) => {
+    if (!S.locked) return;
+    const keys = ["ArrowUp","ArrowDown","PageUp","PageDown","Home","End"," "];
+    if (keys.includes(e.key)) e.preventDefault();
+  }, { passive: false });
+
+  // scroll：更新进度 + 触发事件
+  climbEl.addEventListener("scroll", () => {
+    if (!S.booted || S.locked) return;
+
+    const nowP = getProgressPercent();
+    setProgressUI(nowP);
+
+    const prevP = S.lastP;
+    S.lastP = nowP;
+if (!S.finished && nowP >= SUMMIT_PCT) {
+  showSummit();
+  return;
+}
+    maybeTrigger(prevP, nowP);
+  }, { passive: true });
+
+  /* =========================
+     Init: start at bottom
+  ========================= */
+  function jumpToBottomStable() {
+    const prev = climbEl.style.scrollBehavior;
+    climbEl.style.scrollBehavior = "auto";
+
+    const doJump = () => {
+      climbEl.scrollTop = getMaxScroll();
+      const p = getProgressPercent();
+      setProgressUI(p);
+      S.lastP = p;
+    };
+
+    requestAnimationFrame(doJump);
+    setTimeout(doJump, 60);
+    setTimeout(() => { climbEl.style.scrollBehavior = prev || "smooth"; }, 120);
+  }
+
+  // init
+  updateHUD();
+  setProgressUI(getProgressPercent());
+  jumpToBottomStable();
+  setTimeout(() => { S.booted = true; }, 180);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chapter Three</title>
+  <style>
+:root{
+  --bg:#2B0F1A;                /* 深酒红底 */
+  --card:rgba(255,255,255,.07);
+  --bd:rgba(255,255,255,.16);
+  --txt:#fff;
+  --mut:rgba(255,255,255,.75);
+  --btn:rgba(255,255,255,.10);
+  --btn2:rgba(255,255,255,.16);
+  --shadow:0 12px 34px rgba(0,0,0,.40);
+
+  --gold:#F7D7A8;
+  --pink:#FF6FAE;              /* 点缀粉 */
+  --rose:#FFB3D1;              /* 更浅的粉 */
+}
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Arial,sans-serif;
+
+  /* 爱心更少：把 tile 做大；更不明显：降低不透明度；镂空：stroke-only SVG */
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg fill='none'%3E%3Cpath d='M110 156c-28-18-52-37-52-63 0-14 11-25 25-25 11 0 20 6 27 15 7-9 16-15 27-15 14 0 25 11 25 25 0 26-24 45-52 63z' stroke='rgba(255,179,209,0.08)' stroke-width='2'/%3E%3Cpath d='M110 146c-23-15-43-31-43-54 0-11 9-20 20-20 9 0 16 5 23 13 7-8 14-13 23-13 11 0 20 9 20 20 0 23-20 39-43 54z' stroke='rgba(255,111,174,0.06)' stroke-width='1.6'/%3E%3C/g%3E%3C/svg%3E"),
+    radial-gradient(1100px 760px at 28% 12%, rgba(255,111,174,.18), transparent 62%),
+    radial-gradient(900px 620px at 75% 78%, rgba(255,179,209,.12), transparent 58%),
+    radial-gradient(700px 520px at 55% 48%, rgba(247,215,168,.07), transparent 60%),
+    var(--bg);
+
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-size: 220px 220px, auto, auto, auto, auto;
+
+  color:var(--txt);
+}
+/* 点击爱心水波纹（镂空） */
+.heartRipple{
+  position:fixed;
+  left:0; top:0;
+  width:28px; height:26px;
+  transform:translate(-50%,-50%) scale(.2);
+  transform-origin:center;
+  pointer-events:none;
+  z-index:9999;
+  opacity:.85;
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,.35));
+  animation: heartRipple 900ms ease-out forwards;
+}
+
+.heartRipple path{
+  fill:none;
+  stroke: rgba(255,179,209,.78);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes heartRipple{
+  0%   { transform:translate(-50%,-50%) scale(.2); opacity:.75; }
+  60%  { opacity:.35; }
+  100% { transform:translate(-50%,-50%) scale(6.2); opacity:0; }
+}
+
+    .shell{
+      min-height:100dvh;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      padding:28px 16px;
+    }
+    .card{
+      width:min(960px, 100%);
+      background:var(--card);
+      border:1px solid var(--bd);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    .top h1{ margin:0 0 6px 0; letter-spacing:.3px; }
+    .mut{ color:var(--mut); line-height:1.5; }
+    .small{ font-size:13px; }
+
+    .ruleBox{
+      margin:12px 0 16px;
+      padding:12px 14px;
+      border:1px solid var(--bd);
+      border-radius:14px;
+      background:rgba(0,0,0,.12);
+    }
+    .rules{ margin:0; padding-left:18px; }
+    .rules li{ margin:6px 0; }
+
+    .row{ margin-top:14px; }
+    .label{ display:block; margin:0 0 8px 2px; color:var(--mut); font-size:13px; }
+
+    .gate{ display:flex; gap:10px; flex-wrap:wrap; }
+    .input{
+      flex:1;
+      min-width:180px;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid var(--bd);
+      background:rgba(0,0,0,.18);
+      color:var(--txt);
+      outline:none;
+    }
+    .input::placeholder{ color:rgba(255,255,255,.45); }
+
+    .btn{
+      padding:11px 14px;
+      border-radius:12px;
+      border:1px solid var(--bd);
+      background:var(--btn);
+      color:var(--txt);
+      cursor:pointer;
+    }
+    .btn:hover{ background:var(--btn2); }
+
+.primary{
+  border-color:rgba(255,111,174,.55);
+  box-shadow:0 0 0 1px rgba(255,111,174,.12) inset;
+}
+    .metaLine{ margin-top:10px; color:var(--mut); font-size:13px; }
+
+    .fallback{
+      margin-top:14px;
+      padding:12px;
+      border-radius:14px;
+      border:1px dashed rgba(255,255,255,.22);
+      background:rgba(0,0,0,.10);
+    }
+    .segRow{ display:flex; gap:10px; margin-top:10px; }
+
+    .hintBox{
+      margin:12px 0 14px;
+      padding:10px 12px;
+      border:1px solid var(--bd);
+      border-radius:14px;
+      background:rgba(0,0,0,.10);
+    }
+
+    /* ====== 卡牌网格 ====== */
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:12px;
+    }
+    @media (max-width: 760px){ .grid{ grid-template-columns:repeat(3, 1fr); } }
+    @media (max-width: 520px){ .grid{ grid-template-columns:repeat(2, 1fr); } }
+
+    /* ====== Flip Card ====== */
+    .flip{
+      position:relative;
+      width:100%;
+      aspect-ratio: 2.5 / 3.5; /* 扑克牌比例 */
+      perspective: 900px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .flipInner{
+      width:100%;
+      height:100%;
+      position:relative;
+      transform-style:preserve-3d;
+      transition:transform .45s ease;
+      border-radius:14px;
+    }
+    .flip.is-flipped .flipInner{ transform: rotateY(180deg); }
+
+    @media (hover:hover){
+      .flip:hover .flipInner{ transform: rotateY(180deg); }
+    }
+
+    .face{
+      position:absolute;
+      inset:0;
+      border-radius:14px;
+      backface-visibility:hidden;
+      border:1px solid var(--bd);
+      background:rgba(0,0,0,.16);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      padding:10px;
+      box-shadow:0 10px 24px rgba(0,0,0,.25);
+    }
+    .front{
+      background:
+        radial-gradient(300px 200px at 30% 20%, rgba(247,215,168,.14), transparent 60%),
+        radial-gradient(260px 220px at 80% 70%, rgba(120,170,220,.10), transparent 60%),
+        rgba(0,0,0,.14);
+    }
+.num{
+  font-size:34px;
+  font-weight:700;
+  color:var(--rose);
+  letter-spacing:1px;
+  text-shadow:0 10px 24px rgba(0,0,0,.38);
+}
+    .back{
+      transform: rotateY(180deg);
+      align-items:flex-start;
+      justify-content:flex-start;
+      gap:10px;
+      padding:12px;
+    }
+    .backTitle{
+      font-size:13px;
+      color:var(--mut);
+      letter-spacing:.4px;
+    }
+    .backText{
+      font-size:14px;
+      line-height:1.5;
+      color:rgba(255,255,255,.92);
+      white-space:pre-wrap;
+    }
+
+    /* ====== 顶部小工具行 ====== */
+    .toolbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .pill{
+      font-size:12px;
+      color:rgba(255,255,255,.85);
+      padding:6px 10px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(0,0,0,.10);
+    }
+    .linkBtn{
+      text-decoration:none;
+      color:var(--gold);
+      border:1px solid rgba(247,215,168,.35);
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(247,215,168,.06);
+      display:inline-block;
+    }
+    .linkBtn:hover{ background:rgba(247,215,168,.10); }
+
+    /* ====== Overlay Picker ====== */
+    .overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+    .overlay.show{ display:flex; }
+
+.overlayInner{
+  width:min(720px, 100%);
+  border-radius:18px;
+  background:rgba(43,15,26,.94); /* 用你的 --bg 系 */
+  border:1px solid rgba(255,179,209,.18);
+  box-shadow:0 20px 60px rgba(0,0,0,.55);
+  padding:14px;
+}
+    .overlayTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .overlayTitle{ font-weight:650; }
+
+    .xBtn{
+      border:1px solid rgba(255,255,255,.20);
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      border-radius:12px;
+      padding:8px 10px;
+      cursor:pointer;
+    }
+
+   .nameGrid{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:repeat(5, 1fr); /* 多一列，整体更紧凑 */
+  gap:8px; /* 缩小间距 */
+}
+@media (max-width:640px){ .nameGrid{ grid-template-columns:repeat(4, 1fr); } }
+@media (max-width:420px){ .nameGrid{ grid-template-columns:repeat(3, 1fr); } }
+
+.nameBtn{
+  text-align:left;
+  padding:7px 9px;
+  border-radius:12px;
+  border:1px solid rgba(255,179,209,.22);
+  background:rgba(255,111,174,.06);
+  color:#fff;
+  cursor:pointer;
+  font-size:13px;
+  line-height:1.15;
+}
+.nameBtn:hover{
+  background:rgba(255,111,174,.12);
+  border-color:rgba(255,179,209,.32);
+}
+
+.nameHint{
+  display:block;
+  margin-top:3px;
+  font-size:11px;            /* 更小 */
+  color:rgba(255,255,255,.55);
+}
+
+    /* view 切换 */
+    [data-view]{ display:none; }
+    [data-view].show{ display:block; }
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+    <section class="card">
+
+      <!-- ========== VIEW 1: ENTRY ========== -->
+      <div data-view="entry" id="viewEntry">
+        <header class="top">
+          <h1>调酒之王!</h1>
+          <p class="mut">
+            输入名字，系统根据名字对应的性别进入卡牌页面。<br>
+            名字不在名单里时，可手动选择性别继续。
+          </p>
+        </header>
+
+        <div class="ruleBox">
+          <ol class="rules">
+            <li>请看翻动卡片描述来选自己心仪的酒吧！</li>
+            <li>谁知道呢，节目组摆了一堆上去！</li>
+            <li>节目组的调酒也混进去了哦？也有空杯哦？好好看描述！</li>
+            <li>选完之后把号码或者描述告诉智能模块取酒！</li>
+          </ol>
+        </div>
+
+        <div class="row">
+          <label class="label">名字</label>
+          <div class="gate">
+            <input id="nameIn" class="input" placeholder="你是谁？" autocomplete="off" />
+            <button id="openPickerBtn" class="btn" type="button">选名字</button>
+            <button id="goBtn" class="btn primary" type="button">进入</button>
+          </div>
+          <div class="metaLine" id="metaOut">尚未选择</div>
+        </div>
+
+        <div class="fallback" id="fallback" hidden>
+          <div class="mut small">未在名单中：请选择性别继续</div>
+          <div class="segRow">
+            <button class="btn" id="goMaleBtn" type="button">男</button>
+            <button class="btn" id="goFemaleBtn" type="button">女</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== VIEW 2: CARDS ========== -->
+      <div data-view="cards" id="viewCards">
+        <header class="top">
+          <h1 id="cardsTitle">卡牌</h1>
+          <p class="mut" id="whoOut">—</p>
+
+          <div class="toolbar">
+            <span class="pill" id="genderPill">—</span>
+            <a class="linkBtn" href="./index.html">返回入口</a>
+          </div>
+        </header>
+
+        <div class="hintBox">
+          <div class="mut small">
+            桌面端：鼠标滑上去自动翻面。手机端：点击卡牌翻面。
+          </div>
+        </div>
+
+        <div class="grid" id="cardGrid"></div>
+      </div>
+
+    </section>
+
+    <!-- Picker 弹层 -->
+    <div class="overlay" id="overlay" aria-hidden="true">
+      <div class="overlayInner" role="dialog" aria-modal="true" aria-label="选择名字">
+        <div class="overlayTop">
+          <div class="overlayTitle">选名字</div>
+          <button class="xBtn" id="closePickerBtn" type="button" aria-label="关闭">✕</button>
+        </div>
+
+        <input id="pickerSearch" class="input" placeholder="搜索名字…" autocomplete="off" />
+        <div class="nameGrid" id="nameGrid"></div>
+
+        <div class="mut small" style="margin-top:10px;">
+          点击名字会自动填入并关闭。
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    /* ========= 名字 DB：你按需替换/增删 ========= */
+   const DB = {
+
+  /* ===== lake ===== */
+  "J.O.": { gender: "M", map: "lake" },
+  "Ethan": { gender: "M", map: "lake" },
+  "Samuel": { gender: "M", map: "lake" },
+  "玛顿": { gender: "F", map: "lake" },
+  "Oliven": { gender: "F", map: "lake" },
+  "Erla": { gender: "F", map: "lake" },
+
+  /* ===== falls ===== */
+  "Cela": { gender: "F", map: "falls" }, 
+  "Mubiru": { gender: "M", map: "falls", role: "biologist"},
+  "Zurabia": { gender: "F", map: "falls" },
+  "丹": { gender: "M", map: "falls" },
+  "Naya": { gender: "F", map: "falls" },
+  "Matt": { gender: "M", map: "falls" },
+  "Maya": { gender: "F", map: "falls" },
+  "橙知": { gender: "M", map: "falls" },
+  "向林木": { gender: "F", map: "falls" },
+  "阿基米德": { gender: "M", map: "falls" },
+
+  /* ===== forest ===== */
+  "Amber": { gender: "F", map: "forest" },
+  "Thomas": { gender: "M", map: "forest" },
+  "Honey": { gender: "M", map: "forest" },
+  "Jeffrey": { gender: "F", map: "forest" },
+  "Josephine": { gender: "F", map: "forest" },
+
+  /* ===== wetland ===== */
+  "马塞拉": { gender: "F", map: "wetland" },
+  "Kazares": { gender: "M", map: "wetland" },
+  "Moira": { gender: "F", map: "wetland" },
+  "Eric": { gender: "M", map: "wetland" },
+  "Melusine": { gender: "F", map: "wetland" },
+  "奥利弗": { gender: "M", map: "wetland" },
+
+  /* ===== no map (not in list) ===== */
+  "Friedrich": { gender: "M" },
+  "卡莱比": { gender: "M" },
+  "叶澄希": { gender: "M" },
+  "Romaine": { gender: "F" },
+  "奈芙": { gender: "F" },
+
+};
+
+    /* ========= 16 张牌背面内容（男/女各一套） =========
+       每个数组必须正好 16 条
+    */
+    const CARD_TEXT = {
+    F: [
+      "高球杯中盛满了液体，随时会洒。下层透明，渐变至上层呈黑褐色，有气泡。\n顶部的白色泡沫慢慢塌陷，稀稀拉拉。渐变层有缓慢的对流纹路，像石油污染过的海水。",
+
+      "闻起来有甜腻的酒精味。\n透明的玻璃杯里盛满了琥珀色的液体，在大片冰块的缝隙间，无数细小的、透明的气泡正从杯底疯狂向上升腾。\n应该是某种气泡饮料和高甜度酒精混合的结果。",
+
+      "长条玻璃杯，装满青绿色的澄澈液体，杯口插着片黄柠檬，半浸泡在里面。",
+
+      "透明的，装满气体的高脚杯。",
+
+      "一杯一次性塑料杯装着的尿色液体。",
+
+      "满杯冰块，柠檬片，配上怎么看都是可乐的液体，毫无杀伤力…",
+
+      "黑青色的饮品，乍一看略有奇怪但是打光拍照是不错的选择。\n对于酒而言有点太酸了，适合口味奇特的人。",
+
+      "哎？空气？杯子也是空气做的？",
+
+      "一杯看起来非常漂亮的酒。\n有樱桃、哈密瓜、香橙、小伞，插在雪顶上的吸管甚至还套有小爱心，酒液是黄绿色的。",
+
+      "闻起来什么味道都没有的一杯液体，该不会是自来水吧？",
+
+      "杯中液体分层明显，上层淡黄，下层暗红。晃动后混成浑浊的橙褐色。",
+
+      "这是一份充斥麦香味的奶白色饮料，看起来并不像酒精但似乎是低度数的酒饮。\n五谷杂粮的味道很香甜，饮料顶部放了一层喷枪烤制的薄脆焦糖饼干，据说是一杯给人带来温暖味道的酒。",
+
+      "杯底沉着碎冰，液体呈浅蓝色。颜色梦幻，却有刺鼻的薄荷与烈酒气息。",
+
+      "液体呈蜜色，粘稠度偏高。挂杯明显，像蜂蜜稀释后混入酒精。",
+
+      "一杯写着空气的，空气。",
+
+      "闻起来纯度很高的琥珀色酒液。"
+    ],
+      M: [
+        "金桔色的酒体上方点缀以蓝紫色鼠尾草，高脚杯的杯口有沾有海盐盐边，稍微靠近些便能闻到浓郁的复合型香气。",
+
+        "如同极光一般绚丽的酒。\n即便天气慢慢转雾，通过这杯酸酸的极光消除心中的雾霾吧~",
+
+        "一个空的高脚杯。",
+
+        "杯子里大半是冰，泛蓝的液体在表层被稀释的很浅。\n杯壁沉着柠檬片和一圈偏红的细碎糖粒痕迹，偶尔有细小的气泡沿着冰块边缘往上爬，不知道是苏打水还是其他神秘材料。",
+
+
+        "装着半杯冰的淡粉色饮料，以淡黄色打底，酒味乍一闻并不重，闻起来像是桃子。",
+
+        "深琥珀色的液体，看起来像是天然果汁。\n杯子里有一块巨大的冰，杯沿挂着一片薄薄的苹果片。闻起来也是苹果汁？",
+
+        "深琥珀色酒液悬浮着碎薄荷，似乎有着柑橘和其他什么别的的复杂气味，像是发挥了创意但完全不知道加的东西和在一起是什么效果。",
+
+
+        "哎？！这里怎么是个空气杯子！连杯子都没有？？",
+
+        "你不确定是否真有这样的配分，又或者只是某个人心血来潮的恶作剧。\n但这杯酒里面肯定加了一些食用荧光粉，闪着微弱的绿色荧光。杯上还挂着玫瑰色的盐粒与红色的粉末。",
+
+
+        "蜂蜜一样的酒，闻起来是蜂蜜水，看起来也是。",
+
+        "一个空的一次性纸杯。",
+
+        "一杯让你想起富士山的酒，看起来十分浓稠。\n上层是乳白色的厚重半流体，下层是漂亮的天蓝色，衬出杯子上的漂亮纹痕。",
+
+
+        "颜色暗红近黑，神似血浆袋。\n香气偏酸甜，蔓越莓压过了朗姆的焦糖气味。",
+
+        "透明的大块冰把液体分割成两层不同的绿色。\n下层是深墨绿，颜色浓重，上层则是亮绿，偏青，乍一看有点像人工调出的果味饮料。\n杯口边缘卡着一片切片柠檬？橙子？闻起来更像是热带水果。",
+
+        "一杯气泡水，普通的气泡水，甚至写了气泡水的标签贴上去。",
+
+        "看起来不太妙的酒，闻起来像可乐，是棕灰色的。",
+      ],
+    };
+
+    /* ========= helpers ========= */
+    const $ = (s) => document.querySelector(s);
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+      }[m]));
+    }
+    function normName(s){ return String(s ?? "").trim(); }
+
+    function setView(which){
+      document.querySelectorAll("[data-view]").forEach(v => v.classList.remove("show"));
+      const el = document.querySelector(`[data-view="${which}"]`);
+      if (el) el.classList.add("show");
+    }
+
+    // 用 URL 参数控制显示：?view=entry 或 ?view=cards&g=M&name=xxx
+    function updateURL(params){
+      const url = new URL(window.location.href);
+      Object.entries(params).forEach(([k,v]) => {
+        if (v === null || v === undefined || v === "") url.searchParams.delete(k);
+        else url.searchParams.set(k, v);
+      });
+      history.pushState({}, "", url.toString());
+    }
+
+    function gotoCards(gender, name){
+      updateURL({ view:"cards", g: gender, name: name || "" });
+      renderFromURL();
+    }
+
+    function renderCards(gender, name){
+      const grid = $("#cardGrid");
+      const whoOut = $("#whoOut");
+      const title = $("#cardsTitle");
+      const pill = $("#genderPill");
+
+      const label = (gender === "F") ? "挑酒页面" : "挑酒页面";
+      title.textContent = label;
+      pill.textContent = (gender === "F") ? "Gender: F" : "Gender: M";
+      whoOut.textContent = name ? `当前：${name}` : "当前：匿名";
+
+      const arr = CARD_TEXT[gender] || [];
+      if (arr.length !== 16){
+        grid.innerHTML = `<div class="mut">CARD_TEXT.${gender} 需要正好 16 条文本。当前：${arr.length}</div>`;
+        return;
+      }
+
+      grid.innerHTML = arr.map((txt, i) => {
+        const n = i + 1;
+        return `
+          <div class="flip" data-idx="${i}">
+            <div class="flipInner">
+              <div class="face front">
+                <div class="num">${n}</div>
+              </div>
+              <div class="face back">
+                <div class="backTitle">#${n}</div>
+                <div class="backText">${escapeHtml(txt)}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // 手机端点击翻牌（桌面 hover 在 CSS 处理）
+      grid.querySelectorAll(".flip").forEach(card => {
+        card.addEventListener("click", () => card.classList.toggle("is-flipped"));
+      });
+    }
+
+    function renderFromURL(){
+      const url = new URL(window.location.href);
+      const view = url.searchParams.get("view") || "entry";
+
+      if (view === "cards"){
+        const g = (url.searchParams.get("g") || "M").toUpperCase();
+        const gender = (g === "F") ? "F" : "M";
+        const name = normName(url.searchParams.get("name") || "");
+        setView("cards");
+        renderCards(gender, name);
+      }else{
+        setView("entry");
+      }
+    }
+
+    /* ========= ENTRY view logic ========= */
+    (function initEntry(){
+      const nameIn = $("#nameIn");
+      const openBtn = $("#openPickerBtn");
+      const goBtn = $("#goBtn");
+      const metaOut = $("#metaOut");
+      const fallback = $("#fallback");
+      const goMaleBtn = $("#goMaleBtn");
+      const goFemaleBtn = $("#goFemaleBtn");
+
+      const overlay = $("#overlay");
+      const closePickerBtn = $("#closePickerBtn");
+      const nameGrid = $("#nameGrid");
+      const pickerSearch = $("#pickerSearch");
+
+const allNames = Object.keys(DB).sort((a, b) => {
+  const isZh = (s) => /[\u3400-\u9FFF]/.test(s); // 有中文就算中文
+  const azKey = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, ""); // 去掉点/空格之类
+
+  const aZh = isZh(a), bZh = isZh(b);
+  if (aZh !== bZh) return aZh ? -1 : 1; // 中文在前
+
+  // 中文内部也排一下（按中文排序规则）
+  if (aZh && bZh) return a.localeCompare(b, "zh-Hans");
+
+  // 英文（含 J.O. 这种）按字母序
+  const ka = azKey(a), kb = azKey(b);
+  const cmp = ka.localeCompare(kb, "en", { sensitivity: "base" });
+  if (cmp !== 0) return cmp;
+
+  // 兜底：原字符串对比，避免完全相同 key
+  return a.localeCompare(b, "en", { sensitivity: "base" });
+});
+
+      function updateMeta(name){
+        const n = normName(name);
+        if (!n){
+          metaOut.textContent = "尚未选择";
+          fallback.hidden = true;
+          return;
+        }
+        const hit = DB[n];
+        if (hit?.gender){
+          metaOut.textContent = `已识别：${n}（${hit.gender === "F" ? "女" : "男"}）`;
+          fallback.hidden = true;
+        }else{
+          metaOut.textContent = `未在名单：${n}`;
+          fallback.hidden = false;
+        }
+      }
+
+      function renderNameGrid(list){
+        nameGrid.innerHTML = list.map((nm) => {
+          const g = DB[nm]?.gender === "F" ? "女" : "男";
+          return `
+            <button class="nameBtn" type="button" data-name="${escapeHtml(nm)}">
+              ${escapeHtml(nm)}
+            </button>
+          `;
+        }).join("");
+
+        nameGrid.querySelectorAll(".nameBtn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const nm = btn.getAttribute("data-name") || "";
+            nameIn.value = nm;
+            updateMeta(nm);
+            closePicker();
+          });
+        });
+      }
+
+      function openPicker(){
+        overlay.classList.add("show");
+        overlay.setAttribute("aria-hidden", "false");
+        pickerSearch.value = "";
+        renderNameGrid(allNames);
+        setTimeout(() => pickerSearch.focus(), 0);
+      }
+      function closePicker(){
+        overlay.classList.remove("show");
+        overlay.setAttribute("aria-hidden", "true");
+      }
+
+      openBtn.addEventListener("click", openPicker);
+      closePickerBtn.addEventListener("click", closePicker);
+      overlay.addEventListener("click", (e) => { if (e.target === overlay) closePicker(); });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && overlay.classList.contains("show")) closePicker();
+      });
+
+      pickerSearch.addEventListener("input", () => {
+        const q = pickerSearch.value.trim().toLowerCase();
+        const filtered = allNames.filter(n => n.toLowerCase().includes(q));
+        renderNameGrid(filtered);
+      });
+
+      nameIn.addEventListener("input", () => updateMeta(nameIn.value));
+      nameIn.addEventListener("keydown", (e) => { if (e.key === "Enter") goBtn.click(); });
+
+      goBtn.addEventListener("click", () => {
+        const name = normName(nameIn.value);
+        if (!name){
+          metaOut.textContent = "请先输入名字";
+          fallback.hidden = true;
+          return;
+        }
+        const hit = DB[name];
+        if (hit?.gender){
+          gotoCards(hit.gender, name);
+        }else{
+          updateMeta(name); // 展示 fallback 手选
+        }
+      });
+
+      goMaleBtn.addEventListener("click", () => gotoCards("M", normName(nameIn.value)));
+      goFemaleBtn.addEventListener("click", () => gotoCards("F", normName(nameIn.value)));
+
+      updateMeta("");
+    })();
+
+    /* ========= initial render ========= */
+    window.addEventListener("popstate", renderFromURL);
+    renderFromURL();
+
+
+    // 点击背景出现爱心“水波纹”
+(function initHeartRipple(){
+  const svgNS = "http://www.w3.org/2000/svg";
+
+  document.addEventListener("pointerdown", (e) => {
+    // 避免点按钮/输入框/弹窗内容也冒泡出水波
+    if (e.target.closest("button, input, a, .overlayInner")) return;
+
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("class", "heartRipple");
+    svg.setAttribute("viewBox", "0 0 24 22");
+
+const path1 = document.createElementNS(svgNS, "path");
+path1.setAttribute("d","M12 21 C12 21 3 15.2 3 9.6 C3 6.3 5.4 4 8.4 4 C10.2 4 11.5 4.9 12 5.9 C12.5 4.9 13.8 4 15.6 4 C18.6 4 21 6.3 21 9.6 C21 15.2 12 21 12 21 Z");
+
+const path2 = document.createElementNS(svgNS, "path");
+path2.setAttribute("d","M12 21 C12 21 3 15.2 3 9.6 C3 6.3 5.4 4 8.4 4 C10.2 4 11.5 4.9 12 5.9 C12.5 4.9 13.8 4 15.6 4 C18.6 4 21 6.3 21 9.6 C21 15.2 12 21 12 21 Z");
+path2.setAttribute("style","stroke: rgba(255,111,174,.35); stroke-width: 1.4;");
+
+svg.appendChild(path2);
+svg.appendChild(path1);
+
+    svg.style.left = `${e.clientX}px`;
+    svg.style.top  = `${e.clientY}px`;
+
+    document.body.appendChild(svg);
+    svg.addEventListener("animationend", () => svg.remove(), { once:true });
+  });
+})();
+  </script>
+</body>
+</html>

@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="./style.css">
+  <title>Heart to Beat · Main</title>
+</head>
+
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div>
+        <h1>Heart to Beat</h1>
+        <div class="sub">心动？！生存法则！ ·  Main</div>
+      </div>
+      <div class="mini">入口页</div>
+    </header>
+
+    <section class="grid">
+      <!-- LEFT: 导航/提示 -->
+      <aside class="card pad" id="left">
+        <div class="pill">
+          <span>当前章节</span>
+          <b>Chapter FOUR</b>
+        </div>
+
+<div class="panelCenter">
+<!--         <div class="hr"> </div>
+
+
+        <div class="mini">
+          <br/>
+
+        </div> -->
+
+      <!--   <div class="hr">
+         </div>
+
+        <div class="row">
+
+        </div> -->
+
+<div class="hr"></div>
+
+<div class="mini" style="margin-bottom:8px">今日登山查询</div>
+
+<div class="drawGrid">
+  <!-- 左：突发 -->
+  <div class="drawCol">
+    <button class="btn primary w100" id="drawLuck">抽取今日突发</button>
+  </div>
+
+  <!-- 右：搭档 -->
+  <div class="drawCol">
+    <div class="genderRow">
+      <label class="mini" for="myGender" style="margin-bottom:8px">不知道和谁互动？</label>
+      <select id="myGender">
+        <option value="" selected disabled>请选择你的性别…</option>
+        <option value="F">女</option>
+        <option value="M">男</option>
+      </select>
+    </div>
+    <button class="btn w100" id="drawPartner">抽取异性搭档</button>
+  </div>
+</div>
+
+<div class="hr"></div>
+
+<!-- 结果区：突发 -->
+<div id="luckResult" class="resultBox" style="display:none">
+  <div class="resultTop">
+    <span class="mini">今日突发</span>
+    <span class="tag" id="luckTag">—</span>
+  </div>
+  <b class="resultName" id="luckName">—</b>
+  <div class="mini resultDesc" id="luckDesc"></div>
+</div>
+
+<!-- 结果区：搭档 -->
+<div id="partnerResult" class="resultBox" style="display:none">
+  <div class="resultTop">
+    <span class="mini">异性搭档</span>
+    <span class="tag" id="partnerTag">—</span>
+  </div>
+  <b class="resultName" id="partnerName">—</b>
+  <div class="mini resultDesc" id="partnerDesc"></div>
+</div>
+
+<div class="mini" style="margin-top:10px">
+  规则：每次进入网页仅可各抽一次；退出则会清空结果——非要作弊节目组也没有任何手段阻止。
+  <br>
+  抽卡仅作为打卡灵感参考，不强制绘制，想游玩请截图保存。
+</div>
+</div>
+
+      </aside>
+
+      <!-- RIGHT: 主卡片内容 -->
+      <main class="card pad" id="right">
+        <p class="sceneTitle">MAIN</p>
+
+<!--         <p class="sceneBody">欢迎来到入口页。</p> -->
+
+        <div class="choices">
+          <a class="choiceLink" href="./chap_one/index.html">
+            <div class="choice">
+              <b>▶ Chapter One：</b> 要饿死了！寻找食材大作战！ 
+              <div class="mini">进入第一章节游玩地图</div>
+            </div>
+          </a>
+
+          <div class="choiceRow">
+             <a class="choiceLink" href="./chap_two/index.html">
+            <div class="choice">
+              <b>▶ Chapter Two：</b> 一双又一对！动物追踪大师！
+              <div class="mini">进入第二章节游玩地图</div>
+            </div>
+          </a>
+
+
+            <a class="sideBtn" href="./chap_two/side_index.html">
+              支线：钓鱼佬！
+            </a> 
+
+          </div>
+
+
+<!--             <div class="choices">
+          <a class="choiceLink" href="./chap_three/index.html">
+            <div class="choice">
+              <b>▶ Chapter Three：</b> 坏心眼？好人！调酒之王！ 
+              <div class="mini">进入第三章节游玩页面</div>
+            </div>
+          </a>
+ -->
+
+
+
+ <div class="choiceRow">
+  <a class="choiceLink" href="./chap_three/side_index.html"
+     style="text-decoration:none; filter:saturate(.45) contrast(1.3);">
+    <div class="choice"
+         style="
+           position:relative;
+           overflow:hidden;
+           letter-spacing:.09em;
+           animation:distort 3s infinite;
+         ">
+
+      <b style="
+        display:inline-block;
+        position:relative;
+        color:#fff;
+        text-shadow:
+          0 0 20px rgba(255,255,255,.08),
+          2px 0 rgba(0,200,255,.25),
+         -2px 0 rgba(255,0,0,.25);
+        animation:glitchMain 2.5s infinite;
+      ">
+        ▶ Chapter Three：
+      </b>
+
+      <span style="
+        display:inline-block;
+        position:relative;
+        font-weight:700;
+        margin-left:6px;
+        animation:glitchText 1.8s infinite;
+      ">
+        停电了？
+      </span>
+
+      <div class="mini"
+           style="
+             opacity:.65;
+             filter:blur(.3px);
+             animation:flicker 2.8s infinite;
+           ">
+        进入第三章节游玩页面
+      </div>
+
+      <!-- 扫描线 -->
+      <span aria-hidden="true"
+        style="
+          position:absolute;
+          inset:0;
+          pointer-events:none;
+          background:
+            repeating-linear-gradient(
+              180deg,
+              rgba(255,255,255,.06) 0 1px,
+              rgba(0,0,0,0) 1px 4px
+            );
+          mix-blend-mode:overlay;
+          opacity:.25;
+        ">
+      </span>
+
+      <style>
+        @keyframes glitchMain{
+          0%, 85%, 100% { transform:translate(0,0); }
+          86% { transform:translate(-2px,0); }
+          87% { transform:translate(3px,-1px); }
+          88% { transform:translate(-1px,2px); }
+          89% { transform:translate(0,0); }
+        }
+
+        @keyframes glitchText{
+          0%, 90%, 100% { 
+            transform:translate(0,0);
+            opacity:1;
+          }
+          91% { 
+            transform:translate(-3px,0);
+            opacity:.6;
+          }
+          92% { 
+            transform:translate(4px,-2px);
+            opacity:1;
+          }
+          93% { 
+            transform:translate(-2px,2px);
+            opacity:.4;
+          }
+          94% { 
+            transform:translate(0,0);
+            opacity:1;
+          }
+        }
+
+        @keyframes flicker{
+          0%, 80%, 100% { opacity:.65; }
+          81% { opacity:.2; }
+          82% { opacity:.9; }
+          90% { opacity:.3; }
+          91% { opacity:.65; }
+        }
+
+        @keyframes distort{
+          0%, 96%, 100% { transform:skewX(0deg); }
+          97% { transform:skewX(-3deg); }
+          98% { transform:skewX(4deg); }
+          99% { transform:skewX(-2deg); }
+        }
+      </style>
+
+    </div>
+  </a>
+
+  <a class="sideBtn" href="./chap_three/index.html">
+              体验：调酒之王！
+  </a> 
+</div>
+
+ <div class="choiceRow">
+             <a class="choiceLink" href="./chap_four/stage.html">
+            <div class="choice">
+              <b>▶ Chapter Four：</b> 电闪雷鸣进行曲！
+              <div class="mini">进入第四章节游玩地图</div>
+            </div>
+          </a>
+
+
+            <a class="sideBtn" href="./chap_four/index.html">
+              体验：飞拉达！
+            </a> 
+
+          </div>
+      </main>
+    </section>
+  </div>
+
+
+  <script>
+(() => {
+  /* 今日突发池*/
+  const luckPool = [
+{ tag:"BUFF", name:"默契", desc:"会有人想多看你一眼，而你也一样。\n效果：抬头总是能和人对上视线。", weight:6 },
+
+{ tag:"BUFF", name:"脚踏实地", desc:"今天走路特别稳，踩什么都很安心。\n效果：行动时更加流畅。", weight:8 },
+
+{ tag:"BUFF", name:"顺风而行", desc:"偶尔会有一阵风帮你吹开遮挡视线的树叶。\n效果：探索类描写偏正面。", weight:6 },
+
+{ tag:"BUFF", name:"摸金校尉", desc:"你总会在地上发现别人没注意的小物件。\n效果：更容易触发额外细节。", weight:7 },
+
+{ tag:"BUFF", name:"习以为常", desc:"你不会太担心自己录制时的表现。\n效果：面对突发状况更冷静。", weight:6 },
+
+{ tag: "BUFF", name: "路线雷达", desc: "你今天对看起来不对劲的小路特别敏感。\n效果：涉及方向/选择的判定更有优势。", weight: 14 },
+
+{ tag: "BUFF", name: "恒温动物", desc: "你今天不容易被冷到或热到心态炸裂。\n效果：耐力相关描述偏正面。", weight: 12 },
+
+{ tag: "BUFF", name: "队友滤镜", desc: "你今天看起来尤其很可靠。\n效果：社交/协作场合更容易被信任。", weight: 10 },
+
+{ tag: "BUFF", name: "背包轻了", desc: "你十分有先见之明，没有带太多东西。\n效果：行动更干脆。", weight: 8 },
+
+{ tag: "BUFF", name: "四叶草", desc: "幸运的象征。\n效果：事情更容易往你期望的方向发展。", weight: 4 },
+
+{ tag: "BUFF", name: "镜头宠儿", desc: "你今天似乎十分上镜。\n效果：摄影师的镜头会频繁地对准你。", weight: 7 },
+
+ { tag: "DEBUFF", name: "鞋带诅咒", desc: "你的鞋带就是很爱松。\n效果：需要经常蹲下系鞋带。", weight: 12 },
+
+{ tag: "DEBUFF", name: "信号焦虑", desc: "你会忍不住担心手机没信号。\n效果：遇到未知状况更容易慌张。", weight: 10 },
+
+{ tag: "DEBUFF", name: "口渴感放大", desc: "明明刚喝了水，但你还是觉得渴。\n效果：水补给相关场景更紧张。", weight: 9 },
+
+{ tag: "DEBUFF", name: "迷路错觉", desc: "你会频繁怀疑是不是走错了。\n效果：方向相关叙述偏负面。", weight: 7 },
+
+{ tag: "DEBUFF", name: "舌头打结", desc: "今天你的舌头总是捋不直。\n效果：说话更容易出现失误。", weight: 6 },
+
+{ tag: "DEBUFF", name: "静电体质", desc: "你和别人有点来电…呀！\n效果：接触物品或他人时更容易触发静电。", weight: 9 },
+
+{ tag:"DEBUFF", name:"平地摔", desc:"你会在不该摔的地方绊一下自己。\n效果：行动时更容易摔跤。", weight:10 },
+
+{ tag:"DEBUFF", name:"衣角陷阱", desc:"你的衣服总会被树枝或岩石勾住。\n效果：移动更拖沓。", weight:8 },
+
+{ tag:"DEBUFF", name:"踩到怪东西", desc:"你可能会踩到一些湿湿黏黏的不明物体。\n效果：脚下总感觉很恶心。", weight:7 },
+
+{ tag:"DEBUFF", name:"心浮气躁", desc:"你很难静下心来判断情况。\n效果：决策时更加混乱。", weight:9 },
+
+{ tag:"DEBUFF", name:"注意力漂移", desc:"你总是被不重要的东西吸引注意力。\n效果：容易暂时忘记自己原本的目的。", weight:8 },
+
+{ tag:"DEBUFF", name:"腿软时刻", desc:"你好像站得太久卡。\n效果：行动更加吃力。", weight:6 },
+
+{ tag: "WEIRD", name: "山在看你", desc: "你有一种被自然观察的微妙感觉。\n效果：任何诡异事件都变得合理。", weight: 6 },
+
+{ tag: "WEIRD", name: "好运偏移", desc: "小事很顺，大事难讲。\n效果：小收益更容易出现，但关键节点不保底。", weight: 6 },
+
+{ tag: "WEIRD", name: "迪斯尼公主", desc: "小动物们对你格外偏爱。\n效果：更频繁遇到野生动物。", weight: 6 },
+
+{ tag:"WEIRD", name:"误会", desc:"别人认为你和某人关系不一般。\n效果：和异性互动容易被赋予额外含义。", weight:6 },
+
+{ tag:"WEIRD", name:"慢半拍", desc:"重要情绪总是晚一步出现。\n效果：情感推进更折磨。", weight:5 },
+
+
+  ];
+
+  /* DB*/
+  const PartnerDB = [
+    { name: "橙知", gender: "M" },
+    { name: "丹", gender: "M" },
+    { name: "Eric Wang", gender: "M" },
+    { name: "Ethan Bennett（伊森·贝内特）", gender: "M" },
+    { name: "阿基米德·凡·杜可纳", gender: "M" },
+    { name: "Friedrich Walder（弗里德里希·瓦尔德）", gender: "M" },
+    { name: "Honey Parker（哈尼·帕克）", gender: "M" },
+    { name: "J. O’Connell（J. 奥康纳尔）", gender: "M" },
+    { name: "Kazares（卡扎勒斯）", gender: "M" },
+    { name: "Lucas Moon Olive（奥利弗）", gender: "M" },
+    { name: "Matt Kobayashi", gender: "M" },
+    { name: "Mubiru Abrima", gender: "M" },
+    { name: "Samuel（塞缪尔）", gender: "M" },
+    { name: "Thomas Rocheleau（多马·罗什布吕内）", gender: "M" },
+    { name: "卡莱比", gender: "M" },
+    { name: "叶澄希", gender: "M" },
+
+    // ===== 女嘉宾 =====
+    { name: "Amber Blackwell（安柏·布莱克威尔）", gender: "F" },
+    { name: "Cela（塞拉）", gender: "F" },
+    { name: "Jeffrey（杰芙里）", gender: "F" },
+    { name: "玛顿·琼斯", gender: "F" },
+    { name: "Maya（玛雅）", gender: "F" },
+    { name: "玛塞拉·卡洛", gender: "F" },
+    { name: "Melusine Raisnner（梅露希娜·拉辛纳）", gender: "F" },
+    { name: "Naya Fluor（乃亚·菲洛普）", gender: "F" },
+    { name: "Romaine Mannich", gender: "F" },
+    { name: "向林木", gender: "F" },
+    { name: "伊洛恩·奈芙", gender: "F" },
+    { name: "Zurabia（祖拉比亚）", gender: "F" },
+    { name: "Moira Ross（莫伊拉·罗斯）", gender: "F" },
+    { name: "Erla（厄拉）", gender: "F" },
+    { name: "Josephine Young（乔瑟芬·杨）", gender: "F" },
+    { name: "Oliven Orcinus（奥里文）", gender: "F" }
+  ];
+
+  /* =========================
+     util
+     ========================= */
+  const $ = (id) => document.getElementById(id);
+
+  function weightedPick(items){
+    const total = items.reduce((s, it) => s + (it.weight ?? 1), 0);
+    let r = Math.random() * total;
+    for (const it of items){
+      r -= (it.weight ?? 1);
+      if (r <= 0) return it;
+    }
+    return items[items.length - 1];
+  }
+
+  function pickRandom(arr){
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function oppositeGender(g){
+    if (g === "F") return "M";
+    if (g === "M") return "F";
+    return null;
+  }
+
+  function safeParse(json){
+    try { return JSON.parse(json); } catch { return null; }
+  }
+
+  /*DOM
+     */
+  const btnLuck = $("drawLuck");
+  const btnPartner = $("drawPartner");
+  const myGender = $("myGender");
+
+  const luckBox = $("luckResult");
+  const luckTag = $("luckTag");
+  const luckName = $("luckName");
+  const luckDesc = $("luckDesc");
+
+  const pBox = $("partnerResult");
+  const pTag = $("partnerTag");
+  const pName = $("partnerName");
+  const pDesc = $("partnerDesc");
+
+  const KEY_LUCK_USED = "htb_luck_used_v2";
+  const KEY_LUCK_DATA = "htb_luck_data_v2";
+
+  const KEY_PARTNER_USED = "htb_partner_used_v2";
+  const KEY_PARTNER_DATA = "htb_partner_data_v2";
+
+  function lock(btn, text){
+    if (!btn) return;
+    btn.disabled = true;
+    if (text) btn.textContent = text;
+  }
+
+  /* 
+     恢复结果（刷新后仍显示）
+      */
+  function restoreLuck(){
+    const used = sessionStorage.getItem(KEY_LUCK_USED) === "1";
+    const data = safeParse(sessionStorage.getItem(KEY_LUCK_DATA) || "");
+    if (!used || !data) return;
+
+    luckBox.style.display = "block";
+    luckTag.textContent = data.tag || "—";
+    luckName.textContent = data.name || "—";
+    luckDesc.textContent = data.desc || "";
+
+    lock(btnLuck, "今日突发已抽");
+  }
+
+  function restorePartner(){
+    const used = sessionStorage.getItem(KEY_PARTNER_USED) === "1";
+    const data = safeParse(sessionStorage.getItem(KEY_PARTNER_DATA) || "");
+    if (!used || !data) return;
+
+    pBox.style.display = "block";
+    pTag.textContent = data.tag || "—";
+    pName.textContent = data.name || "—";
+    pDesc.textContent = data.desc || "";
+
+    // 也把性别恢复一下（如果之前选过）
+    if (myGender && data.myGender){
+      myGender.value = data.myGender;
+    }
+
+    lock(btnPartner, "搭档已抽");
+  }
+
+  restoreLuck();
+  restorePartner();
+
+  /* 今日突发抽取
+    */
+  if (btnLuck){
+    btnLuck.addEventListener("click", () => {
+      if (sessionStorage.getItem(KEY_LUCK_USED) === "1") return;
+
+      const r = weightedPick(luckPool);
+
+      // 展示
+      luckBox.style.display = "block";
+      luckTag.textContent = r.tag;
+      luckName.textContent = r.name;
+      luckDesc.textContent = r.desc;
+
+      // 存储（刷新仍在）
+      sessionStorage.setItem(KEY_LUCK_USED, "1");
+      sessionStorage.setItem(KEY_LUCK_DATA, JSON.stringify({
+        tag: r.tag, name: r.name, desc: r.desc
+      }));
+
+      lock(btnLuck, "今日突发已抽");
+    });
+  }
+
+  /*
+    异性搭档抽取
+    */
+  if (btnPartner){
+    btnPartner.addEventListener("click", () => {
+      if (sessionStorage.getItem(KEY_PARTNER_USED) === "1") return;
+
+      const g = myGender ? myGender.value : "";
+      if (!g){
+        pBox.style.display = "block";
+        pTag.textContent = "提示";
+        pName.textContent = "请选择性别";
+        pDesc.textContent = "先在右侧下拉框选择你的性别，再抽取可能的异性搭档。";
+        return;
+      }
+
+      const want = oppositeGender(g);
+      const candidates = PartnerDB.filter(x => x.gender === want);
+
+      if (candidates.length === 0){
+        pBox.style.display = "block";
+        pTag.textContent = "ERROR";
+        pName.textContent = "DB里没有可抽对象";
+        pDesc.textContent = "请在找节目组补全异性名单。";
+        return;
+      }
+
+      const picked = pickRandom(candidates);
+
+      pBox.style.display = "block";
+      pTag.textContent = "互动对象！";
+      pName.textContent = picked.name;
+      pDesc.textContent =
+        `性别匹配：${g} → ${want}\n\n
+        再说一句：如果抽到心动嘉宾了这会是个好理由去小窗。`;
+
+      sessionStorage.setItem(KEY_PARTNER_USED, "1");
+      sessionStorage.setItem(KEY_PARTNER_DATA, JSON.stringify({
+        tag: "互动对象！",
+        name: picked.name,
+        desc: `性别匹配：${g} → ${want}\n\n
+        再说一句：如果抽到心动嘉宾了这会是个好理由去小窗。`,
+        myGender: g
+      }));
+
+      lock(btnPartner, "搭档已抽");
+    });
+  }
+})();
+</script>
+
+
+
+</body>
+
+
+</html>
+

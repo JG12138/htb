@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Heart to Beat · Fishing</title>
+
+  <style>
+:root{
+  --bg:#1A2733;  
+  --card:rgba(255,255,255,.06);
+  --bd:rgba(255,255,255,.12);
+  --txt:#fff;
+  --mut:rgba(255,255,255,.72);
+  --btn:rgba(255,255,255,.10);
+  --btn2:rgba(255,255,255,.16);
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Arial,sans-serif;
+  background:var(--bg);
+  color:var(--txt);
+  display:flex;
+  justify-content:center;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:-20%;
+  z-index:-1;
+
+  background:
+    radial-gradient(circle at 30% 40%, rgba(120,180,200,.10), transparent 55%),
+    radial-gradient(circle at 70% 60%, rgba(80,140,180,.08), transparent 60%);
+
+  animation: waterMove 26s linear infinite;
+  pointer-events:none;
+}
+
+body::after{
+  content:"";
+  position:fixed;
+  inset:-15%;
+  z-index:-1;
+
+  background:
+    repeating-linear-gradient(
+      120deg,
+      rgba(255,255,255,.025) 0px,
+      rgba(255,255,255,.025) 2px,
+      transparent 6px,
+      transparent 14px
+    );
+
+  animation: ripple 18s linear infinite;
+  mix-blend-mode:overlay;
+  pointer-events:none;
+}
+
+@keyframes ripple{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-80px); }
+}
+
+.wrap{
+  width:min(980px,100%);
+  padding:clamp(14px,3vw,28px);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+h2{ margin:0; font-size:clamp(18px,3.6vw,28px); }
+.subtitle{ color:var(--mut); font-size:12.5px; margin-top:2px; }
+
+.layout{
+  display:grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap:12px;
+  align-items:start;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  box-shadow:var(--shadow);
+  padding:14px;
+}
+
+label{
+  display:block;
+  font-size:12px;
+  color:var(--mut);
+  margin-bottom:6px;
+}
+
+.row{ display:flex; gap:10px; flex-wrap:wrap; }
+.row > div{ flex:1; min-width:160px; }
+
+input{
+  width:100%;
+  padding:11px 12px;
+  border:1px solid var(--bd);
+  background:rgba(0,0,0,.12);
+  color:var(--txt);
+  border-radius:8px;
+  outline:none;
+}
+
+input:disabled{
+  opacity:1;
+  cursor:default;
+  background:rgba(0,0,0,.18);
+  border-color:var(--bd);
+  color:rgba(255,255,255,.85);
+}
+
+button{
+  border:1px solid var(--bd);
+  background:var(--btn);
+  color:var(--txt);
+  padding:11px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+button:hover{ background:var(--btn2); }
+button.primary{ background:rgba(255,255,255,.18); font-weight:600; }
+button:disabled{ opacity:.45; cursor:not-allowed; }
+
+.center{ text-align:center; }
+.hidden{ display:none; }
+
+hr{
+  border:none;
+  border-top:1px solid var(--bd);
+  margin:10px 0;
+}
+
+.muted{ color:var(--mut); font-size:12px; }
+
+/* 右侧战绩 */
+.sideTitle{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+ul.log{
+  list-style:none;
+  padding:0;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.logItem{
+  padding:10px 12px;
+  border:1px solid var(--bd);
+  border-radius:10px;
+  background:rgba(0,0,0,.10);
+  line-height:1.45;
+  font-size:13px;
+}
+
+.pill{
+  display:inline-block;
+  font-size:12px;
+  padding:2px 8px;
+  border:1px solid var(--bd);
+  border-radius:999px;
+  color:var(--mut);
+  margin-right:8px;
+  background:rgba(0,0,0,.10);
+}
+
+.pill.success{
+  color:#6fdc8c;
+  border-color:#2f6f4f;
+  background:rgba(111,220,140,0.08);
+}
+.pill.fail{
+  color:#ff6b6b;
+  border-color:#7a2f2f;
+  background:rgba(255,107,107,0.08);
+}
+
+/* mobile */
+@media (max-width:860px){
+  .layout{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+}
+
+@keyframes waterMove{
+  0%{ transform:translate(0,0); }
+  50%{ transform:translate(-3%, -2%); }
+  100%{ transform:translate(0,0); }
+}
+
+/* 抛竿水波 */
+.ripple{
+  position:fixed;
+  left:50%;
+  top:50%;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.35);
+  transform:translate(-50%,-50%) scale(0.2);
+  opacity:.6;
+  pointer-events:none;
+  z-index:-1;
+  animation:rippleExpand 1.2s ease-out forwards;
+}
+
+@keyframes rippleExpand{
+  0%{
+    transform:translate(-50%,-50%) scale(0.2);
+    opacity:.6;
+  }
+  100%{
+    transform:translate(-50%,-50%) scale(8);
+    opacity:0;
+  }
+}
+
+/* 轻微摇晃 */
+.shake-soft{ animation: shakeSoft .45s ease-out; }
+@keyframes shakeSoft{
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-4px); }
+  40%  { transform: translateX(4px); }
+  60%  { transform: translateX(-2px); }
+  80%  { transform: translateX(2px); }
+  100% { transform: translateX(0); }
+}
+
+/* ====== Name Picker（大富翁同款：弹窗 + 搜索 + 选中）====== */
+.pickerMask{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  backdrop-filter: blur(2px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  z-index:99;
+}
+.pickerMask.show{ display:flex; }
+
+.pickerCard{
+  width:min(760px,100%);
+  background:rgba(20,30,40,.92);
+  border:1px solid var(--bd);
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  padding:14px;
+}
+
+.pickerTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.pickerTitle{
+  font-weight:700;
+  font-size:14px;
+}
+.pickerHint{
+  color:var(--mut);
+  font-size:12px;
+  margin-top:2px;
+}
+
+.pickerGrid{
+  margin-top:8px;
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap:6px;
+}
+
+@media (max-width:560px){
+  .pickerGrid{
+    grid-template-columns: repeat(3, minmax(0, 1fr)); /* 手机3列 */
+  }
+}
+
+.pickerBtn{
+  text-align:center;
+  padding:6px 2px;   /* 上下变薄，左右变窄 */
+  border-radius:0;
+  border:1px solid var(--bd);
+  background:rgba(255,255,255,.06);
+  cursor:pointer;
+}
+
+.pickerBtn b{
+  font-size:12px;
+  line-height:1.1;
+}
+
+.pickerBtn:hover{ background:rgba(255,255,255,.10); }
+
+
+.pickerBtn .mini{
+  color:var(--mut);
+  font-size:11px;
+  margin-top:2px;
+}
+
+.smallRow{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div>
+      <h2>哎呦，钓鱼佬又来赌博了。</h2>
+      <div class="subtitle">湖边 · 非正式活动</div>
+    </div>
+
+    <div class="layout">
+      <!-- 左侧主区 -->
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div class="card">
+          <label>你的名字（点这里选）</label>
+          <input id="pName" placeholder="点我打开名单" readonly>
+
+          <div class="row" style="margin-top:10px;">
+            <div>
+              <label>现在耐心如何？（1–10）</label>
+              <input id="pPat" type="number" min="1" max="10" placeholder="1-10（默认4）">
+            </div>
+            <div>
+              <label>还有力气吗？（1–10）</label>
+              <input id="pStr" type="number" min="1" max="10" placeholder="1-10（默认4）">
+            </div>
+          </div>
+
+          <div class="center" style="margin-top:12px; display:flex; gap:10px; justify-content:center; align-items:center;">
+            <button id="castBtn" class="primary" onclick="fish()">抛竿</button>
+            <button id="quitBtn" onclick="quitNow()">不玩了！</button>
+          </div>
+
+          <div class="muted" style="margin-top:10px;">
+            今日抛竿次数：<span id="castsLeft">5</span> / 5
+          </div>
+
+          <div class="muted" style="margin-top:8px;">
+            想炫耀的话记得截图，浏览器不会留存记录，刷新或者退出不玩了就没了。
+          </div>
+        </div>
+
+        <!-- 钓鱼结果 -->
+        <div id="result" class="card hidden"></div>
+
+        <!-- 帮忙选择 -->
+        <div id="helpBox" class="card hidden center">
+          <div style="margin-bottom:10px;">
+            老天，这是什么运气？！<br>
+            但这条鱼太大了，要不要找人帮忙？
+          </div>
+
+          <div class="muted" style="margin-bottom:8px; font-size:12px;">
+            看什么啊，我都给你机会和 Crush 互动了！
+          </div>
+
+          <label style="text-align:left;">你的亲亲帮手姓名为？（点这里选）</label>
+          <input id="helperName" placeholder="点我打开名单" readonly>
+
+          <div style="margin-top:10px;">
+            <button onclick="resolve(true)">找人帮忙！</button>
+            <button onclick="resolve(false)">我非要自己来。</button>
+          </div>
+        </div>
+
+        <!-- 5次用完后的结算选择 -->
+        <div id="endBox" class="card hidden center">
+          <div style="margin-bottom:10px;">
+            时间差不多了，总不能钓一天鱼吧？！
+          </div>
+          <button onclick="fishAllDay()">我非要钓一天</button>
+          <button onclick="wrapUp()">算了，差不多收拾一下要回去了。</button>
+        </div>
+      </div>
+
+      <!-- 右侧记录区 -->
+      <div class="card">
+        <div class="sideTitle">
+          <div>今日战绩</div>
+          <div class="muted">最近在上面</div>
+        </div>
+        <ul id="log" class="log"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Name Picker Modal ====== -->
+  <div id="pickerMask" class="pickerMask" aria-hidden="true">
+    <div class="pickerCard">
+      <div class="pickerTop">
+        <div>
+          <div id="pickerTitle" class="pickerTitle">选择名字</div>
+          <div class="pickerHint">支持搜索；点名字即可填入。</div>
+        </div>
+        <button id="pickerCloseBtn" class="smallBtn">关闭</button>
+      </div>
+
+      <div class="smallRow">
+        <input id="pickerSearch" placeholder="搜索名字（中英文都行）">
+        <button id="pickerClearBtn">清空</button>
+      </div>
+
+      <div id="pickerGrid" class="pickerGrid"></div>
+
+      <div class="muted" style="margin-top:10px;">
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ===== data ===== */
+
+  const PAT_TXT = {
+  low: {
+    miss: [
+      "你只盯了十几秒就开始烦了：这水面怎么一点动静都没有？",
+      "你手指都在抖，线还没沉稳，你已经想把鱼竿当武器了。",
+      "你盯着浮漂的眼神像在催债：要么上钩，要么散伙。"
+    ],
+    hit: [
+      "你几乎是“碰运气式”地一甩，结果还真给你碰到了。",
+      "你本来都要收竿走人了，浮漂偏偏在这时候动了一下。",
+      "你嘴上骂骂咧咧，手倒是很诚实——猛地一提，居然中了。"
+    ]
+  },
+
+  mid: {
+    miss: [
+      "你耐着性子等了一会儿，但水面安静得像在装死。",
+      "你调整呼吸，数着秒等浮漂，可它就像在和你冷战。",
+      "你稳稳守着节奏：线在水里，心在天边——但鱼不来。"
+    ],
+    hit: [
+      "你耐着性子守住节奏，终于等到那一下轻轻的下沉。",
+      "你不急不躁地控线，浮漂微微一顿——就是现在。",
+      "你保持了很标准的等待姿势：所以中鱼这事也很合理。"
+    ]
+  },
+
+  high: {
+    miss: [
+      "你很有耐心，连风声都听清了——但鱼还是不给你面子。",
+      "你像一块石头一样稳，稳到鱼都不敢来打扰你。",
+      "你沉得住气，水面每一次细小的纹路都被你记住了——可惜没中。"
+    ],
+    hit: [
+      "你几乎不动声色地等着，像早就知道它会来。",
+      "你一直稳着线，等到最合适的时机才起竿——漂亮。",
+      "你安静到让鱼以为世界很安全——然后你把它捞上来了。"
+    ]
+  }
+};
+const peopleDB = { 
+  "橙知": { luck: 1, direction: 7, stamina: 9 },
+  "丹": { luck: 4, direction: 4, stamina: 4 },
+  "Eric": { luck: 10, direction: 10, stamina:10 },
+  "Ethan": { luck: 4, direction: 4, stamina: 4 },
+  "阿基米德": { luck: 4, direction: 4, stamina: 4 },
+  "Friedrich": { luck: 4, direction: 4, stamina: 4 },
+  "Honey": { luck: 4, direction: 4, stamina: 4 },
+  "J.O.": { luck: 4, direction: 4, stamina: 4 },
+  "Kazares": { luck: 4, direction: 5, stamina: 9 },
+  "奥利弗": { luck: 10, direction: 3, stamina: 8 },
+  "Matt": { luck: 4, direction: 2, stamina: 5 },
+  "Mubiru": { luck: 3, direction: 8, stamina: 7 },
+  "Samuel": { luck: 100, direction: 100, stamina: 100 },
+  "Thomas": { luck: 9, direction: 9, stamina: 9 },
+  "卡莱比": { luck: 1, direction: 2, stamina: 3 },
+  "叶澄希": { luck: 4, direction: 4, stamina: 4 },
+
+  "Amber": { luck: 0, direction: 0, stamina: 0 },
+  "Cela": { luck: 4, direction: 4, stamina: 4 },
+  "Jeffrey": { luck: 9, direction: 6, stamina: 6 },
+  "玛顿": { luck: 4, direction: 4, stamina: 4 },
+  "Maya": { luck: 5, direction: 9, stamina: 8 },
+  "马塞拉": { luck: 8, direction: 2, stamina: 5 },
+  "Melusine": { luck: 4, direction: 6, stamina: 7 },
+  "Naya": { luck: 4, direction: 4, stamina: 4 },
+  "Romaine": { luck: 4, direction: 4, stamina: 4 },
+  "向林木": { luck: 7, direction: 7, stamina: 8.5 },
+  "奈芙": { luck: 10, direction: 10, stamina: 10 },
+  "Zurabia": { luck: 4, direction: 4, stamina: 4 },
+  "Moira": { luck: 4, direction: 4, stamina: 4 },
+  "Erla": { luck: 3, direction: 8, stamina: 7 },
+  "Josephine": { luck: 5, direction: 3, stamina: 7 },
+  "Oliven": { luck: 5, direction: 6, stamina: 7 }
+};
+
+const fishingSpot = {
+  name: "湖边",
+  fishPool: [
+    // 常见
+    { name:"小鲤鱼", min:18, max:40 },
+    { name:"草鱼",   min:28, max:75 },
+    { name:"鳊鱼",   min:18, max:45 },
+    { name:"罗非鱼", min:22, max:55 },
+    { name:"太阳鱼", min:10, max:24 },
+    { name:"黄鲈", min:18, max:45 },
+    { name:"美洲西鲱", min:25, max:45 },
+    { name:"大眼鱼", min:35, max:80 },
+
+    // 稀有
+    { name:"鳜鱼",   min:25, max:70 },
+    { name:"虹鳟鱼",   min:30, max:85 },
+    { name:"翘嘴",   min:28, max:90 },
+    { name:"黑鲈", min:30, max:80 },
+    { name:"白鲈", min:25, max:70 },
+    { name:"鲢鱼", min:55, max:130 },
+    { name:"大嘴鲈鱼", min:25, max:75 },
+    { name:"小嘴鲈鱼", min:22, max:65 },
+
+    // 罕见
+    { name:"湖鳟", min:30, max:90 },
+    { name:"狗鱼", min:40, max:120 },
+    { name:"大头鱼", min:60, max:160 },
+    { name:"黑鱼",   min:45, max:110 },
+    { name:"鲶鱼",   min:35, max:120 },
+
+    // 彩蛋
+    { name:"锦鲤（疑似来串场）", min:20, max:60 },
+    { name:"传说中的银鳞鱼",     min:50, max:140 },
+    { name:"塑料袋（不是鱼）",   min:10, max:225 },
+    { name:"破旧鱼线团",         min:8,  max:18 },
+    { name:"绿藻",         min:8,  max:120 }
+  ]
+};
+
+
+let currentFish = null;
+let player = {};
+let castsLeft = 5;
+
+/* 你之前想要整体更高一点：2/5 */
+const CATCH_PROB = 2/5;
+
+let locked = false;
+
+const rnd = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const $ = (id)=>document.getElementById(id);
+
+function show(el){ el.classList.remove("hidden"); }
+function hide(el){ el.classList.add("hidden"); }
+function setCastEnabled(enabled){ $("castBtn").disabled = !enabled; }
+
+function clamp(n, lo, hi){
+  n = Number(n);
+  if(Number.isNaN(n)) return lo;
+  return Math.max(lo, Math.min(hi, n));
+}
+function roundClamp10(n){
+  return clamp(Math.round(Number(n)), 1, 10);
+}
+
+function updateCastsUI(){
+  $("castsLeft").textContent = String(castsLeft);
+}
+
+function addLogItem(html){
+  const li = document.createElement("li");
+  li.className = "logItem";
+  li.innerHTML = html;
+  $("log").prepend(li);
+}
+
+/* 锁输入：第一次抛竿后锁定 */
+function lockPlayerInputs(){
+  $("pName").disabled = true;
+  $("pPat").disabled  = true;
+  $("pStr").disabled  = true;
+  locked = true;
+}
+
+/* 切屏（顶掉） */
+function showFishingUI(){
+  hide($("endBox"));
+  hide($("helpBox"));
+  show($("result"));
+}
+function showEndUI(){
+  hide($("result"));
+  hide($("helpBox"));
+  show($("endBox"));
+}
+
+/* 抛竿水波 */
+function spawnRipple(){
+  const r = document.createElement("div");
+  r.className = "ripple";
+  document.body.appendChild(r);
+  r.addEventListener("animationend", () => r.remove());
+}
+
+/* ====== Name Picker logic ====== */
+let pickerTarget = "pName"; // 当前要填哪个 input
+const nameList = Object.keys(peopleDB).sort((a,b)=>a.localeCompare(b, "zh-Hans-CN"));
+
+function openPicker(targetId, titleText){
+  pickerTarget = targetId;
+  $("pickerTitle").textContent = titleText || "选择名字";
+  $("pickerSearch").value = "";
+  renderPickerGrid("");
+  $("pickerMask").classList.add("show");
+  $("pickerMask").setAttribute("aria-hidden","false");
+  setTimeout(()=> $("pickerSearch").focus(), 0);
+}
+
+function closePicker(){
+  $("pickerMask").classList.remove("show");
+  $("pickerMask").setAttribute("aria-hidden","true");
+}
+
+function renderPickerGrid(keyword){
+  const kw = String(keyword || "").trim().toLowerCase();
+  const grid = $("pickerGrid");
+  grid.innerHTML = "";
+
+  const filtered = nameList.filter(n => n.toLowerCase().includes(kw));
+  if(filtered.length === 0){
+    const div = document.createElement("div");
+    div.className = "muted";
+    div.style.gridColumn = "1 / -1";
+    div.textContent = "没有匹配到名字。";
+    grid.appendChild(div);
+    return;
+  }
+
+  filtered.forEach(name=>{
+    const meta = peopleDB[name];
+    const btn = document.createElement("div");
+    btn.className = "pickerBtn";
+    btn.innerHTML = `
+      <b>${name}</b>
+    `;
+    btn.addEventListener("click", ()=>{
+      $(pickerTarget).value = name;
+      closePicker();
+    });
+    grid.appendChild(btn);
+  });
+}
+
+/* 点击遮罩空白处关闭 */
+$("pickerMask").addEventListener("click", (e)=>{
+  if(e.target === $("pickerMask")) closePicker();
+});
+$("pickerCloseBtn").addEventListener("click", closePicker);
+$("pickerClearBtn").addEventListener("click", ()=>{
+  $("pickerSearch").value = "";
+  renderPickerGrid("");
+  $("pickerSearch").focus();
+});
+$("pickerSearch").addEventListener("input", (e)=>{
+  renderPickerGrid(e.target.value);
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape") closePicker();
+});
+
+/* 绑定：点 input 打开 picker（锁定后不让改） */
+$("pName").addEventListener("click", ()=>{
+  if(locked) return;
+  openPicker("pName", "选择你的名字（节目组名单）");
+});
+$("helperName").addEventListener("click", ()=>{
+  openPicker("helperName", "选择帮手（同场嘉宾）");
+});
+
+/* ===== 主流程 ===== */
+function fish(){
+  spawnRipple();
+
+  const resultEl = $("result");
+  const helpEl = $("helpBox");
+
+  if(castsLeft <= 0){
+    showEndUI();
+    return;
+  }
+
+  showFishingUI();
+  resultEl.innerHTML = "";
+  currentFish = null;
+  $("helperName").value = "";
+
+  player.name = $("pName").value.trim();
+  if(!player.name){
+    hide(resultEl);
+    alert("先选你的名字！节目组名单里没有你就不能开赌。");
+    openPicker("pName", "先选你的名字（节目组名单）");
+    return;
+  }
+
+  if(!peopleDB[player.name]){
+    hide(resultEl);
+    alert("你谁啊？节目组名单里没你。换个名字！");
+    openPicker("pName", "换个在名单里的名字");
+    return;
+  }
+
+let patVal = $("pPat").value.trim();
+let strVal = $("pStr").value.trim();
+
+player.pat = patVal === "" ? 4 : Number(patVal);
+player.str = strVal === "" ? 4 : Number(strVal);
+
+if(!(player.pat>=1 && player.pat<=10 && player.str>=1 && player.str<=10)){
+  hide(resultEl);
+  alert("耐心和力量要在 1–10 之间哦（不填默认是 4）。");
+  return;
+}
+
+  if(!locked) lockPlayerInputs();
+
+  castsLeft -= 1;
+  updateCastsUI();
+
+  const caught = Math.random() < CATCH_PROB;
+
+  if(!caught){
+const tier = patTier(player.pat);
+const patText = pick(PAT_TXT[tier].miss);
+
+resultEl.innerHTML = `
+  <div><b>空军。</b></div>
+  <div>${patText}</div>
+  <div>你盯着水面看了半天：水面盯着你看了半天。</div>
+`;
+    addLogItem(`
+      <div><span class="pill">空军</span>${player.name}：什么都没钓到。</div>
+    `);
+
+    return;
+  }
+
+  const f = fishingSpot.fishPool[rnd(0, fishingSpot.fishPool.length-1)];
+  const length = rnd(f.min, f.max);
+
+  currentFish = { name:f.name, length, need: Math.ceil(length/20) };
+
+  resultEl.innerHTML = `
+    <div>你在 ${fishingSpot.name} 钓到一条 <b>${currentFish.name}</b></div>
+    <div>长度：${length} cm</div>
+  `;
+  const tierHit = patTier(player.pat);
+const patHit = pick(PAT_TXT[tierHit].hit);
+
+resultEl.innerHTML += `
+  <div class="muted" style="margin-top:6px;">${patHit}</div>
+`;
+
+  if(length >= 60){
+    show(helpEl);
+
+    helpEl.classList.remove("shake-soft");
+    void helpEl.offsetWidth;
+    helpEl.classList.add("shake-soft");
+
+    setCastEnabled(false);
+  }else{
+    resolve(false);
+  }
+}
+
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function patTier(pat){
+  if(pat <= 3) return "low";
+  if(pat <= 7) return "mid";
+  return "high";
+}
+
+function resolve(withHelp){
+  const resultEl = $("result");
+  const helpEl = $("helpBox");
+
+  if(!currentFish){
+    alert("这会儿没鱼可拉。");
+    return;
+  }
+
+  let bonus = 0;
+  let helperText = "";
+  let helperNameClean = "";
+
+  if(withHelp){
+    helperNameClean = $("helperName").value.trim();
+    if(!helperNameClean){
+      alert("先选一个帮手名字。");
+      show(helpEl);
+      openPicker("helperName", "先选帮手（同场嘉宾）");
+      return;
+    }
+    if(helperNameClean === player.name){
+      alert("你不能叫自己来帮忙。");
+      show(helpEl);
+      return;
+    }
+    if(!peopleDB[helperNameClean]){
+      alert("这个人现在不在湖边。");
+      show(helpEl);
+      openPicker("helperName", "换个在名单里的帮手");
+      return;
+    }
+
+    bonus = 2;
+    helperText = `<div>你叫来了 <b>${helperNameClean}</b> 帮忙（+2）</div>`;
+  }
+
+  hide(helpEl);
+
+  const total = player.str + bonus;
+  const success = total >= currentFish.need;
+
+  resultEl.innerHTML += `
+    <hr>
+    ${helperText}
+    <div>判定需求：${currentFish.need}</div>
+    <div>你的力量：${total}</div>
+    <br>
+    <b>${success ? "成功钓上来！" : "鱼挣脱了……"}</b>
+  `;
+
+  addLogItem(`
+    <div>
+      <span class="pill ${success ? "success" : "fail"}">
+        ${success ? "成功钓上来" : "没拉住"}
+      </span>
+      ${player.name}：${currentFish.name}（${currentFish.length}cm）
+    </div>
+    ${withHelp ? `<div class="muted">帮手：${helperNameClean}（+2）</div>` : ``}
+  `);
+
+  $("helperName").value = "";
+  currentFish = null;
+  setCastEnabled(true);
+}
+
+/* endBox 两按钮 */
+function fishAllDay(){
+  castsLeft = 5;
+  updateCastsUI();
+
+  showFishingUI();
+
+  $("result").innerHTML = `<div><b>你决定继续钓。</b>（节目组：行，随你。）</div>`;
+  addLogItem(`<div><span class="pill">加时</span>${player.name || "某人"}：我非要钓一天！</div>`);
+  setCastEnabled(true);
+}
+
+function wrapUp(){
+  currentFish = null;
+  addLogItem(`<div><span class="pill">收工</span>${player.name || "某人"}：差不多回去了。</div>`);
+  setCastEnabled(false);
+  window.location.href = "../index.html";
+}
+
+function quitNow(){
+  addLogItem(`<div><span class="pill">收工</span>${player.name || "某人"}：不玩了，走了。</div>`);
+  window.location.href = "../index.html";
+}
+
+/* init */
+updateCastsUI();
+setCastEnabled(true);
+
+/* 首次渲染 picker */
+renderPickerGrid("");
+</script>
+
+</body>
+</html>
