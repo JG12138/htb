@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Finale · Name Credits</title>
+  <style>
+    :root{
+      --bg0:#07090c;
+      --bg1:#0b0f16;
+      --txt:rgba(255,255,255,.92);
+      --mut:rgba(255,255,255,.62);
+      --bd:rgba(255,255,255,.12);
+      --card:rgba(255,255,255,.06);
+      --gold:#f1d6a6;
+      --shadow:0 18px 55px rgba(0,0,0,.55);
+      --round:18px;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 700px at 20% 15%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(900px 550px at 80% 70%, rgba(241,214,166,.06), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      color:var(--txt);
+      font-family: system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Arial,sans-serif;
+      overflow:hidden;
+    }
+
+    .wrap{ position:relative; width:100%; height:100%; }
+
+    /* HUD */
+    .hud{
+      position:absolute; left:18px; top:16px; right:18px;
+      display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
+      z-index:50; pointer-events:none;
+    }
+    .panel{
+      pointer-events:auto;
+      backdrop-filter: blur(8px);
+      background:var(--card);
+      border:1px solid var(--bd);
+      border-radius:var(--round);
+      box-shadow: var(--shadow);
+      padding:12px 14px;
+      min-width: 240px;
+    }
+    .title{ display:flex; align-items:baseline; gap:10px; margin:0 0 6px 0; }
+    .title b{ font-size:14px; letter-spacing:.2px; }
+    .title span{ font-size:12px; color:var(--mut); }
+
+    .slots{ display:flex; gap:8px; flex-wrap:wrap; }
+    .slot{
+      width:92px;
+      padding:6px 8px;
+      border-radius:12px;
+      border:1px dashed rgba(255,255,255,.18);
+      background:rgba(0,0,0,.18);
+      color:rgba(255,255,255,.55);
+      font-size:12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .slot.filled{
+      border-style:solid;
+      border-color:rgba(241,214,166,.35);
+      color:rgba(255,255,255,.88);
+      background:rgba(241,214,166,.08);
+    }
+
+    .btnRow{ display:flex; gap:10px; justify-content:flex-end; }
+    button{
+      pointer-events:auto;
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.08);
+      color:var(--txt);
+      border-radius:14px;
+      padding:9px 12px;
+      font-size:12px;
+    }
+    button:hover{ background:rgba(255,255,255,.12); }
+
+    /* Flying names */
+    .name{
+      position:absolute; left:0; top:0;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.24);
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+      font-size:13px;
+      line-height:1;
+      user-select:none;
+      white-space:nowrap;
+      transform: translate(-9999px,-9999px);
+      will-change: transform;
+      cursor:pointer;
+    }
+    .name small{ opacity:.7; font-size:11px; margin-left:6px; }
+    .name:hover{
+      border-color: rgba(241,214,166,.35);
+      background: rgba(241,214,166,.10);
+    }
+    .name.picked{ opacity:.15; pointer-events:none; filter: blur(.2px); }
+
+    .hint{
+      position:absolute;
+      left:18px; bottom:16px;
+      color:rgba(255,255,255,.55);
+      font-size:12px;
+      z-index:50;
+      pointer-events:none;
+    }
+
+    /* Fade overlay: use opacity (more reliable than bg transition) */
+    .fade{
+      position:absolute; inset:0;
+      background:rgba(0,0,0,.90);
+      opacity:0;
+      pointer-events:none;
+      z-index:60;
+      transition: opacity 420ms ease;
+    }
+    .fade.on{ opacity:1; }
+
+    /* Thanks message */
+    .centerMsg{
+      position:absolute; inset:0;
+      z-index:65;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+      opacity:0;
+      transform: translateY(8px);
+      transition: opacity 320ms ease, transform 320ms ease;
+    }
+    .centerMsg.on{
+      opacity:1;
+      transform: translateY(0);
+    }
+    .msgBox{
+      text-align:center;
+      padding:18px 20px;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.30);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+    .msgBox b{
+      display:block;
+      font-size:20px;
+      letter-spacing:1px;
+      margin-bottom:6px;
+    }
+    .msgBox span{
+      display:block;
+      font-size:13px;
+      color:rgba(255,255,255,.65);
+      letter-spacing:.3px;
+    }
+
+    /* Credits container (opacity; no display none) */
+    .credits{
+      position:absolute; inset:0;
+      z-index:70;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 360ms ease;
+    }
+    .credits.on{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .creditFrame{
+      width:min(740px, 86vw);
+      height:min(78vh, 680px);
+      border-radius:26px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.30);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .creditTop{
+      position:absolute;
+      left:18px; right:18px; top:14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      color:rgba(255,255,255,.85);
+      z-index:2;
+    }
+    .creditTop b{ font-size:13px; letter-spacing:.6px; }
+    .creditTop span{ font-size:12px; color:rgba(255,255,255,.55); }
+
+    .vignette{
+      position:absolute; inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.85), transparent 30%),
+        linear-gradient(0deg, rgba(0,0,0,.90), transparent 34%);
+      opacity:.75;
+      z-index:1;
+    }
+
+    .scroll{
+      position:absolute;
+      left:0; right:0;
+      top:100%;
+      padding:70px 22px 140px;
+      text-align:center;
+      transform: translateY(0);
+      will-change: transform;
+    }
+    .scroll h2{ margin:0 0 14px; font-size:20px; letter-spacing:.8px; }
+    .scroll .sub{ margin:0 0 26px; color:rgba(255,255,255,.62); font-size:12px; }
+
+    .sectionTitle{
+      margin:26px 0 10px;
+      font-size:12px;
+      letter-spacing:1.2px;
+      color:rgba(255,255,255,.55);
+      text-transform:uppercase;
+    }
+
+    .creditList{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:center;
+    }
+    .creditItem{
+      width: min(560px, 88%);
+      padding:10px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.05);
+      color:rgba(255,255,255,.86);
+      font-size:14px;
+      line-height:1.25;
+    }
+    .creditItem .meta{
+      display:block;
+      margin-top:4px;
+      font-size:12px;
+      color:rgba(255,255,255,.55);
+    }
+    .creditItem.star{
+      border-color: rgba(241,214,166,.35);
+      background: rgba(241,214,166,.10);
+      color: rgba(255,255,255,.95);
+    }
+
+    /* Small on-screen error line (optional) */
+    .err{
+      position:absolute; left:12px; bottom:12px;
+      z-index:90;
+      max-width:min(92vw, 860px);
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,120,120,.35);
+      background:rgba(120,0,0,.22);
+      color:rgba(255,230,230,.92);
+      font-size:12px;
+      display:none;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .err.on{ display:block; }
+
+    /* 中间“感谢观看” */
+.centerMsg .msgBox b{
+  display:block;
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:1.2px;
+  margin-bottom:10px;
+}
+
+/* “最后感谢——特别的你！”：更大更粗 */
+.centerMsg .msgBox span{
+  display:block;
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:.8px;
+  color:rgba(241,214,166,.92);
+  text-shadow: 0 10px 26px rgba(0,0,0,.55);
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 560px){
+  body{ min-height:100dvh; }
+
+  .hud{
+    left:12px; right:12px; top:10px;
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+  }
+  .panel{
+    min-width:0;
+    padding:10px 12px;
+  }
+
+  .slots{ gap:6px; }
+  .slot{
+    width:calc((100% - 12px) / 3); /* 一行 3 个 */
+    font-size:11px;
+    padding:6px 7px;
+  }
+
+  .btnRow{ justify-content:space-between; }
+  button{ padding:9px 10px; }
+
+  .name{
+    font-size:12px;
+    padding:6px 9px;
+  }
+
+  .hint{
+    left:12px; right:12px; bottom:10px;
+    font-size:11px;
+  }
+
+  .creditFrame{
+    width:92vw;
+    height:82vh;
+    border-radius:22px;
+  }
+  .scroll{
+    padding:64px 16px 120px;
+  }
+  .creditItem{
+    width:min(92%, 560px);
+  }
+}
+  </style>
+</head>
+
+<body>
+<div class="wrap" id="wrap">
+  <div class="hud">
+    <div class="panel">
+      <div class="title">
+        <b>请点选 5 位嘉宾</b>
+        <span id="countOut">0 / 5</span>
+      </div>
+      <div class="slots" id="slots"></div>
+    </div>
+
+    <div class="panel">
+      <div class="title">
+        <b>Finale</b>
+        <span>选人 →  谢幕</span>
+      </div>
+      <div class="btnRow">
+        <button id="resetBtn" type="button">重置</button>
+        <button id="skipBtn" type="button">直接滚字幕</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint">点击名字捕捉。选满 5 个后自动进入谢幕。</div>
+
+  <div class="fade" id="fade"></div>
+
+  <div class="centerMsg" id="centerMsg" aria-hidden="true">
+    <div class="msgBox">
+      <b>感谢观看</b>
+      <span>谢幕TIME!</span>
+    </div>
+  </div>
+
+  <div class="credits" id="credits">
+    <div class="creditFrame">
+      <div class="creditTop">
+        <b>ROLL CREDITS</b>
+        <span id="creditNote">Thank you for watching.</span>
+      </div>
+      <div class="vignette"></div>
+
+      <div class="scroll" id="scroll">
+        <h2>Heart to Beat · Finale</h2>
+        <div class="sub">Cast & Guests</div>
+
+        <div class="sectionTitle">STARRING</div>
+        <div class="creditList" id="creditStarring"></div>
+
+        <div class="sectionTitle">FEATURING</div>
+        <div class="creditList" id="creditFeaturing"></div>
+
+        <div style="height:160px"></div>
+        <div class="sub">— THE END —</div>
+        <<<<<
+        <div class="sub" style="margin-top:10px;font-size:18px;font-weight:900;color:rgba(241,214,166,.92)">
+  最后感谢——特别的你！
+</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="err" id="errBox"></div>
+</div>
+
+<script>
+(() => {
+  // ===== debug (optional) =====
+  const errBox = document.getElementById('errBox');
+  window.addEventListener('error', (e) => {
+    errBox.classList.add('on');
+    errBox.textContent = 'JS Error: ' + (e.message || 'unknown');
+  });
+
+  // ===== data =====
+  const PartnerDB = [
+    { name: "橙知", gender: "M" },
+    { name: "丹", gender: "M" },
+    { name: "Eric Wang", gender: "M" },
+    { name: "Ethan Bennett（伊森·贝内特）", gender: "M" },
+    { name: "阿基米德·凡·杜可纳", gender: "M" },
+    { name: "Friedrich Walder（弗里德里希·瓦尔德）", gender: "M" },
+    { name: "Honey Parker（哈尼·帕克）", gender: "M" },
+    { name: "J. O’Connell（J. 奥康纳尔）", gender: "M" },
+    { name: "Kazares（卡扎勒斯）", gender: "M" },
+    { name: "Lucas Moon Olive（奥利弗）", gender: "M" },
+    { name: "Matt Kobayashi", gender: "M" },
+    { name: "Mubiru Abrima", gender: "M" },
+    { name: "Samuel（塞缪尔）", gender: "M" },
+    { name: "Thomas Rocheleau（多马·罗什布吕内）", gender: "M" },
+    { name: "卡莱比", gender: "M" },
+    { name: "叶澄希", gender: "M" },
+
+    { name: "Amber Blackwell（安柏·布莱克威尔）", gender: "F" },
+    { name: "Cela（塞拉）", gender: "F" },
+    { name: "Jeffrey（杰芙里）", gender: "F" },
+    { name: "玛顿·琼斯", gender: "F" },
+    { name: "Maya（玛雅）", gender: "F" },
+    { name: "玛塞拉·卡洛", gender: "F" },
+    { name: "Melusine Raisnner（梅露希娜·拉辛纳）", gender: "F" },
+    { name: "Naya Fluor（乃亚·菲洛普）", gender: "F" },
+    { name: "Romaine Mannich", gender: "F" },
+    { name: "向林木", gender: "F" },
+    { name: "伊洛恩·奈芙", gender: "F" },
+    { name: "Zurabia（祖拉比亚）", gender: "F" },
+    { name: "Moira Ross（莫伊拉·罗斯）", gender: "F" },
+    { name: "Erla（厄拉）", gender: "F" },
+    { name: "Josephine Young（乔瑟芬·杨）", gender: "F" },
+    { name: "Oliven Orcinus（奥里文·奥辛努斯）", gender: "F" }
+  ];
+
+  // ===== knobs (tune here) =====
+  const PICK_N = 5;
+  const ENTER_DELAY = 120;   // ms: black screen -> show "thanks"
+  const THANKS_HOLD = 3000;  // ms: how long thanks stays
+  const CREDIT_SPEED = 200;  // px/s: credits scrolling speed
+
+  // ===== DOM =====
+  const wrap = document.getElementById('wrap');
+  const fade = document.getElementById('fade');
+  const centerMsg = document.getElementById('centerMsg');
+  const credits = document.getElementById('credits');
+
+  const scroll = document.getElementById('scroll');
+  const creditStarring = document.getElementById('creditStarring');
+  const creditFeaturing = document.getElementById('creditFeaturing');
+  const creditNote = document.getElementById('creditNote');
+
+  const countOut = document.getElementById('countOut');
+  const slots = document.getElementById('slots');
+  const resetBtn = document.getElementById('resetBtn');
+  const skipBtn = document.getElementById('skipBtn');
+
+  // ===== helpers =====
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
+
+function parseName(full){
+  const hasParen = full.includes('（') && full.includes('）');
+
+  // ===== 情况 1：有括号（中英双名）=====
+  if(hasParen){
+    const outside = full.split('（')[0].trim();
+    const inside = full.slice(
+      full.indexOf('（')+1,
+      full.lastIndexOf('）')
+    ).trim();
+
+    // 优先判断是否含英文
+    if(/[A-Za-z]/.test(outside)){
+      return {
+        display: outside.split(/\s+/)[0],
+        full
+      };
+    }
+    if(/[A-Za-z]/.test(inside)){
+      return {
+        display: inside.split(/\s+/)[0],
+        full
+      };
+    }
+
+    // 都没有英文 → 当纯中文处理
+    const base = outside || inside;
+    return {
+      display: base.split('·')[0],
+      full
+    };
+  }
+
+  // ===== 情况 2：没有括号 =====
+
+  // 有英文 → 取英文 first name
+  if(/[A-Za-z]/.test(full)){
+    return {
+      display: full.trim().split(/\s+/)[0],
+      full
+    };
+  }
+
+  // 纯中文 → 取“·”前面
+  if(full.includes('·')){
+    return {
+      display: full.split('·')[0],
+      full
+    };
+  }
+
+  // 单纯中文名
+  return {
+    display: full,
+    full
+  };
+}
+
+  // ===== items =====
+  const items = PartnerDB.map((p, idx) => ({ id: idx, gender: p.gender, ...parseName(p.name) }));
+
+  // ===== slots UI =====
+  const slotEls = [];
+  for(let i=0;i<PICK_N;i++){
+    const s = document.createElement('div');
+    s.className = 'slot';
+    s.textContent = '空';
+    slots.appendChild(s);
+    slotEls.push(s);
+  }
+
+  function updateSlots(picked){
+    countOut.textContent = `${picked.length} / ${PICK_N}`;
+    for(let i=0;i<PICK_N;i++){
+      const id = picked[i];
+      const s = slotEls[i];
+      if(id == null){
+        s.classList.remove('filled');
+        s.textContent = '空';
+        s.title = '';
+      }else{
+        const it = items[id];
+        s.classList.add('filled');
+        s.textContent = it.display;
+        s.title = it.full;
+      }
+    }
+  }
+
+  // ===== flying nodes =====
+  const nodes = [];            // index = item.id
+  const state = new Map();     // id -> {x,y,vx,vy,w,h}
+  const picked = [];           // store ids in order
+  let running = true;
+
+  function makeNode(item){
+    const el = document.createElement('div');
+    el.className = 'name';
+    el.dataset.id = String(item.id);
+
+    const g = item.gender === 'M' ? '♂' : '♀';
+    el.innerHTML = `${escapeHtml(item.display)} <small>${g}</small>`;
+    el.title = item.full;
+
+    wrap.appendChild(el);
+    nodes[item.id] = el;
+
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const x = Math.random() * (W - 160) + 30;
+    const y = Math.random() * (H - 220) + 90;
+    const vx = (Math.random()*2-1) * (1.1 + Math.random()*1.8);
+    const vy = (Math.random()*2-1) * (0.9 + Math.random()*1.5);
+
+    state.set(item.id, { x, y, vx, vy, w:120, h:32 });
+
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      if(picked.length >= PICK_N) return;
+      if(picked.includes(item.id)) return;
+
+      picked.push(item.id);
+      el.classList.add('picked');
+      updateSlots(picked);
+
+      if(picked.length >= PICK_N){
+        startFinale();
+      }
+    });
+
+    requestAnimationFrame(() => {
+      const r = el.getBoundingClientRect();
+      const st = state.get(item.id);
+      st.w = r.width;
+      st.h = r.height;
+    });
+  }
+  items.forEach(makeNode);
+  updateSlots(picked);
+
+  // pointer wind
+  const wind = { x:0, y:0, on:false };
+  window.addEventListener('pointermove', (e) => {
+    wind.on = true; wind.x = e.clientX; wind.y = e.clientY;
+  });
+  window.addEventListener('pointerleave', () => wind.on = false);
+
+  function tick(){
+    if(!running) return;
+
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+
+    for(const it of items){
+      if(picked.includes(it.id)) continue;
+      const st = state.get(it.id);
+      if(!st) continue;
+
+      st.vx *= 0.993;
+      st.vy *= 0.993;
+
+      st.vx += (Math.random()*2-1) * 0.020;
+      st.vy += (Math.random()*2-1) * 0.017;
+
+      if(wind.on){
+        const cx = st.x + st.w/2;
+        const cy = st.y + st.h/2;
+        const dx = cx - wind.x;
+        const dy = cy - wind.y;
+        const d2 = dx*dx + dy*dy;
+        if(d2 < 220*220){
+          const d = Math.max(12, Math.sqrt(d2));
+          const push = (1 - d/220) * 0.18;
+          st.vx += (dx / d) * push;
+          st.vy += (dy / d) * push;
+        }
+      }
+
+      st.x += st.vx;
+      st.y += st.vy;
+
+      const topBound = 86;
+      if(st.x < 12){ st.x = 12; st.vx *= -1; }
+      if(st.x + st.w > W - 12){ st.x = W - 12 - st.w; st.vx *= -1; }
+      if(st.y < topBound){ st.y = topBound; st.vy *= -1; }
+      if(st.y + st.h > H - 14){ st.y = H - 14 - st.h; st.vy *= -1; }
+
+      nodes[it.id].style.transform = `translate(${st.x}px, ${st.y}px)`;
+    }
+
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // ===== credits build =====
+  function buildCredits(){
+    creditStarring.innerHTML = '';
+    creditFeaturing.innerHTML = '';
+
+    const pickedSet = new Set(picked);
+    const starring = picked.map(id => items[id]);
+    const featuring = items.filter(it => !pickedSet.has(it.id));
+
+    creditNote.textContent = picked.length
+      ? `Starring: ${starring.map(it => it.display).join(' · ')}`
+      : 'Thank you for watching.';
+
+    const mkItem = (it, isStar) => {
+      const div = document.createElement('div');
+      div.className = 'creditItem' + (isStar ? ' star' : '');
+      const meta = [];
+      meta.push(it.gender === 'M' ? 'Male Guest' : 'Female Guest');
+      if(it.aka) meta.push(`AKA: ${it.aka}`);
+      div.innerHTML = `${escapeHtml(it.full)}<span class="meta">${escapeHtml(meta.join(' · '))}</span>`;
+      return div;
+    };
+
+    starring.forEach(it => creditStarring.appendChild(mkItem(it, true)));
+    featuring.forEach(it => creditFeaturing.appendChild(mkItem(it, false)));
+  }
+
+  // ===== finale sequence =====
+  let creditRAF = null;
+
+  function startFinale(){
+    if(!running) return;
+    running = false;
+
+    // fade out remaining name nodes
+    nodes.forEach((el, idx) => {
+      if(el && !picked.includes(idx)) el.style.opacity = '0';
+    });
+
+    // fade to black
+    fade.classList.add('on');
+
+    // show thanks
+    setTimeout(() => {
+      centerMsg.classList.add('on');
+
+      setTimeout(() => {
+        // hide thanks
+        centerMsg.classList.remove('on');
+
+        // enter credits
+        buildCredits();
+        credits.classList.add('on');
+
+        const frame = document.querySelector('.creditFrame');
+        const frameH = frame.getBoundingClientRect().height;
+
+        let y = frameH + 40;
+        let last = performance.now();
+        const contentH = scroll.scrollHeight;
+
+        function step(now){
+          const dt = (now - last) / 1000;
+          last = now;
+
+          y -= CREDIT_SPEED * dt;
+          scroll.style.transform = `translateY(${y}px)`;
+
+          if(y < -contentH - 90){
+            scroll.style.transform = `translateY(${-contentH - 90}px)`;
+            if(creditRAF) cancelAnimationFrame(creditRAF);
+            creditRAF = null;
+            return;
+          }
+          creditRAF = requestAnimationFrame(step);
+        }
+        creditRAF = requestAnimationFrame(step);
+
+      }, THANKS_HOLD);
+
+    }, ENTER_DELAY);
+  }
+
+  // ===== controls =====
+  resetBtn.addEventListener('click', () => location.reload());
+
+  skipBtn.addEventListener('click', () => {
+    while(picked.length < PICK_N){
+      const id = items[picked.length].id;
+      if(!picked.includes(id)) picked.push(id);
+    }
+    updateSlots(picked);
+
+    nodes.forEach((el, idx) => {
+      if(!el) return;
+      if(picked.includes(idx)) el.classList.add('picked');
+    });
+
+    startFinale();
+  });
+})();
+</script>
+</body>
+</html>
