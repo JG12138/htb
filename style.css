@@ -1,19 +1,18 @@
 :root{
-  --bg:#1E2A1B;
-  --txt:#fff;
-  --mut:rgba(255,255,255,.72);
+  --bg:#0E1110;          
+  --txt:rgba(255,255,255,.88);
+  --mut:rgba(255,255,255,.45);
 
-  --bd:rgba(255,255,255,.12);
-  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --bd:rgba(255,255,255,.06);
+  --shadow:0 18px 55px rgba(0,0,0,.65);
 
-  --btn:rgba(255,255,255,.10);
-  --btn2:rgba(255,255,255,.16);
+  --btn:rgba(255,255,255,.04);
+  --btn2:rgba(255,255,255,.08);
 
-  --gold:#F7D7A8;
-
-  --cardSolid: rgba(20,30,18,.96);
-  --cardHi1: rgba(255,255,255,.06);
-  --cardHi2: rgba(255,255,255,.02);
+  --gold:#9E8B6C;        /* 暗金 */
+  --cardSolid: rgba(10,12,11,.96);
+  --cardHi1: rgba(255,255,255,.03);
+  --cardHi2: rgba(255,255,255,.008);
 }
 
 *{ box-sizing:border-box; }
@@ -298,22 +297,21 @@ button[disabled]{ opacity:.55; cursor:not-allowed; }
   .panelCenter{ max-width:none; }
 }
 :root{
-  --bg:#1E2A1B;
-  --txt:#fff;
-  --mut:rgba(255,255,255,.72);
+  --bg:#0E1110;          /* 几乎黑，但带一点冷调 */
+  --txt:rgba(255,255,255,.88);
+  --mut:rgba(255,255,255,.45);
 
-  --bd:rgba(255,255,255,.12);
-  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --bd:rgba(255,255,255,.06);
+  --shadow:0 18px 55px rgba(0,0,0,.65);
 
-  --btn:rgba(255,255,255,.10);
-  --btn2:rgba(255,255,255,.16);
+  --btn:rgba(255,255,255,.04);
+  --btn2:rgba(255,255,255,.08);
 
-  --gold:#F7D7A8;
-
-  --cardSolid: rgba(20,30,18,.96);
-  --cardHi1: rgba(255,255,255,.06);
-  --cardHi2: rgba(255,255,255,.02);
-}
+  --gold:#9E8B6C;        /* 暗金 */
+  --cardSolid: rgba(10,12,11,.96);
+  --cardHi1: rgba(255,255,255,.03);
+  --cardHi2: rgba(255,255,255,.008);
+}s
 
 *{ box-sizing:border-box; }
 
@@ -523,7 +521,7 @@ button[disabled]{ opacity:.55; cursor:not-allowed; }
 .genderRow select{
   width:100%;
   padding:10px 38px 10px 12px;
-  border:2px solid rgba(247,215,168,.70);
+  border:1px solid rgba(247,215,168,.70);
   background: rgba(0,0,0,.18);     /* translucent, matches cards */
   color: var(--txt);
   font-weight:700;
